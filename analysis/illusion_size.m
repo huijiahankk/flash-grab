@@ -7,9 +7,9 @@ clear all;
 clear all;
 % addpath '../function';
 
-sbjnames = {'huijiahan'}; 
+sbjnames = {'huijiahan','jiangyong','hehuixia'}; 
 
-mark = 4;
+mark = 3;
 
 if mark == 1
     cd '../data/illusionSize/120/SpinSpeed_4'
@@ -41,6 +41,7 @@ tiltLeftIndex(:,sbjnum) = find( data.flashTiltDirection == 2 );
 aveTiltRight(sbjnum) = mean(data.wedgeTiltEachBlock(tiltRightIndex(:,sbjnum)),2);
 aveTiltLeft(sbjnum) = mean(data.wedgeTiltEachBlock(tiltLeftIndex(:,sbjnum)),2);
 
+aveIlluSize(sbjnum) = (aveTiltRight(sbjnum) + abs(aveTiltLeft(sbjnum)))/2;
 
 % plot(1:size(tiltRightIndex,1),data.wedgeTiltEachBlock(tiltRightIndex),'r');
 % hold on;
@@ -53,9 +54,9 @@ end
 
 
 figure(mark);
-bar([abs(aveTiltLeft),aveTiltRight],'r');
+bar(aveIlluSize,'r');
 
-xlim([0 3]);
+xlim([0 4]);
 ylim([0 15]);
 if mark == 1
     title('illusion size(120-SpinSpeed-4)','fontSize',20);

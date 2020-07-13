@@ -18,7 +18,11 @@ tic;
 
 % sbjname = input('Please input the subject''s name\n','s');
 % BlockNum = input('Please input the Block No.\n','s');
-sbjname = 'h';
+% sbjname = input('>>>Please input the subject''s name:   ','s');
+sbjname = 'k';
+debug = input('>>>Debug? (y/n):   ','s');
+% data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
+data.sectorRadiusIn = 300;
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
@@ -30,11 +34,11 @@ Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
 screenNumber = max(screens);
 backcolor = 120;
-[wptr,rect]=Screen('OpenWindow',screenNumber,backcolor,[]); %set window to ,[0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,backcolor,[0 0 1024 768]); %set window to ,[0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 centerMovePix = 0;
-sectorRadius_mov = xCenter + centerMovePix;
+
 %% set parameters
 fixcolor = 0;
 framerate = FrameRate(wptr);
@@ -50,21 +54,16 @@ framerate = FrameRate(wptr);
 % and right arrow keys as response keys for the task and the escape key as
 % a exit/reset key
 KbName('UnifyKeyNames');
-escapeKey = KbName('ESCAPE');
-leftKey = KbName('LeftArrow');
-rightKey = KbName('RightArrow');
-upKey = KbName('UpArrow');
-downKey = KbName('DownArrow');
-spaceKey = KbName('space');
 
 %----------------------------------------------------------------------
 %                      background sector setup
 %----------------------------------------------------------------------
+sectorRadius_mov = xCenter + centerMovePix;
 contrastratio = 0.12;
 sector1_color = backcolor + backcolor * contrastratio;
 sector2_color = backcolor;
 contrast = (sector1_color - sector2_color)/2;
-sectorNumber = 8;
+sectorNumber = 6;
 sector_angle = 360/sectorNumber;
 [m2 n2] = meshgrid(- sectorRadius_mov : sectorRadius_mov, - sectorRadius_mov : sectorRadius_mov); % coordinate of sector
 mask = (m2.^2+n2.^2 <= (sectorRadius_mov).^2);
@@ -101,10 +100,11 @@ y = fliplr(linspace(-yCenter,yCenter,yCenter * 2 + 1));
 [X,Y] = meshgrid(x,y);
 % Parameters for sector
 sectorArcAngle = 15; % abs(sectorStartAngle * 2);
+adjustSectorArcAngle = mod(sectorArcAngle,2)/2;
 % checkerboard tilt angle
 tiltAngle = sectorArcAngle/2;
-sectorRadiusIn = 300;
-sectorRadiusOut = xCenter;
+% data.sectorRadiusIn = 300;
+data.sectorRadiusOut = xCenter;
 % Coordinates to polarcoordinates
 [phi, rho] = cart2pol(X,Y);
 phi = rad2deg(phi);
@@ -114,7 +114,7 @@ phi = rad2deg(phi);
 % location of checkerboard
 % alphaSectorMask_left = 255 * (rho > sectorRadiusIn & rho < sectorRadiusOut & phi > (- 90 - sectorArcAngle/2 - tiltAngle) & phi< (-90 + sectorArcAngle/2 - tiltAngle));
 % alphaSectorMask_right = 255 * (rho > sectorRadiusIn & rho < sectorRadiusOut & phi > (- 90 - sectorArcAngle/2 + tiltAngle) & phi< (-90 + sectorArcAngle/2 + tiltAngle));
-alphaSectorMask = 255 * (rho > sectorRadiusIn & rho < sectorRadiusOut & phi > (- 90 - sectorArcAngle/2) & phi< (-90 + sectorArcAngle/2));
+alphaSectorMask = 255 * (rho > data.sectorRadiusIn & rho < data.sectorRadiusOut & phi > (- 90 - sectorArcAngle/2) & phi< (-90 + sectorArcAngle/2));
 % size(alphaSectorMask);
 % Have a look at the mask
 % spy(alphaSectorMask);
@@ -153,14 +153,16 @@ cbColorMask1DestinationRect = CenterRectOnPoint(cbColorMask1Rect,xCenter,yCenter
 blockNumber = 10;
 % trialNumber = 3;
 
-back.AngleRange = 180;
+back.AngleRange = 120;
 back.ReverseAngle = back.AngleRange/2; % duration frame of checkerboard
 back.CurrentAngle = 0;  % back.ReverseAngle + tiltAngle + 0.5;
 back.SpinSpeed = 4; % degree/frame
 back.SpinDirec = 1; % 1 means clockwise     -1 means counter-clockwise
 back.FlagSpinDirecA = 0;
 back.FlagSpinDirecB = 0;
-wedgeTilt = 0;
+
+
+wedgeTilt = 7.5;
 
 % responseKey = 1;
 
@@ -169,7 +171,7 @@ wedgeTilt = 0;
 TR = 2; % second
 % the sector first rotate rightward 90 degree and then leftward 180 degree
 % rightward 180 degree and so on
-% sectorTimeRound = 360/(back.SpinSpeed * framerate);% how many second does the background rotate rightward and then leftward cost
+back.ReversalSec = back.ReverseAngle/(back.SpinSpeed * framerate);% how many second does the background rotate rightward and then leftward cost
 
 
 %----------------------------------------------------------------------
@@ -206,11 +208,10 @@ event.TypeNumericIdAll = []; %  RespMat column 1
 event.InterTimeAll = [];     %  RespMat column 2
 flashTimePointAll = [];       %  RespMat column 3
 
-event.TypeNumericIdMat = [0 1 2];  % 0 no sector checkerboard(scb) 1 checkerboard tilt left and perceived right  2 checkerboard tilt right and perceived left
+event.TypeNumericIdMat = [0 1 2];  % 0 no sector checkerboard(scb) 1 checkerboard tilt left   2 checkerboard tilt right
 event.InterTimeMat = [2 4 6];
 % testDuration = 10;
-
-
+back.ReversalTimesMat = [event.InterTimeMat]/back.ReversalSec;
 
 % for k = 1:length(event.InterTimeMat)
 %     % each block time contain how many round of background
@@ -226,19 +227,22 @@ ScanOnset = GetSecs;
 for block = 1 : blockNumber
     BlockOnset = GetSecs;
     
-    back.RotateTimes = 0;
+    debugFlag = 0;
+    back.ReversalTime = 0;
     event.TypeNumericId = event.TypeNumericIdMat(mod(block,3) + 1);
     %     event.InterRound = event.InterRoundMat(mod(block,3) + 1);
     event.InterTime = event.InterTimeMat(mod(block,3) + 1);
     %     ShowUpTimes = ShowUpTimesMat(mod(block,3) + 1);
+    back.ReversalTimes = back.ReversalTimesMat(mod(block,3) + 1);
     respToBeMade = true;
     %     while respToBeMade
     
     prekeyIsDown = 0;
+    % make sure during each block the checkerboard only flash once
     tiltRightFlag = 0;
     tiltLeftFlag = 0;
-    frameCounter = 0;
-    
+    %     frameCounter = 0;
+    flashFreezeFrameFlag = 0;
     
     %----------------------------------------------------------------------
     %                      background rotate
@@ -246,14 +250,14 @@ for block = 1 : blockNumber
     
     
     % each block lasting seconds 10s
-    while GetSecs - BlockOnset < event.InterTime  && respToBeMade
+    while GetSecs - BlockOnset < event.InterTime  && back.ReversalTime <= back.ReversalTimes  %&& respToBeMade
+        
         
         %         frameCounter = frameCounter + 1;
         %         % Time we want to wait before flash the checkerboard
         %         checkFlipTimeSecs = 2;
         %         checkFlipTimeFrames = round(checkFlipTimeSecs / ifi);
         %         frameCounter = 0;
-        %
         %
         %         if frameCounter == checkFlipTimeFrames
         %             textureCue = fliplr(textureCue);
@@ -262,14 +266,15 @@ for block = 1 : blockNumber
         
         % background first rotate clockwise until to the reverse angle
         % 0.5 because  tiltAngle is
-        if back.CurrentAngle > back.ReverseAngle  + tiltAngle + 0.5
+        if back.CurrentAngle > back.ReverseAngle  + wedgeTilt - tiltAngle %  + adjustSectorArcAngle
             back.SpinDirec = - 1;
             back.FlagSpinDirecA = back.SpinDirec;
-            back.RotateTimes = back.RotateTimes + 1;
-        elseif back.CurrentAngle < - back.ReverseAngle  - tiltAngle - 0.5
+            back.ReversalTime = back.ReversalTime + 1;
+            % tilt right
+        elseif back.CurrentAngle < - back.ReverseAngle - wedgeTilt  + tiltAngle % - adjustSectorArcAngle
             back.SpinDirec = 1;
             back.FlagSpinDirecB = back.SpinDirec;
-            back.RotateTimes = back.RotateTimes + 1;
+            back.ReversalTime = back.ReversalTime + 1;
         end
         
         back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
@@ -278,6 +283,8 @@ for block = 1 : blockNumber
         
         %         if GetSecs - BlockOnset >= event.InterTime  && respToBeMade && GetSecs - BlockOnset < event.InterTime
         
+        
+        %         1 checkerboard tilt right
         if event.TypeNumericId == 2 && tiltRightFlag == 0
             % checkerboard flash at the reverse time()
             % back.FlagSpinDirecA == - 1  flash tilt right
@@ -286,22 +293,31 @@ for block = 1 : blockNumber
                 tiltRightFlag = 1;
                 flashTimePoint = GetSecs - ScanOnset;
                 display(GetSecs - ScanOnset);
-                timeTiltRight = GetSecs;
+                debugFlag = 1;
+                flashFreezeFrameFlag = flashFreezeFrameFlag + 1;
+                
             end
             
+            %         1 checkerboard tilt left
         elseif event.TypeNumericId == 1 && tiltLeftFlag == 0
             % back.FlagSpinDirecB == 1  flash tilt left
             if back.FlagSpinDirecB == 1 %  && back.RotateTimes == ShowUpTimes
-                Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTilt);
+                Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,-wedgeTilt);
                 tiltLeftFlag = 1;
                 flashTimePoint = GetSecs - ScanOnset;
                 display(GetSecs - ScanOnset);
-                timeTiltLeft = GetSecs;
+                debugFlag = 1;
+                flashFreezeFrameFlag = flashFreezeFrameFlag + 1;
+                
             end
+            %             end
             
         elseif event.TypeNumericId == 0
+            flashTimePoint = 0;
+        else
+            debugFlag = 0;
         end
-        
+        %         end
         back.FlagSpinDirecA = 0;
         back.FlagSpinDirecB = 0;
         
@@ -311,19 +327,19 @@ for block = 1 : blockNumber
         
         [keyIsDown,secs,keyCode] = KbCheck(-1);
         if keyIsDown && ~prekeyIsDown
-            if keyCode(escapeKey)
+            if keyCode(KbName('ESCAPE'))
                 ShowCursor;
                 sca;
                 return
                 % the bar was on the left of the gabor
-            elseif keyCode(leftKey)
+            elseif keyCode(KbName('LeftArrow'))
                 response = 1;
                 %                 response(2,responseKey) = GetSecs - BlockOnset;
                 %                 responseKey = responseKey + 1;
                 
-            elseif keyCode(rightKey)
+            elseif keyCode(KbName('RightArrow'))
                 response = 2;
-            elseif keyCode(spaceKey)
+            elseif keyCode(KbName('Space'))
                 respToBeMade = false;
                 %                 Wait(0.5);
             end
@@ -335,32 +351,36 @@ for block = 1 : blockNumber
         
         Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]); % fixation
         Screen('Flip',wptr);
+        %     end
         
+        if debug== 'y' && debugFlag
+            KbWait;
+        end
         
         % seprate each illusion test for 0.5 sec
         %         if GetSecs - BlockOnset >= testDuration
         %             respToBeMade = false;
         %             WaitSecs (0.5);
-        %         end
-        
     end
     
-    WaitSecs(1);
+    
+    
+    %     WaitSecs(1);
     
     event.InterTimeAll = [event.InterTimeAll;event.InterTime];
     event.TypeNumericIdAll = [event.TypeNumericIdAll;event.TypeNumericId];
     flashTimePointAll = [flashTimePointAll; flashTimePoint];
-    
-    %     display(GetSecs - BlockOnset);
-    %----------------------------------------------------------------------
-    %                      save parameters files
-    %----------------------------------------------------------------------
-    time = clock;
-    RespMat = [event.TypeNumericIdAll  event.InterTimeAll  flashTimePointAll];
-    fileName = ['../data/' sbjname '-' num2str(time(1)) '-' num2str(time(2)) '-' num2str(time(3)) '-' num2str(time(4)) '-' num2str(time(5)) '.mat'];
-    % save(fileName,'RespMat','meanSubIlluDegree','time','all','gauss','cueVerDisDegree','gabor','viewingDistance','trialNumber','blockNumber');
-    save(fileName,'RespMat');
 end
+%     display(GetSecs - BlockOnset);
+%----------------------------------------------------------------------
+%                      save parameters files
+%----------------------------------------------------------------------
+time = clock;
+RespMat = [event.TypeNumericIdAll  event.InterTimeAll  flashTimePointAll];
+fileName = ['../data/' sbjname '-' num2str(time(1)) '-' num2str(time(2)) '-' num2str(time(3)) '-' num2str(time(4)) '-' num2str(time(5)) '.mat'];
+% save(fileName,'RespMat','meanSubIlluDegree','time','all','gauss','cueVerDisDegree','gabor','viewingDistance','trialNumber','blockNumber');
+save(fileName,'RespMat');
+% end
 
 
 
