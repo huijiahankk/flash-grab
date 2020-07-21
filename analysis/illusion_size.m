@@ -7,19 +7,35 @@ clear all;
 clear all;
 % addpath '../function';
 
-sbjnames = {'huijiahan','jiangyong','hehuixia'}; 
+sbjnames = {'huijiahan','hehuixia','jiangyong','zhanghongtao'}; 
 
-mark = 3;
+% for mark = 1:4
+mark = 4;
 
+% if mark == 1
+%     cd '../data/illusionSize/120/SpinSpeed_4'
+% elseif mark == 2
+%     cd '../data/illusionSize/120/SpinSpeed_2.3'
+% elseif mark == 3
+%     cd '../data/illusionSize/180/SpinSpeed_4'
+% elseif mark == 4
+%     cd '../data/illusionSize/180/SpinSpeed_2.3'
+% end
+
+
+% 1 background tilt，flash vertical  2 flash/background vertical 
 if mark == 1
-    cd '../data/illusionSize/120/SpinSpeed_4'
+    cd '../data/illusionSize/backTilt_FlashVer/1frame/';
 elseif mark == 2
-    cd '../data/illusionSize/120/SpinSpeed_2.3'
+    cd  '../data/illusionSize/backTilt_FlashVer/3frame/';
 elseif mark == 3
-    cd '../data/illusionSize/180/SpinSpeed_4'
+    cd  '../data/illusionSize/backFlash_Ver/1frame/';
 elseif mark == 4
-    cd '../data/illusionSize/180/SpinSpeed_2.3'
+    cd '../data/illusionSize/backFlash_Ver/3frame/';
 end
+
+
+
 
 
 
@@ -54,24 +70,40 @@ end
 
 
 figure(mark);
-bar(aveIlluSize,'r');
+% bar(aveIlluSize,'r');
+bar(mean(aveIlluSize));
 
-xlim([0 4]);
-ylim([0 15]);
+xlim([0 2]);
+ylim([0 8]);
+
+% if mark == 1
+%     title('illusion size(120-SpinSpeed-4)','fontSize',20);
+% elseif mark == 2
+%     title('illusion size(120-SpinSpeed-2.3)','fontSize',20);
+% elseif mark == 3
+%     title('illusion size(180-SpinSpeed-4)','fontSize',20);
+% elseif mark == 4
+%     title('illusion size(180-SpinSpeed-2.3)','fontSize',20);
+% end
+
+
 if mark == 1
-    title('illusion size(120-SpinSpeed-4)','fontSize',20);
+    title('background Tilt- Flash Vertical present for 1 frame','fontSize',20);
 elseif mark == 2
-    title('illusion size(120-SpinSpeed-2.3)','fontSize',20);
+    title('background Tilt- Flash Vertical present for 3 frame','fontSize',20);
 elseif mark == 3
-    title('illusion size(180-SpinSpeed-4)','fontSize',20);
+    title('background and Flash Vertical flash present for 1 frame','fontSize',20);
 elseif mark == 4
-    title('illusion size(180-SpinSpeed-2.3)','fontSize',20);
+    title('background and Flash Vertical flash present for 3 frame','fontSize',20);
 end
+
+
+
 
 xlabel('tilt direction');
 ylabel('degree');
 hold on;
-
+% end
 
 % axis equal;
 % set(gca,'Visible','off');
