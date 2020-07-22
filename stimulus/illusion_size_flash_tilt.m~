@@ -160,7 +160,7 @@ alphaSectorMask = 255 * (rho > data.sectorRadiusIn & rho < data.sectorRadiusOut 
 %----------------------------------------------------------------------
 %%%                     generate  wedge checkerboard
 %----------------------------------------------------------------------
-wedgeBackColor = [64,64,64];
+wedgeBackColor = [64,0,0];
 % ScreenXlengthHalf=700;
 % wedgeAngleTheta = -15;
 

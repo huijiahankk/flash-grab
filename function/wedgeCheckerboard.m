@@ -10,9 +10,9 @@ mask_wedge(:,:,3) = (wedgeMat_m.^2 + wedgeMat_n.^2 >= yCenter^2) * wedgeBackColo
 
 
 checkerboard = MakeCheckerboard(yCenter,yCenter,wedgeStripe_width,wedgeSector_width);
-cbColor(:,:,1) = (checkerboard+1)/2 * (1) * 255 + mask_wedge(:,:,1);
-cbColor(:,:,2) = (checkerboard+1)/2 * (1) * 255 + mask_wedge(:,:,2);
-cbColor(:,:,3) = (checkerboard+1)/2 * (1) * 255 + mask_wedge(:,:,3);
+cbColor(:,:,1) = (checkerboard+1)/2 * (1) * 255 + mask_wedge(:,:,1);   % 
+cbColor(:,:,2) = (checkerboard+1)/2 * (1) * 1 + mask_wedge(:,:,2);  % (checkerboard+1)/2 * (1) * 255 + mask_wedge(:,:,2); 
+cbColor(:,:,3) = (checkerboard+1)/2 * (1) * 1 + mask_wedge(:,:,3); % (checkerboard+1)/2 * (1) * 255 + mask_wedge(:,:,2); 
 cbColor(:,:,4) = alphaSectorMask;
 
 end
