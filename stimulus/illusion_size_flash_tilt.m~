@@ -15,12 +15,12 @@
 %%
 clear all;close all;
 
-if 0
-    sbjname = 1;
-    debug = 'n';
+if 1
+    sbjname = 'k';
+    debug = 'y';
     expmark = 2;
-    flashRepresentFrame = 2.2 ;
-    data.sectorRadiusIn = 200;
+    flashRepresentFrame = 0.8 ;
+    data.sectorRadiusIn = 100;
 else
     
 sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -40,15 +40,15 @@ flashRepresentFrame = 0.8;  % means 1 frame    input('>>>flash represent frames?
 end
 
 % 1 background tilt，flash vertical  2 flash/background vertical 
-if expmark == 1  && flashRepresentFrame == 0.8
-    savePath = '../data/illusionSize/backTilt_FlashVer/1frame/';
-elseif expmark == 1 && flashRepresentFrame == 2.2
-    savePath = '../data/illusionSize/backTilt_FlashVer/3frame/';
-elseif expmark == 2 && flashRepresentFrame == 0.8 
-    savePath = '../data/illusionSize/backFlash_Ver/1frame/';
-elseif expmark == 2 && flashRepresentFrame == 2.2
-    savePath = '../data/illusionSize/backFlash_Ver/3frame/';
-end
+% if expmark == 1  && flashRepresentFrame == 0.8
+%     savePath = '../data/illusionSize/backTilt_FlashVer/1frame/';
+% elseif expmark == 1 && flashRepresentFrame == 2.2
+%     savePath = '../data/illusionSize/backTilt_FlashVer/3frame/';
+% elseif expmark == 2 && flashRepresentFrame == 0.8 
+%     savePath = '../data/illusionSize/backFlash_Ver/1frame/';
+% elseif expmark == 2 && flashRepresentFrame == 2.2
+%     savePath = '../data/illusionSize/backFlash_Ver/3frame/';
+% end
 
 savePath = '../data/illusionSize/highContrast/';   % highContrast
 
@@ -64,16 +64,18 @@ Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
 screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
+whitecolor = [255 255 255];
+% redcolor = 0.5;
 backcolor = 255;
 bottomColor = 120;
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[0 0 1024 768]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 centerMovePix = 0;
 %% set parameters
 fixcolor = 200; % 0 255
 framerate = FrameRate(wptr);
-
+redcolor = [256 0 0];
 
 %----------------------------------------------------------------------
 %                       Keyboard information
@@ -88,7 +90,7 @@ KbName('UnifyKeyNames');
 %----------------------------------------------------------------------
 %                      background sector setup
 %----------------------------------------------------------------------
-sectorRadius_mov = xCenter + centerMovePix;
+sectorRadius_mov = xCenter + centerMovePix; 
 % InnerRadii = 400; % pixel
 contrastratio = 1;
 sector1_color = backcolor + backcolor * contrastratio;
@@ -160,12 +162,12 @@ alphaSectorMask = 255 * (rho > data.sectorRadiusIn & rho < data.sectorRadiusOut 
 %----------------------------------------------------------------------
 %%%                     generate  wedge checkerboard
 %----------------------------------------------------------------------
-wedgeBackColor = [64,0,0];
+wedgeBackColor = [64,64,64];
 % ScreenXlengthHalf=700;
 % wedgeAngleTheta = -15;
 
 
-wedgeSector_width = 5;  
+wedgeSector_width = 10;  
 wedgeStripe_width = wedgeSector_width * 5;
 % cbColorLeft = wedgeCheckerboard(alphaSectorMask_left,yCenter,wedgeBackColor,wedgeStripe_width,wedgeSector_width);
 % cbColorRight = wedgeCheckerboard(alphaSectorMask_right,yCenter,wedgeBackColor,wedgeStripe_width,wedgeSector_width);
@@ -180,6 +182,14 @@ cbColor = wedgeCheckerboard(alphaSectorMask,yCenter,wedgeBackColor,wedgeStripe_w
 cbColorMask = Screen('MakeTexture', wptr,cbColor);
 cbColorMask1Rect = Screen('Rect',cbColorMask);
 cbColorMask1DestinationRect = CenterRectOnPoint(cbColorMask1Rect,xCenter,yCenter);
+
+% sector = Screen('DrawArc',wptr,[256 0 0],[sectorRect],180 - sectorArcAngle/2,sectorArcAngle);
+
+%----------------------------------------------------------------------
+%%%                     generate  red disk 
+%----------------------------------------------------------------------
+[wedgeMat_m wedgeMat_n] = meshgrid(-yCenter:yCenter,-yCenter:yCenter);
+
 
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
@@ -309,16 +319,22 @@ for block = 1 : blockNumber
         % present flash
         if data.flashTiltDirection(block) == 1  && back.FlagSpinDirecA ==  - 1  % flash tilt right
             responseFlag = responseFlag + 1;
-            Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
+%             Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
+            Screen('FillArc',wptr,redcolor,ScreenRect,180 - sectorArcAngle/2,sectorArcAngle);
+            Screen('FillArc',wptr,whitecolor,ScreenRect,180,sectorArcAngle/2);
+            Screen('FillArc',wptr,blackcolor,ScreenRect,180 - sectorArcAngle/2,sectorArcAngle);
             debugFlag = 1;
         elseif data.flashTiltDirection(block) == 2  && back.FlagSpinDirecB ==  1  % flash tilt left
             responseFlag = responseFlag + 1;
-            Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
+%             Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
+            Screen('FillArc',wptr,redcolor,ScreenRect,180 - sectorArcAngle/2,sectorArcAngle);
             debugFlag = 1;
         else
             debugFlag = 0;
             %                 %             display(GetSecs - ScanOnset);
         end
+        
+%         Screen('FillOval', wptr,redcolor,sectorRect); %   [yCenter - xCenter  0  xCenter*2  xCenter + yCenter]
         
         
         back.FlagSpinDirecA = 0;

@@ -15,40 +15,43 @@
 %%
 clear all;close all;
 
-if 0
-    sbjname = 1;
-    debug = 'n';
+if 1
+    sbjname = 'k';
+    debug = 'y';
     expmark = 2;
-    flashRepresentFrame = 2.2 ;
-    data.sectorRadiusIn = 200;
+    flashRepresentFrame = 0.8 ;
+    data.sectorRadiusIn = 100;
+    flashRedDiskFlag = 'y';
 else
     
-sbjname = input('>>>Please input the subject''s name:   ','s');
-% session = input('>>>Please input the session:  ','s');
-% session 1
-% 1  annulus segment condition
-% sectorNumber = input('>>>> How many background segment ? (e.g.: 8/12):  ');
-% savePath = '../data/'
-% InnerRadii = input('>>>> Inner radii of the annulus? (e.g.: 200/400):  ');
-% back.SpinSpeed = input('>>>> Background spin velocity(deg/frame)? (e.g.: 2.3/4):  ');
-debug = input('>>>Debug? (y/n):  ','s');
-data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
-expmark = 2; % input('>>>Which experiment? (1 background tilt，flash vertical/2 flash/background vertical):  ');
-% 1 background tilt，flash vertical  2 flash/background vertical  
-% flash represent for 3 frames
-flashRepresentFrame = 0.8;  % means 1 frame    input('>>>flash represent frames? (0.8/2.2):  ');
+    sbjname = input('>>>Please input the subject''s name:   ','s');
+    % session = input('>>>Please input the session:  ','s');
+    % session 1
+    % 1  annulus segment condition
+    % sectorNumber = input('>>>> How many background segment ? (e.g.: 8/12):  ');
+    % savePath = '../data/'
+    % InnerRadii = input('>>>> Inner radii of the annulus? (e.g.: 200/400):  ');
+    % back.SpinSpeed = input('>>>> Background spin velocity(deg/frame)? (e.g.: 2.3/4):  ');
+    debug = input('>>>Debug? (y/n):  ','s');
+    data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
+    expmark = 2; % input('>>>Which experiment? (1 background tilt，flash vertical/2 flash/background vertical):  ');
+    % 1 background tilt，flash vertical  2 flash/background vertical
+    % flash represent for 3 frames
+    flashRepresentFrame = 0.8;  % means 1 frame    input('>>>flash represent frames? (0.8/2.2):  ');
+    flashRedDiskFlag =  input('>>>> Flash with red disk ? (e.g.: y/n):  ','s');
+    
 end
 
-% 1 background tilt，flash vertical  2 flash/background vertical 
-if expmark == 1  && flashRepresentFrame == 0.8
-    savePath = '../data/illusionSize/backTilt_FlashVer/1frame/';
-elseif expmark == 1 && flashRepresentFrame == 2.2
-    savePath = '../data/illusionSize/backTilt_FlashVer/3frame/';
-elseif expmark == 2 && flashRepresentFrame == 0.8 
-    savePath = '../data/illusionSize/backFlash_Ver/1frame/';
-elseif expmark == 2 && flashRepresentFrame == 2.2
-    savePath = '../data/illusionSize/backFlash_Ver/3frame/';
-end
+% 1 background tilt，flash vertical  2 flash/background vertical
+% if expmark == 1  && flashRepresentFrame == 0.8
+%     savePath = '../data/illusionSize/backTilt_FlashVer/1frame/';
+% elseif expmark == 1 && flashRepresentFrame == 2.2
+%     savePath = '../data/illusionSize/backTilt_FlashVer/3frame/';
+% elseif expmark == 2 && flashRepresentFrame == 0.8
+%     savePath = '../data/illusionSize/backFlash_Ver/1frame/';
+% elseif expmark == 2 && flashRepresentFrame == 2.2
+%     savePath = '../data/illusionSize/backFlash_Ver/3frame/';
+% end
 
 savePath = '../data/illusionSize/highContrast/';   % highContrast
 
@@ -64,16 +67,20 @@ Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
 screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
+whitecolor = [255 255 255];
+% redcolor = 0.5;
 backcolor = 255;
 bottomColor = 120;
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[0 0 1024 768]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
+coverSectorShrink = 4;
+coverSectorRect = [xCenter - ScreenRect(3)/coverSectorShrink yCenter - ScreenRect(4)/coverSectorShrink  xCenter + ScreenRect(3)/coverSectorShrink  yCenter + ScreenRect(4)/coverSectorShrink]; %[0 0 256 192];
 centerMovePix = 0;
 %% set parameters
 fixcolor = 200; % 0 255
 framerate = FrameRate(wptr);
-
+redcolor = [256 0 0];
 
 %----------------------------------------------------------------------
 %                       Keyboard information
@@ -165,7 +172,7 @@ wedgeBackColor = [64,64,64];
 % wedgeAngleTheta = -15;
 
 
-wedgeSector_width = 5;  
+wedgeSector_width = 10;
 wedgeStripe_width = wedgeSector_width * 5;
 % cbColorLeft = wedgeCheckerboard(alphaSectorMask_left,yCenter,wedgeBackColor,wedgeStripe_width,wedgeSector_width);
 % cbColorRight = wedgeCheckerboard(alphaSectorMask_right,yCenter,wedgeBackColor,wedgeStripe_width,wedgeSector_width);
@@ -180,6 +187,7 @@ cbColor = wedgeCheckerboard(alphaSectorMask,yCenter,wedgeBackColor,wedgeStripe_w
 cbColorMask = Screen('MakeTexture', wptr,cbColor);
 cbColorMask1Rect = Screen('Rect',cbColorMask);
 cbColorMask1DestinationRect = CenterRectOnPoint(cbColorMask1Rect,xCenter,yCenter);
+
 
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
@@ -249,27 +257,27 @@ for block = 1 : blockNumber
     BlockOnset = GetSecs;
     
     back.RotateTimes = 0;
-%     event.TypeNumericId = event.TypeNumericIdMat(mod(block,3) + 1);
+    %     event.TypeNumericId = event.TypeNumericIdMat(mod(block,3) + 1);
     %     event.InterRound = event.InterRoundMat(mod(block,3) + 1);
-%     event.InterTime = event.InterTimeMat(mod(block,3) + 1);
+    %     event.InterTime = event.InterTimeMat(mod(block,3) + 1);
     %     ShowUpTimes = ShowUpTimesMat(mod(block,3) + 1);
     wedgeTiltNow = wedgeTiltStart;
-            
-        % If this is the first trial we present a start screen and wait for a key-press
-        if block == 1
-            
-            formatSpec = 'This is the %dth of %d block. Press Any Key To Begin';
-            A1 = block;
-            A2 = blockNumber;
-            str = sprintf(formatSpec,A1,A2);
-%             DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
-            DrawFormattedText(wptr, 'Press Any Key To Begin', 'center', 'center', blackcolor);
-            fprintf(1,'\tBlock number: %2.0f\n',blockNumber);
-            
-            Screen('Flip', wptr);
-            KbStrokeWait;
-        end
+    
+    % If this is the first trial we present a start screen and wait for a key-press
+    if block == 1
         
+        formatSpec = 'This is the %dth of %d block. Press Any Key To Begin';
+        A1 = block;
+        A2 = blockNumber;
+        str = sprintf(formatSpec,A1,A2);
+        %             DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
+        DrawFormattedText(wptr, 'Press Any Key To Begin', 'center', 'center', blackcolor);
+        fprintf(1,'\tBlock number: %2.0f\n',blockNumber);
+        
+        Screen('Flip', wptr);
+        KbStrokeWait;
+    end
+    
     
     
     %----------------------------------------------------------------------
@@ -280,7 +288,7 @@ for block = 1 : blockNumber
     debugFlag = 0;
     prekeyIsDown = 0;
     
-%     flashTiltDirection = Shuffle(flashTiltDirectionMat);
+    %     flashTiltDirection = Shuffle(flashTiltDirectionMat);
     responseFlag = 0;
     
     
@@ -309,16 +317,32 @@ for block = 1 : blockNumber
         % present flash
         if data.flashTiltDirection(block) == 1  && back.FlagSpinDirecA ==  - 1  % flash tilt right
             responseFlag = responseFlag + 1;
-            Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
+            
+            if flashRedDiskFlag == 'y'
+                Screen('FillArc',wptr,redcolor,ScreenRect,180 - sectorArcAngle/2,sectorArcAngle);
+                Screen('FillArc',wptr,whitecolor,coverSectorRect,180,sectorArcAngle/2);
+                Screen('FillArc',wptr,blackcolor,coverSectorRect,180 - sectorArcAngle/2,sectorArcAngle/2);
+            else
+                Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
+            end
             debugFlag = 1;
         elseif data.flashTiltDirection(block) == 2  && back.FlagSpinDirecB ==  1  % flash tilt left
             responseFlag = responseFlag + 1;
-            Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
+            
+            if flashRedDiskFlag == 'y'
+                Screen('FillArc',wptr,redcolor,ScreenRect,180 - sectorArcAngle/2,sectorArcAngle);
+                Screen('FillArc',wptr,whitecolor,coverSectorRect,180,sectorArcAngle/2);
+                Screen('FillArc',wptr,blackcolor,coverSectorRect,180 - sectorArcAngle/2,sectorArcAngle/2);
+            else
+                Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
+            end
             debugFlag = 1;
         else
             debugFlag = 0;
             %                 %             display(GetSecs - ScanOnset);
         end
+        
+        %         Screen('FillOval', wptr,redcolor,sectorRect); %   [yCenter - xCenter  0  xCenter*2  xCenter + yCenter]
         
         
         back.FlagSpinDirecA = 0;
@@ -338,24 +362,24 @@ for block = 1 : blockNumber
                 % the bar was on the left of the gabor
             elseif keyCode(KbName('LeftArrow'))
                 wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
-
+                
             elseif keyCode(KbName('RightArrow'))
                 wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
-
+                
             elseif keyCode(KbName('z'))  % ||keyCode(KbName('1!'))
                 wedgeTiltNow = wedgeTiltNow - 4 * wedgeTiltStep;
-
+                
             elseif keyCode(KbName('x')) % ||keyCode(KbName('3#'))
                 wedgeTiltNow = wedgeTiltNow + 4 * wedgeTiltStep;
-
+                
             elseif keyCode(KbName('Space'))
                 respToBeMade = false;
-
+                
                 %                 WaitSecs(0.5);
             end
             
-                data.wedgeTiltEachRes(block,responseFlag) = wedgeTiltNow;
-
+            data.wedgeTiltEachRes(block,responseFlag) = wedgeTiltNow;
+            
         end
         
         prekeyIsDown = keyIsDown;
@@ -365,16 +389,16 @@ for block = 1 : blockNumber
         
         if debugFlag
             WaitSecs((1/framerate) * flashRepresentFrame);
-%             WaitSecs(1);
+            %             WaitSecs(1);
         end
-%         vbl = Screen('Flip', window, flashRepresentFrame);
-%       vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
-
-%         if debugFlag && flashRepresentFrame == 'y'
-%             framesSinceLastWait = Screen('WaitBlanking', wptr, flashRepresentFrame);
-%         end
+        %         vbl = Screen('Flip', window, flashRepresentFrame);
+        %       vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
         
-        if debug== 'y' && debugFlag 
+        %         if debugFlag && flashRepresentFrame == 'y'
+        %             framesSinceLastWait = Screen('WaitBlanking', wptr, flashRepresentFrame);
+        %         end
+        
+        if debug== 'y' && debugFlag
             KbWait;
         end
         
