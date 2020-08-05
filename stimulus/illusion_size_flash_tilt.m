@@ -22,6 +22,7 @@ if 1
     flashRepresentFrame = 0.8 ;
     data.sectorRadiusIn = 100;
     flashRedDiskFlag = 'y';
+    
 else
     
     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -33,12 +34,17 @@ else
     % InnerRadii = input('>>>> Inner radii of the annulus? (e.g.: 200/400):  ');
     % back.SpinSpeed = input('>>>> Background spin velocity(deg/frame)? (e.g.: 2.3/4):  ');
     debug = input('>>>Debug? (y/n):  ','s');
-    data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
+    
     expmark = 2; % input('>>>Which experiment? (1 background tilt，flash vertical/2 flash/background vertical):  ');
     % 1 background tilt，flash vertical  2 flash/background vertical
     % flash represent for 3 frames
     flashRepresentFrame = 0.8;  % means 1 frame    input('>>>flash represent frames? (0.8/2.2):  ');
     flashRedDiskFlag =  input('>>>> Flash with red disk ? (e.g.: y/n):  ','s');
+    if  flashRedDiskFlag == 'n'
+        data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
+    else
+        data.sectorRadiusIn = 300;
+    end
     
 end
 
@@ -71,11 +77,21 @@ whitecolor = [255 255 255];
 % redcolor = 0.5;
 backcolor = 255;
 bottomColor = 120;
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[0 0 1024 768]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
-coverSectorShrink = 4;
-coverSectorRect = [xCenter - ScreenRect(3)/coverSectorShrink yCenter - ScreenRect(4)/coverSectorShrink  xCenter + ScreenRect(3)/coverSectorShrink  yCenter + ScreenRect(4)/coverSectorShrink]; %[0 0 256 192];
+
+coverSectorShrink = 4; % 2 big cover sector 4 small cover sector
+coverSectorRect = [xCenter - xCenter/coverSectorShrink yCenter - xCenter/coverSectorShrink  xCenter  + xCenter/coverSectorShrink  yCenter + xCenter/coverSectorShrink]; %[0 0 256 192];
+redSectorRect = [xCenter - xCenter*coverSectorShrink yCenter - xCenter*coverSectorShrink  xCenter  + xCenter*coverSectorShrink  yCenter + xCenter*coverSectorShrink];
+
+% Create rotation matrix
+% theta = 90; % to rotate 90 counterclockwise
+% R = [cosd(theta) -sind(theta); sind(theta) cosd(theta)];
+% % Rotate your point(s)
+% point = coverSectorRect'; % arbitrarily selected
+% rotpoint = R .* point;
+
 centerMovePix = 0;
 %% set parameters
 fixcolor = 200; % 0 255
@@ -196,7 +212,7 @@ cbColorMask1DestinationRect = CenterRectOnPoint(cbColorMask1Rect,xCenter,yCenter
 % VisualField = [2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2];
 % VisualField = [1 1 1 1];
 
-blockNumber = 20; % block number should be even
+blockNumber = 200; % block number should be even
 % trialNumber = 3;
 back.CurrentAngle = 0;
 back.AngleRange = 120;
@@ -287,10 +303,10 @@ for block = 1 : blockNumber
     %     while respToBeMade
     debugFlag = 0;
     prekeyIsDown = 0;
-    
+    prekeyIsDowna = 0;
     %     flashTiltDirection = Shuffle(flashTiltDirectionMat);
     responseFlag = 0;
-    
+    frameFlag = 0;
     
     % each block lasting seconds 10s
     while GetSecs - BlockOnset < testDuration  && respToBeMade
@@ -318,10 +334,12 @@ for block = 1 : blockNumber
         if data.flashTiltDirection(block) == 1  && back.FlagSpinDirecA ==  - 1  % flash tilt right
             responseFlag = responseFlag + 1;
             
+            % background on the vertical meridian the left part is always
+            % white and the right part is always black   
             if flashRedDiskFlag == 'y'
-                Screen('FillArc',wptr,redcolor,ScreenRect,180 - sectorArcAngle/2,sectorArcAngle);
-                Screen('FillArc',wptr,whitecolor,coverSectorRect,180,sectorArcAngle/2);
-                Screen('FillArc',wptr,blackcolor,coverSectorRect,180 - sectorArcAngle/2,sectorArcAngle/2);
+                Screen('FillArc',wptr,redcolor,redSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
+                Screen('FillArc',wptr,whitecolor,coverSectorRect,180 + wedgeTiltNow,sectorArcAngle/2);
+                Screen('FillArc',wptr,blackcolor,coverSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle/2);
             else
                 Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
             end
@@ -330,9 +348,9 @@ for block = 1 : blockNumber
             responseFlag = responseFlag + 1;
             
             if flashRedDiskFlag == 'y'
-                Screen('FillArc',wptr,redcolor,ScreenRect,180 - sectorArcAngle/2,sectorArcAngle);
-                Screen('FillArc',wptr,whitecolor,coverSectorRect,180,sectorArcAngle/2);
-                Screen('FillArc',wptr,blackcolor,coverSectorRect,180 - sectorArcAngle/2,sectorArcAngle/2);
+                Screen('FillArc',wptr,redcolor,redSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
+                Screen('FillArc',wptr,whitecolor,coverSectorRect,180 + wedgeTiltNow,sectorArcAngle/2);
+                Screen('FillArc',wptr,blackcolor,coverSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle/2);
             else
                 Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
             end
@@ -360,26 +378,26 @@ for block = 1 : blockNumber
                 sca;
                 return
                 % the bar was on the left of the gabor
-            elseif keyCode(KbName('LeftArrow'))
+            elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
                 wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
                 
-            elseif keyCode(KbName('RightArrow'))
+            elseif keyCode(KbName('3')) || keyCode(KbName('3#'))
                 wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
                 
-            elseif keyCode(KbName('z'))  % ||keyCode(KbName('1!'))
+            elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
                 wedgeTiltNow = wedgeTiltNow - 4 * wedgeTiltStep;
                 
-            elseif keyCode(KbName('x')) % ||keyCode(KbName('3#'))
+            elseif keyCode(KbName('6')) || keyCode(KbName('6^'))
                 wedgeTiltNow = wedgeTiltNow + 4 * wedgeTiltStep;
                 
             elseif keyCode(KbName('Space'))
                 respToBeMade = false;
-                
+  
                 %                 WaitSecs(0.5);
             end
             
             data.wedgeTiltEachRes(block,responseFlag) = wedgeTiltNow;
-            
+%             KbStrokeWait;
         end
         
         prekeyIsDown = keyIsDown;
@@ -387,10 +405,10 @@ for block = 1 : blockNumber
         Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]); % fixation
         Screen('Flip',wptr);
         
-        if debugFlag
-            WaitSecs((1/framerate) * flashRepresentFrame);
-            %             WaitSecs(1);
-        end
+%         if debugFlag
+%             WaitSecs((1/framerate) * flashRepresentFrame);
+%             %             WaitSecs(1);
+%         end
         %         vbl = Screen('Flip', window, flashRepresentFrame);
         %       vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
         
@@ -400,23 +418,23 @@ for block = 1 : blockNumber
         
         if debug== 'y' && debugFlag
             KbWait;
+%              KbPressWait(1);
         end
         
+
+         
+%        framesSinceLastWait = Screen('WaitBlanking', wptr,60); 
         
-        
-        %       prevent illusion angle over 180
-        %         if wedgeTiltNow > 180
-        %             wedgeTiltNow = wedgeTiltNow - 360
-        %         elseif wedgeTiltNow < -180
-        %             wedgeTiltNow = wedgeTiltNow + 360
-        %         end
-        
-        % seprate each illusion test for 0.5 sec
-        %         if GetSecs - BlockOnset >= testDuration
-        %             respToBeMade = false;
-        %             WaitSecs (0.5);
-        %         end
-        
+%         [keyIsDowna,secs,keyCode] = KbCheck(-1);
+%         if keyIsDowna && ~prekeyIsDowna
+%             if keyCode(KbName('s'))
+%                 frameFlag = 1;
+%             end
+%             if frameFlag == 1
+%                 KbWait;
+%             end
+%         end
+%         prekeyIsDowna = keyIsDowna;
     end
     data.wedgeTiltEachBlock(:,block) = wedgeTiltNow;
     WaitSecs (0.5);
