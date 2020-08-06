@@ -17,12 +17,11 @@ clear all;close all;
 
 if 1
     sbjname = 'k';
-    debug = 'y';
+    debug = 'n';
     expmark = 2;
     flashRepresentFrame = 30;
     data.sectorRadiusIn = 100;
     flashRedDiskFlag = 'y';
-    InnerRadii = 200;
     
     
 else
@@ -42,7 +41,7 @@ else
     % flash represent for 3 frames
     flashRepresentFrame = input('>>>flash represent frames? (0.8/2.2):  ');
     flashRedDiskFlag =  input('>>>> Flash with red disk ? (e.g.: y/n):  ','s');
-    InnerRadii = input('>>>> Inner Radius of annulus ? (e.g.: 0/300):  ');
+    InnerRadii = input('>>>> Inner Radius o ? (e.g.: y/n):  ');
     if  flashRedDiskFlag == 'n'
         data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
     else
@@ -62,15 +61,7 @@ end
 %     savePath = '../data/illusionSize/backFlash_Ver/3frame/';
 % end
 
-if flashRepresentFrame == 0.8  && InnerRadii == 0
-    savePath = '../data/illusionSize/highContrast/1frame/0InnerRadii/';   % highContrast
-elseif flashRepresentFrame == 0.8  && InnerRadii == 200
-    savePath = '../data/illusionSize/highContrast/1frame/200InnerRadii/';
-elseif flashRepresentFrame == 2.2  && InnerRadii == 0
-    savePath = '../data/illusionSize/highContrast/3frame/0InnerRadii/';
-elseif flashRepresentFrame == 2.2  && InnerRadii == 200
-    savePath = '../data/illusionSize/highContrast/3frame/200InnerRadii/';
-end
+savePath = '../data/illusionSize/highContrast/';   % highContrast
 
 
 %----------------------------------------------------------------------
