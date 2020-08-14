@@ -7,10 +7,10 @@ clear all;
 clear all;
 % addpath '../function';
 
-sbjnames = {'huijiahan','hehuixia','jiangyong','zhanghongtao'}; 
+sbjnames = {'houwenhao','huangsiyuan','huijiahan','songyunjie'};  %,'huangsiyuan','houwenhao'
 
-% for mark = 1:4
-mark = 4;
+for mark = 1:4
+% mark = 4;
 
 % if mark == 1
 %     cd '../data/illusionSize/120/SpinSpeed_4'
@@ -24,17 +24,26 @@ mark = 4;
 
 
 % 1 background tilt，flash vertical  2 flash/background vertical 
-if mark == 1
-    cd '../data/illusionSize/backTilt_FlashVer/1frame/';
+% if mark == 1
+%     cd '../data/illusionSize/backTilt_FlashVer/1frame/';
+% elseif mark == 2
+%     cd  '../data/illusionSize/backTilt_FlashVer/3frame/';
+% elseif mark == 3
+%     cd  '../data/illusionSize/backFlash_Ver/1frame/';
+% elseif mark == 4
+%     cd '../data/illusionSize/backFlash_Ver/3frame/';
+% end
+
+
+if  mark == 1
+    cd '../data/illusionSize/highContrast/1frame/0InnerRadii/';   % highContrast
 elseif mark == 2
-    cd  '../data/illusionSize/backTilt_FlashVer/3frame/';
+    cd   '../../1frame/200InnerRadii/';
 elseif mark == 3
-    cd  '../data/illusionSize/backFlash_Ver/1frame/';
+    cd   '../../3frame/0InnerRadii/';
 elseif mark == 4
-    cd '../data/illusionSize/backFlash_Ver/3frame/';
+    cd    '../../3frame/200InnerRadii/';
 end
-
-
 
 
 
@@ -57,7 +66,7 @@ tiltLeftIndex(:,sbjnum) = find( data.flashTiltDirection == 2 );
 aveTiltRight(sbjnum) = mean(data.wedgeTiltEachBlock(tiltRightIndex(:,sbjnum)),2);
 aveTiltLeft(sbjnum) = mean(data.wedgeTiltEachBlock(tiltLeftIndex(:,sbjnum)),2);
 
-aveIlluSize(sbjnum) = (aveTiltRight(sbjnum) + abs(aveTiltLeft(sbjnum)))/2;
+aveIlluSize(sbjnum,mark) = (aveTiltRight(sbjnum) + abs(aveTiltLeft(sbjnum)))/2;
 
 % plot(1:size(tiltRightIndex,1),data.wedgeTiltEachBlock(tiltRightIndex),'r');
 % hold on;
@@ -67,14 +76,20 @@ aveIlluSize(sbjnum) = (aveTiltRight(sbjnum) + abs(aveTiltLeft(sbjnum)))/2;
 % ylim([0 10]);
 
 end
-
+end
 
 figure(mark);
 % bar(aveIlluSize,'r');
-bar(mean(aveIlluSize));
+bar(mean(aveIlluSize,1));
 
-xlim([0 2]);
-ylim([0 8]);
+xlim([0 mark+1]);
+ylim([0 25]);
+
+title('illusion size(frame/InnerRadii)','fontSize',20);
+ylabel('reported perceived position °','fontSize',20);
+set(gca,'xticklabel',{'1frame/0','1frame/200','3frame/0','3frame/200'},'fontSize',20);
+
+
 
 % if mark == 1
 %     title('illusion size(120-SpinSpeed-4)','fontSize',20);
@@ -86,24 +101,21 @@ ylim([0 8]);
 %     title('illusion size(180-SpinSpeed-2.3)','fontSize',20);
 % end
 
-
-if mark == 1
-    title('background Tilt- Flash Vertical present for 1 frame','fontSize',20);
-elseif mark == 2
-    title('background Tilt- Flash Vertical present for 3 frame','fontSize',20);
-elseif mark == 3
-    title('background and Flash Vertical flash present for 1 frame','fontSize',20);
-elseif mark == 4
-    title('background and Flash Vertical flash present for 3 frame','fontSize',20);
-end
-
-
-
-
-xlabel('tilt direction');
-ylabel('degree');
-hold on;
+% 
+% if mark == 1
+%     title('background Tilt- Flash Vertical present for 1 frame','fontSize',20);
+% elseif mark == 2
+%     title('background Tilt- Flash Vertical present for 3 frame','fontSize',20);
+% elseif mark == 3
+%     title('background and Flash Vertical flash present for 1 frame','fontSize',20);
+% elseif mark == 4
+%     title('background and Flash Vertical flash present for 3 frame','fontSize',20);
 % end
+% 
+
+
+
+
 
 % axis equal;
 % set(gca,'Visible','off');

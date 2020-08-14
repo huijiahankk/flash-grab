@@ -15,11 +15,11 @@
 %%
 clear all;close all;
 
-if 1
+if 0
     sbjname = 'k';
-    debug = 'y';
+    debug = 'n';
     expmark = 2;
-    flashRepresentFrame = 30;
+    flashRepresentFrame = 0.8;
     data.sectorRadiusIn = 100;
     flashRedDiskFlag = 'y';
     InnerRadii = 200;
@@ -37,12 +37,12 @@ else
     % back.SpinSpeed = input('>>>> Background spin velocity(deg/frame)? (e.g.: 2.3/4):  ');
     debug = input('>>>Debug? (y/n):  ','s');
     
-    expmark = 2; % input('>>>Which experiment? (1 background tilt，flash vertical/2 flash/background vertical):  ');
-    % 1 background tilt，flash vertical  2 flash/background vertical
+    expmark = 2; % input('>>>Which experiment? (1 background tilt???flash vertical/2 flash/background vertical):  ');
+    % 1 background tilt???flash vertical  2 flash/background vertical
     % flash represent for 3 frames
     flashRepresentFrame = input('>>>flash represent frames? (0.8/2.2):  ');
     flashRedDiskFlag =  input('>>>> Flash with red disk ? (e.g.: y/n):  ','s');
-    InnerRadii = input('>>>> Inner Radius of annulus ? (e.g.: 0/300):  ');
+    InnerRadii = input('>>>> Inner Radius of annulus ? (e.g.: 0/200):  ');
     if  flashRedDiskFlag == 'n'
         data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
     else
@@ -51,7 +51,7 @@ else
     
 end
 
-% 1 background tilt，flash vertical  2 flash/background vertical
+% 1 background tilt???flash vertical  2 flash/background vertical
 % if expmark == 1  && flashRepresentFrame == 0.8
 %     savePath = '../data/illusionSize/backTilt_FlashVer/1frame/';
 % elseif expmark == 1 && flashRepresentFrame == 2.2
@@ -238,7 +238,7 @@ back.FlagSpinDirecB = 0;  % flash tilt left
 wedgeTiltStart = 0;
 wedgeTiltStep = 0.5;
 % wedgeTiltIncre = 0;
-back.SpinSpeed = 1;
+back.SpinSpeed = 4;
 flashTiltDirectionMat = repmat([1;2],blockNumber/2,1);
 data.flashTiltDirection = Shuffle(flashTiltDirectionMat);
 % flashTiltDirectionMat = ['l','r'];
@@ -529,7 +529,7 @@ hold on;
 plot(1:size(tiltLeftIndex,1),abs(data.wedgeTiltEachBlock(tiltLeftIndex)),'b');
 legend({'tilt right','tilt left'},'FontSize',14);
 xlim([1 6]);
-ylim([0 10]);
+ylim([0 25]);
 
 
 
