@@ -24,8 +24,8 @@ if 1
     flashRedDiskFlag = 'y';
     InnerRadii = 0;
     %     contrastratio = 0.06;
-    whiteBlackContrast = 'y';
-    
+    %     whiteBlackContrast = 'n';
+    back.contrastTrend == 'higher';
 else
     
     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -43,14 +43,15 @@ else
     % flash represent for 3 frames
     flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
     flashRedDiskFlag =  'y'; %input('>>>> Flash with red disk ? (e.g.: y/n):  ','s');
-    InnerRadii = 0;% input('>>>> Inner Radius of annulus ? (e.g.: 0/200):  ');
+    InnerRadii = 0; % input('>>>> Inner Radius of annulus ? (e.g.: 0/200):  ');
     if  flashRedDiskFlag == 'n'
         data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
     else
         data.sectorRadiusIn = 300;
     end
-    whiteBlackContrast = input('>>>> background white and black ? (e.g.: y/n):  ','s');
+%     whiteBlackContrast = input('>>>> background white and black ? (e.g.: y/n):  ','s');
     %     contrastratio = input('>>>background contrast ratio? (0.06/0.12/0.24/0.48/0.96):  ');
+    back.contrastTrend = input('>>>> background contrast trend ? (e.g.: higher/lower):  ','s');
     
 end
 
@@ -86,11 +87,9 @@ end
 % elseif contrastratio == 0.96
 %     savePath = '../data/illusionSize/ContrastHierarchy/0.96/';
 % end
-if whiteBlackContrast == 'y'
-    savePath = '../data/illusionSize/ContrastHierarchy/';
-else
-    savePath = '../data/illusionSize/whiteAndBlack/';
-end
+
+savePath = '../data/illusionSize/ContrastHierarchy/';
+
 
 
 %----------------------------------------------------------------------
@@ -104,14 +103,11 @@ Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
 screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
-whitecolor = [255 255 255];
-% redcolor = 0.5;
-if whiteBlackContrast == 'y'
-    backcolor = 255;
-else
-    backcolor = 120;  % high contrast 255
-end
-bottomColor = 120;
+whitecolor = WhiteIndex(screenNumber);
+%     mask for change contrast
+back.maskcolor = (whitecolor + blackcolor) / 2;
+backcolor = (whitecolor + blackcolor) / 2;  % high contrast 255
+bottomColor = (whitecolor + blackcolor) / 2; % 128
 [wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
@@ -153,11 +149,21 @@ KbName('UnifyKeyNames');
 % sectorTex = Screen('MakeTexture', wptr, sector);
 % sectorRect = Screen('Rect',sectorTex);
 % sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter,yCenter-centerMovePix);
-if whiteBlackContrast == 'y'
-    back.contrastratioMat = 1;
-else
-    back.contrastratioMat = [0.06 0.12 0.24 0.48 0.96]; % [0.96 0.48 0.24 0.12 0.06]
+if back.contrastTrend == 'higher'
+    back.contrastMat = [0.06 0.12 0.24 0.48 0.96]; % [0.96 0.48 0.24 0.12 0.06]
+elseif back.contrastTrend == 'lower'
+    back.contrastMat = [0.96 0.48 0.24 0.12 0.06];
 end
+
+sectorNumber = 6;
+contrastratio = 1;
+% for annulus background  draw the inner sector the same as background
+[sector,InnerSectorRect]= MakeSector(xCenter,yCenter,centerMovePix,contrastratio,whitecolor,sectorNumber,InnerRadii);
+sectorTex = Screen('MakeTexture', wptr, sector);
+sectorRect = Screen('Rect',sectorTex);
+sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter,yCenter-centerMovePix);
+% Screen('FillRect', wptr,bttomcolor, rect);
+
 %----------------------------------------------------------------------
 %                      initialize on Screen Window
 %----------------------------------------------------------------------
@@ -230,8 +236,8 @@ cbColorMask1DestinationRect = CenterRectOnPoint(cbColorMask1Rect,xCenter,yCenter
 % VisualField = [2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2];
 % VisualField = [1 1 1 1];
 
-trialNumber = 16; % trial number should be even
-blockNumber = length(back.contrastratioMat);
+trialNumber = 20; % trial number should be even
+blockNumber = length(back.contrastMat);
 % trialNumber = 3;
 back.CurrentAngle = 0;
 back.AngleRange = 120;
@@ -319,19 +325,8 @@ for block = 1 : blockNumber
     KbStrokeWait;
     
     
-    %----------------------------------------------------------------------
-    %                      background sector setup
-    %----------------------------------------------------------------------
-    
-    sectorNumber = 6;
-    back.contrastratio = back.contrastratioMat(block);
-    % for annulus background  draw the inner sector the same as background
-    [sector,InnerSectorRect]= MakeSector(xCenter,yCenter,centerMovePix,back.contrastratio,backcolor,sectorNumber,InnerRadii);
-    sectorTex = Screen('MakeTexture', wptr, sector);
-    sectorRect = Screen('Rect',sectorTex);
-    sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter,yCenter-centerMovePix);
-    Screen('FillRect', wptr,backcolor, rect);
-    
+    back.contrast = back.contrastMat(block);
+    %     back.contrast = 1;
     
     for trial = 1:trialNumber
         %----------------------------------------------------------------------
@@ -367,6 +362,8 @@ for block = 1 : blockNumber
             back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
             %    draw background each frame
             Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle); %  + backGroundRota
+            Screen('FillRect', wptr, [back.maskcolor back.maskcolor back.maskcolor back.contrast * 255], sectorDestinationRect);
+            
             
             % present flash
             if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1  % flash tilt right
@@ -376,8 +373,10 @@ for block = 1 : blockNumber
                 % white and the right part is always black
                 if flashRedDiskFlag == 'y'
                     Screen('FillArc',wptr,redcolor,redSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
-                    Screen('FillArc',wptr,backcolor,coverSectorRect,180 + wedgeTiltNow,sectorArcAngle/2);
-                    Screen('FillArc',wptr,backcolor * (1 - back.contrastratio),coverSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle/2);
+                    Screen('FillArc',wptr,whitecolor,coverSectorRect,180 + wedgeTiltNow,sectorArcAngle/2); % backcolor * (1 - back.contrast)
+                    Screen('FillArc',wptr,blackcolor,coverSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle/2);
+                    Screen('FillArc', wptr, [back.maskcolor back.maskcolor back.maskcolor back.contrast * 255], coverSectorRect, 180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
+                    %                     Screen('FillRect', wptr, [back.maskcolor back.maskcolor back.maskcolor back.contrast * 255], coverSectorRect);
                     %                     Screen('FillArc',wptr,bottomColor,InnerSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
                 else
                     Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
@@ -388,8 +387,12 @@ for block = 1 : blockNumber
                 
                 if flashRedDiskFlag == 'y'
                     Screen('FillArc',wptr,redcolor,redSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
-                    Screen('FillArc',wptr,backcolor,coverSectorRect,180 + wedgeTiltNow,sectorArcAngle/2);
-                    Screen('FillArc',wptr,backcolor * (1 - back.contrastratio),coverSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle/2);
+                    Screen('FillArc',wptr,whitecolor,coverSectorRect,180 + wedgeTiltNow,sectorArcAngle/2); % backcolor * (1 - back.contrast)
+                    Screen('FillArc',wptr,blackcolor,coverSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle/2);
+                    Screen('FillArc', wptr, [back.maskcolor back.maskcolor back.maskcolor back.contrast * 255], coverSectorRect, 180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
+                    %                     Screen('FillRect', wptr, [back.maskcolor back.maskcolor back.maskcolor back.contrast * 255], sectorDestinationRect); % back.contrast * 255
+                    %                     Screen('FillRect', wptr, [back.maskcolor back.maskcolor back.maskcolor back.contrast * 255], coverSectorRect);
+                    %                     Screen('FillArc',wptr,backcolor,coverSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
                     %                     Screen('FillArc',wptr,bottomColor,InnerSectorRect,180 + wedgeTiltNow - sectorArcAngle/2,sectorArcAngle);
                 else
                     Screen('DrawTexture',wptr,cbColorMask,cbColorMask1Rect,cbColorMask1DestinationRect,wedgeTiltNow);
@@ -402,10 +405,10 @@ for block = 1 : blockNumber
             
             %         Screen('FillOval', wptr,redcolor,sectorRect); %   [yCenter - xCenter  0  xCenter*2  xCenter + yCenter]
             
-            
+            %             Screen('FillRect', wptr, [back.maskcolor back.maskcolor back.maskcolor back.contrast * 255], sectorDestinationRect); % back.contrast * 255
             back.FlagSpinDirecA = 0;
             back.FlagSpinDirecB = 0;
-            
+            %             Screen('FillRect', wptr, [back.maskcolor back.maskcolor back.maskcolor back.contrast * 255], sectorDestinationRect); % back.contrast * 255
             
             %----------------------------------------------------------------------
             %                      Response record
@@ -485,6 +488,7 @@ for block = 1 : blockNumber
 end
 
 display(GetSecs - ScanOnset);
+
 % end
 % eventseq;
 % response;

@@ -15,11 +15,11 @@
 %%
 clear all;close all;
 
-if 0
+if 1
     sbjname = 'k';
-    debug = 'n';
+    debug = 'y';
     expmark = 2;
-    flashRepresentFrame = 0.8;
+    flashRepresentFrame = 2.2;
     data.sectorRadiusIn = 100;
     flashRedDiskFlag = 'y';
     InnerRadii = 200;
@@ -87,8 +87,8 @@ blackcolor = BlackIndex(screenNumber);
 whitecolor = [255 255 255];
 % redcolor = 0.5;
 backcolor = 255;
-bottomColor = 120;
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
+bottomColor = 125;
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomColor,[0 0 1024 768]); %set window to ,[0 0 1600 900]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -128,7 +128,7 @@ sectorRadius_mov = xCenter + centerMovePix;
 contrastratio = 1;
 sector1_color = backcolor + backcolor * contrastratio;
 sector2_color = backcolor;
-contrast = (sector1_color - sector2_color)/2;
+contrast = (sector1_color - sector2_color);% (sector1_color - sector2_color)/2
 
 sectorNumber = 6;
 
@@ -226,7 +226,7 @@ cbColorMask1DestinationRect = CenterRectOnPoint(cbColorMask1Rect,xCenter,yCenter
 % VisualField = [2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2];
 % VisualField = [1 1 1 1];
 
-blockNumber = 10; % block number should be even
+blockNumber = 20; % block number should be even
 % trialNumber = 3;
 back.CurrentAngle = 0;
 back.AngleRange = 120;
