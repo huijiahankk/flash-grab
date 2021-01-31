@@ -31,7 +31,7 @@ end
 formatSpec = '%f%f%f%f%s%[^\n\r]';
 
 %% Open the text file.
-fileID = fopen(filename,'r');
+[fileID,errmsg] = fopen(filename,'r');
 
 %% Read columns of data according to the format.
 % This call is based on the structure of the file used to generate this

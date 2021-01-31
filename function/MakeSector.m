@@ -18,9 +18,11 @@ end
 sectorRadius_mov = xCenter + centerMovePix;
 % InnerRadii = 400; % pixel
 % contrastratio = 1;
-sector1_color = backcolor * (1 + contrastratio); % backcolor + backcolor * contrastratio;
-sector2_color = backcolor; % backcolor * (1 - contrastratio); % backcolor 
-contrast = (sector1_color - sector2_color)/2; %2（black and white） - 255 
+sector2_color = backcolor; % backcolor * (1 - contrastratio); % backcolor
+sector1_color = ((1 + contrastratio)/(1 - contrastratio)) * sector2_color;
+% sector1_color = backcolor * (1 + contrastratio); % backcolor + backcolor * contrastratio;
+
+contrastPara = (sector1_color - sector2_color)/2; %2（black and white） - 255 
 
 % sectorNumber = 6;
 
@@ -34,9 +36,14 @@ mask = ((InnerRadii).^2 <= (m2.^2+n2.^2) & ((m2.^2+n2.^2)<= (sectorRadius_mov).^
 
 InnerSectorRect = [xCenter - InnerRadii  yCenter - InnerRadii  xCenter + InnerRadii  yCenter + InnerRadii];
 
-sector(:,:,1) = (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1)*contrast+backcolor; % *contrast;%
-sector(:,:,2) = (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1)*contrast+backcolor;
-sector(:,:,3) =  (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1)*contrast+backcolor;  %(MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle))*contrast;%.* mask); 
+% sector(:,:,1) = (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1)*contrastPara+backcolor; % *contrast;%
+% sector(:,:,2) = (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1)*contrastPara+backcolor;
+% sector(:,:,3) =  (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1)*contrastPara+backcolor;  %(MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle))*contrast;%.* mask); 
+% sector(:,:,4) = mask * 255; % 255
+
+sector(:,:,1) = (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1);%*contrastPara+backcolor; % *contrast;%
+sector(:,:,2) = (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1);%*contrastPara+backcolor;
+sector(:,:,3) =  (MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle).*mask-1);%*contrastPara+backcolor;  %(MakeSectorDisc(sectorRadius_mov,sectorRadius_mov,sector_angle))*contrast;%.* mask); 
 sector(:,:,4) = mask * 255; % 255
 
 % sectorTex = Screen('MakeTexture', wptr, sector);

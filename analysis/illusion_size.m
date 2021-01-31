@@ -7,20 +7,20 @@ clear all;
 clear all;
 % addpath '../function';
 
-sbjnames = {'houwenhao','huangsiyuan','huijiahan','songyunjie'};  %,'huangsiyuan','houwenhao'
+sbjnames = {'hehuixia','huijiahan','jiangyong'};  %,'huangsiyuan','houwenhao'
 
 for mark = 1:4
 % mark = 4;
 
-% if mark == 1
-%     cd '../data/illusionSize/120/SpinSpeed_4'
-% elseif mark == 2
-%     cd '../data/illusionSize/120/SpinSpeed_2.3'
-% elseif mark == 3
-%     cd '../data/illusionSize/180/SpinSpeed_4'
-% elseif mark == 4
-%     cd '../data/illusionSize/180/SpinSpeed_2.3'
-% end
+if mark == 1
+    cd '../data/illusionSize/120/SpinSpeed_4'
+elseif mark == 2
+    cd '../../120/SpinSpeed_2.3'
+elseif mark == 3
+    cd '../../180/SpinSpeed_4'
+elseif mark == 4
+    cd '../../180/SpinSpeed_2.3'
+end
 
 
 % 1 background tilt，flash vertical  2 flash/background vertical 
@@ -34,16 +34,16 @@ for mark = 1:4
 %     cd '../data/illusionSize/backFlash_Ver/3frame/';
 % end
 
-
-if  mark == 1
-    cd '../data/illusionSize/highContrast/1frame/0InnerRadii/';   % highContrast
-elseif mark == 2
-    cd   '../../1frame/200InnerRadii/';
-elseif mark == 3
-    cd   '../../3frame/0InnerRadii/';
-elseif mark == 4
-    cd    '../../3frame/200InnerRadii/';
-end
+% 'houwenhao','huangsiyuan','huijiahan','songyunjie'
+% if  mark == 1
+%     cd '../data/illusionSize/highContrast/1frame/0InnerRadii/';   % highContrast
+% elseif mark == 2
+%     cd   '../../1frame/200InnerRadii/';
+% elseif mark == 3
+%     cd   '../../3frame/0InnerRadii/';
+% elseif mark == 4
+%     cd    '../../3frame/200InnerRadii/';
+% end
 
 
 
@@ -83,11 +83,10 @@ figure(mark);
 bar(mean(aveIlluSize,1));
 
 xlim([0 mark+1]);
-ylim([0 25]);
+ylim([0 15]);
 
-title('illusion size(frame/InnerRadii)','fontSize',20);
+
 ylabel('reported perceived position °','fontSize',20);
-set(gca,'xticklabel',{'1frame/0','1frame/200','3frame/0','3frame/200'},'fontSize',20);
 
 
 
@@ -101,6 +100,9 @@ set(gca,'xticklabel',{'1frame/0','1frame/200','3frame/0','3frame/200'},'fontSize
 %     title('illusion size(180-SpinSpeed-2.3)','fontSize',20);
 % end
 
+set(gca,'xticklabel',{'120-SpinSpeed-4','120-SpinSpeed-2.3','180-SpinSpeed-4','180-SpinSpeed-2.3'},'fontSize',20);
+title('illusion size(Sector number/Spin speed)','fontSize',20);
+
 % 
 % if mark == 1
 %     title('background Tilt- Flash Vertical present for 1 frame','fontSize',20);
@@ -111,8 +113,8 @@ set(gca,'xticklabel',{'1frame/0','1frame/200','3frame/0','3frame/200'},'fontSize
 % elseif mark == 4
 %     title('background and Flash Vertical flash present for 3 frame','fontSize',20);
 % end
-% 
-
+% set(gca,'xticklabel',{'1frame/0','1frame/200','3frame/0','3frame/200'},'fontSize',20);
+% title('illusion size(frame/InnerRadii)','fontSize',20);
 
 
 

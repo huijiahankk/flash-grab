@@ -21,20 +21,20 @@ tic;
 % sbjname = input('>>>Please input the subject''s name:   ','s');
 sbjname = 'k';
 debug = input('>>>Debug? (y/n):','s');
-expMark = input('>>>Which experiment? (1/2):');
+expmark = input('>>>Which experiment? (1/2):');
 % 1 background tilt，flash vertical  2 flash/background vertical  
 % flash represent for 3 frames
 flashRepresentFrame = input('>>>flash represent frames? (1/3):');
 
 % 1 background tilt，flash vertical  2 flash/background vertical 
 if expmark == 1  && flashRepresentFrame == 1
-    savePath = '../data/illusionSize/backTilt_FlashVer/1frame'
+    savePath = '../data/illusionSize/backTilt_FlashVer/1frame';
 elseif expmark == 1 && flashRepresentFrame == 3
-    savePath = '../data/illusionSize/backTilt_FlashVer/3frame'
+    savePath = '../data/illusionSize/backTilt_FlashVer/3frame';
 elseif expmark == 2 && flashRepresentFrame == 1 
-    savePath = '../data/illusionSize/backFlash_Ver/1frame'
+    savePath = '../data/illusionSize/backFlash_Ver/1frame';
 elseif expmark == 2
-    savePath = '../data/illusionSize/backFlash_Ver/3frame'
+    savePath = '../data/illusionSize/backFlash_Ver/3frame';
 end
 % data.sectorRadiusIn = input('>>>> CheckerBoard wedge Inner Radius(degree) ? (e.g.: 0/300):  ');
 data.sectorRadiusIn = 200;
@@ -118,10 +118,10 @@ sectorArcAngle = 15; % abs(sectorStartAngle * 2);
 adjustSectorArcAngle = mod(sectorArcAngle,2)/2;
 
 % 1 background tilt，flash vertical  2 flash/background vertical  
-if expMark == 1
+if expmark == 1
     % checkerboard tilt angle
     tiltAngle = sectorArcAngle/2;
-elseif expMark == 2
+elseif expmark == 2
     tiltAngle = 0;
 end
 % data.sectorRadiusIn = 300;

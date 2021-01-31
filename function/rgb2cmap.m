@@ -1,0 +1,1 @@
+function cmap = rgb2cmap(dirRGB,mnRGB,contrast,gamInv)global dacsizemaxval = 2.^dacsize -1;ncolors = size(dirRGB,1);mnRGB = ones(ncolors,1) * mnRGB;contRGB = mnRGB+contrast*dirRGB;cmap = round(maxval*rgb2dac(contRGB,gamInv));
