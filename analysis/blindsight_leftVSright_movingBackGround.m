@@ -3,7 +3,7 @@ clear all;
 % huangwenxiang1 only have the illusion to the normal vision field
 % huangwenxiang  have the data in both directions  the flash on the edge
 sbjnames = {'wuzhigang'} ;
-
+addpath '../function';
 
 
 %----------------------------------------------------------------------
@@ -11,9 +11,7 @@ sbjnames = {'wuzhigang'} ;
 %----------------------------------------------------------------------
 
 
-cd '../data/illusionSize/corticalBlindness/bar/upper_field/'
-
-addpath '../function';
+cd '../data/illusionSize/corticalBlindness/bar/normal/'
 
 
 for sbjnum = 1:length(sbjnames)
@@ -56,10 +54,10 @@ for sbjnum = 1:length(sbjnames)
     h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
     hold on;
     h_error = errorbar(1:3,y,y_error,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','none');
-    set(gca, 'XTick', 1:3, 'XTickLabels', {'average'  'tilt left'  'tilt right' },'fontsize',20,'FontWeight','bold');
+    set(gca, 'XTick', 1:3, 'XTickLabels', {'average'  'tilt left'  'tilt right' },'fontsize',35,'FontWeight','bold');
     set(gcf,'color','w');
     set(gca,'box','off');
-    title('Illusion size','FontSize',25);
+    title('Normal visiual field illusion size','FontSize',40);
 end
 
 [H1,P1,CI1] = ttest2(illusionTiltLeftDegree,  illusionTiltRightDegree);
