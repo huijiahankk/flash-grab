@@ -11,7 +11,7 @@ addpath '../function';
 %----------------------------------------------------------------------
 
 
-cd '../data/illusionSize/corticalBlindness/bar/normal/'
+cd '../data/illusionSize/corticalBlindness/bar/lower_field/'
 
 
 for sbjnum = 1:length(sbjnames)
@@ -30,34 +30,43 @@ for sbjnum = 1:length(sbjnames)
     %                    average illusion size
     %----------------------------------------------------------------------
     
-    % tilt right
-    illusionTiltIndexRight = find(data.flashTiltDirection(:,:) == 1);
+    if barLocation == 'u'
+        % tilt right
+        illusionTiltIndexRight = find(data.flashTiltDirection(:,:) == 1);
+        % tilt left
+        illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 2);
+        
+    elseif barLocation == 'l'
+        illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 1);
+        % tilt left
+        illusionTiltIndexRight = find(data.flashTiltDirection(:,:) == 2);
+    end
+    
     illusionTiltRightDegree = data.wedgeTiltEachBlock(illusionTiltIndexRight);
     illusionAveTiltRight = mean(illusionTiltRightDegree);
     
-    % tilt left
-    illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 2);
-    illusionTiltLeftDegree = data.wedgeTiltEachBlock(illusionTiltIndexLeft);
+
+    illusionTiltLeftDegree = data.wedgeTiltEachBlock(illusionTiltIndexLeft(1:end-1));
     illusionAveTiltLeft = mean(illusionTiltLeftDegree);
-    
+
+        
     illusionAll = [ illusionTiltLeftDegree'  illusionTiltLeftDegree'];
     illusionAve = (illusionAveTiltRight + illusionAveTiltLeft)/2;
     
+   
     
-    
-    
-    y = abs([illusionAve illusionAveTiltLeft illusionAveTiltRight]);
+    y = [illusionAve illusionAveTiltLeft illusionAveTiltRight];
     illusionTiltRightDegree_ste = ste(illusionTiltRightDegree,1);
     illusionTiltLeftDegree_ste = ste(illusionTiltLeftDegree,1);
     illusionAll_ste = ste(illusionAll,2);
-    y_error = [illusionAll_ste illusionTiltLeftDegree_ste   illusionTiltRightDegree_ste];
+    y_error = [illusionAll_ste   illusionTiltLeftDegree_ste   illusionTiltRightDegree_ste];
     h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
     hold on;
     h_error = errorbar(1:3,y,y_error,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','none');
-    set(gca, 'XTick', 1:3, 'XTickLabels', {'average'  'tilt left'  'tilt right' },'fontsize',35,'FontWeight','bold');
+    set(gca, 'XTick', 1:3, 'XTickLabels', {'average' 'tilt left'  'tilt right' },'fontsize',35,'FontWeight','bold');
     set(gcf,'color','w');
     set(gca,'box','off');
-    title('Normal visiual field illusion size','FontSize',40);
+    title('Lower visiual field illusion size','FontSize',40);
 end
 
 [H1,P1,CI1] = ttest2(illusionTiltLeftDegree,  illusionTiltRightDegree);

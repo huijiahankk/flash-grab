@@ -7,7 +7,7 @@
 
 clear all;
 
-sbjnames = {'guofanhua','huijiahan1','wangye'}; % 'zhangpeng','guofanhua','huijiahan1','wangye'
+sbjnames = {'zhangpeng'}; % 'guofanhua','huijiahan1','wangye','zhaona','songyunjie' 'zhangpeng'
 addpath '../function';
 
 % s = what('flash-grab');
@@ -55,7 +55,7 @@ X = categorical({'Background contrast'});
 % bar([aveIllusionSizeAll(1) aveIllusionSizeAll(2)],0.4,'r');
 bar([mean(aveIllusionSize,2)],'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
 % h = bar([aveIllusionSizeL aveIllusionSizeR aveIllusionSize],30,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
-ylim([0 25]);
+ylim([0 50]);
 set(gca, 'XTick', 1:5, 'XTickLabels', {'0.06' '0.12' '0.24' '0.48' '0.96'},'fontsize',20,'FontWeight','bold');
 set(gcf,'color','w');
 set(gca,'box','off');

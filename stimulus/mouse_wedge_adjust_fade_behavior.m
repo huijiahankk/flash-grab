@@ -273,7 +273,7 @@ elseif back.contrastTrend == '2'     %'lower'
 end
 
 
-trialNumber = 2;
+trialNumber = 4;
 blockNumber = length(back.ground_alphaMat);
 % back.contrastratio = 1;
 % trialNumber = 3;
@@ -300,7 +300,7 @@ back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
 
 % back.ground_alpha_step = 0.005; %1/(0.4*framerate); %framerate/1000
 % how many times does the flash present before it gradually dissappear
-flashPresentTimesCeiling = 2;
+flashPresentTimesCeiling = 1;
 
 % flashTiltDirectionMat = ['l','r'];
 % flashTiltDirectionShu = Shuffle(1:length(flashTiltDirection));
@@ -391,7 +391,7 @@ for block = 1 : blockNumber
         %         click_mouse = 1;
         back_ground_alpha = back.ground_alphaMat(block);
         back.ground_alpha_step = back.ground_alpha_stepMat(block);
-        
+%         back.CurrentAngle = 0;
         
         if dotOrWedgeFlag == 'd'
             adjustAngleL = 0;%11.25;%360/sectorNumber/2 - mod(back.ReverseAngle,back.SpinSpeed) - mod((360/sectorNumber/2 - mod(back.ReverseAngle,back.SpinSpeed)),back.SpinSpeed); % 360/sectorNumber/2 - mod(back.ReverseAngle,back.SpinSpeed)/2 - 0.25;
