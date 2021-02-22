@@ -2,6 +2,10 @@
 clear all;
 % huangwenxiang1 only have the illusion to the normal vision field
 % huangwenxiang  have the data in both directions  the flash on the edge
+% huagnwenxiang  data can't use this program because it has flash alone
+% trials in the same block
+% wuzhigang 
+
 sbjnames = {'wuzhigang'} ;
 addpath '../function';
 
@@ -32,21 +36,28 @@ for sbjnum = 1:length(sbjnames)
     
     if barLocation == 'u'
         % tilt right
-        illusionTiltIndexRight = find(data.flashTiltDirection(:,:) == 1);
-        % tilt left
-        illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 2);
-        
-    elseif barLocation == 'l'
-        illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 1);
-        % tilt left
         illusionTiltIndexRight = find(data.flashTiltDirection(:,:) == 2);
+        % tilt left
+        illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 1);
+        
+    elseif barLocation == 'l' 
+        illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 2);
+        % tilt left
+        illusionTiltIndexRight = find(data.flashTiltDirection(:,:) == 1);
+        
+    elseif  barLocation == 'n'   %  define up is left   down is right 
+        illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 2);
+        % tilt left
+        illusionTiltIndexRight = find(data.flashTiltDirection(:,:) == 1);
+        
+        
     end
     
     illusionTiltRightDegree = data.wedgeTiltEachBlock(illusionTiltIndexRight);
     illusionAveTiltRight = mean(illusionTiltRightDegree);
     
 
-    illusionTiltLeftDegree = data.wedgeTiltEachBlock(illusionTiltIndexLeft(1:end-1));
+    illusionTiltLeftDegree = data.wedgeTiltEachBlock(illusionTiltIndexLeft);
     illusionAveTiltLeft = mean(illusionTiltLeftDegree);
 
         

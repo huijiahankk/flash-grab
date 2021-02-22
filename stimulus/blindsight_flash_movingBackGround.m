@@ -21,13 +21,14 @@ if 1
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
     dotOrWedgeFlag = 'b';
-    barLocation = 'u';  % u for  upper visual field  l for lower   n  for normal visual field
+    barLocation = 'u';
     
 else
-    
+       
     sbjname = input('>>>Please input the subject''s name:   ','s');
     debug = input('>>>Debug? (y/n):  ','s');
-    dotOrWedgeFlag = input('>>>Use dot flash Or wedge flash or bar flash? (d/w/b):  ','s');
+    dotOrWedgeFlag = 'b';
+%     dotOrWedgeFlag = input('>>>Use dot flash Or wedge flash or bar flash? (d/w/b):  ','s');
     % flash represent for 3 frames
     flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
     barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
@@ -53,9 +54,19 @@ ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
 fixsize = 8;
+% coverSectorShrink = 4; % 2 big cover sector 4 small cover sector
+% coverSectorRect = [xCenter - xCenter/coverSectorShrink yCenter - xCenter/coverSectorShrink  xCenter  + xCenter/coverSectorShrink  yCenter + xCenter/coverSectorShrink]; %[0 0 256 192];
+% redSectorRect = [xCenter - xCenter*coverSectorShrink yCenter - xCenter*coverSectorShrink  xCenter  + xCenter*coverSectorShrink  yCenter + xCenter*coverSectorShrink];
+% sectorRect = [0  yCenter - xCenter  2*xCenter yCenter + xCenter];
 
-% HideCursor;
+HideCursor;
 
+% Create rotation matrix
+% theta = 90; % to rotate 90 counterclockwise
+% R = [cosd(theta) -sind(theta); sind(theta) cosd(theta)];
+% % Rotate your point(s)
+% point = coverSectorRect'; % arbitrarily selected
+% rotpoint = R .* point;
 
 centerMovePix = 0;
 %% set parameters
@@ -204,10 +215,10 @@ back.FlagSpinDirecA = 0;  % flash tilt right
 back.FlagSpinDirecB = 0;  % flash tilt left
 % wedgeTiltStart = 0;
 wedgeTiltStep = 1; %2.8125   1.40625;
-back.alpha = 1; % background transparence
+back.alpha = 1; % background transparence 
 
-wedgeTiltStartUpperRight = - 15;
-wedgeTiltStartLowerRight = 15;
+wedgeTiltStartUpperRight = - 23;  
+wedgeTiltStartLowerRight = 12.5;
 wedgeTiltStartNormal = - 90;
 % wedgeTiltIncre = 0;
 back.SpinSpeed = 3;% 2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
@@ -261,7 +272,7 @@ for block = 1 : blockNumber
     %     end
     
     %     data.flashTiltDirection(block,:) = Shuffle(back.flashTiltDirectionMat)';
-    %     data.wedgeTiltEachBlock(block,1) = 0;
+%     data.wedgeTiltEachBlock(block,1) = 0;
     back.flashTiltDirectionMatShuff = Shuffle(back.flashTiltDirectionMat)';
     
     for trial = 1:trialNumber
@@ -272,24 +283,30 @@ for block = 1 : blockNumber
         %     while respToBeMade
         flashPresentFlag = 0;
         prekeyIsDown = 0;
-        data.flashTiltDirection(block,trial) = back.flashTiltDirectionMat(trial);
-
+        data.flashTiltDirection(block,trial) = back.flashTiltDirectionMatShuff(trial);
         
-        
-        if trial == 1
-            if barLocation == 'u'
-                wedgeTiltNow = wedgeTiltStartUpperRight;  %-15
-            elseif barLocation == 'l'
-                wedgeTiltNow = wedgeTiltStartLowerRight; %15
-            elseif barLocation == 'n'
-                wedgeTiltNow = wedgeTiltStartNormal;%-90
+                
+        if barLocation == 'u'
+            if trial == 1
+                wedgeTiltNow = wedgeTiltStartUpperRight;
+            else
+                wedgeTiltNow = data.wedgeTiltEachBlock(block,trial - 1) + randWedgeTiltNoiseMat(trial);
             end
             
-        else
-            wedgeTiltNow = data.wedgeTiltEachBlock(block,trial - 1) + randWedgeTiltNoiseMat(trial);
+        elseif barLocation == 'l'
+            if trial == 1
+                wedgeTiltNow = wedgeTiltStartLowerRight;
+            else
+                wedgeTiltNow = data.wedgeTiltEachBlock(block,trial - 1) + randWedgeTiltNoiseMat(trial);
+            end
+        elseif barLocation == 'n'
+            if trial == 1
+                wedgeTiltNow = wedgeTiltStartNormal;
+            else
+                wedgeTiltNow = data.wedgeTiltEachBlock(block,trial - 1) + randWedgeTiltNoiseMat(trial);
+            end
         end
-        
-        
+              
         
         while respToBeMade
             
@@ -309,10 +326,6 @@ for block = 1 : blockNumber
             Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.alpha); %  + backGroundRota
             
             
-%             in the upper visual field if the data.flashTiltDirection == 1 means the illusion tilt left of the physical location
-%                if the data.flashTiltDirection == 2 means the illusion tilt right of the physical location 
-            
-            
             
             % present flash tilt right
             if data.flashTiltDirection(block,trial) == 1  && back.FlagSpinDirecA ==  - 1   % flash tilt right
@@ -322,7 +335,7 @@ for block = 1 : blockNumber
                 %  the location of the red dot is present in the middle of annlus (between outer and inner radii)
                 
                 if dotOrWedgeFlag == 'd'
-                    dotCentercoord = [xCenter + dotRadius2Center * cosd(wedgeTiltNow)    yCenter + dotRadius2Center * (1 - tand(wedgeTiltNow/2)*cosd(90-wedgeTiltNow))];
+                    dotCentercoord = [xCenter + dotRadius2Center * cosd(back.CurrentAngle)    yCenter + dotRadius2Center * (1 - tand(wedgeTiltNow/2)*cosd(90-wedgeTiltNow))];
                     %  Screen('DrawDots', wptr, rotcoord, dotSizePix, dotColor,[],2);
                     dotRect = [dotCentercoord(1) - dotRadiusPix  dotCentercoord(2) - dotRadiusPix   dotCentercoord(1) + dotRadiusPix  dotCentercoord(2) + dotRadiusPix];
                     Screen('FillOval', wptr,dotColor,dotRect);
@@ -367,7 +380,7 @@ for block = 1 : blockNumber
                         barDestinationRect = CenterRectOnPoint(bartRect,xCenter - dotRadius2Center * sind(wedgeTiltNow), yCenter - dotRadius2Center * cosd(wedgeTiltNow));
                         
                     end
-                    Screen('DrawTexture',wptr,barTexture,bartRect,barDestinationRect,back.CurrentAngle);  % back.CurrentAngle
+                    Screen('DrawTexture',wptr,barTexture,bartRect,barDestinationRect,back.CurrentAngle);
                 end
                 
                 flashPresentFlag = 1;
@@ -445,7 +458,7 @@ for block = 1 : blockNumber
             
         end
         
-        data.barTiltAngle(block,trial) = back.CurrentAngle;
+        
         data.wedgeTiltEachBlock(block,trial) = wedgeTiltNow;
         WaitSecs (0.5);
         
@@ -486,7 +499,7 @@ elseif dotOrWedgeFlag == 'b'
         savePath = '../data/illusionSize/corticalBlindness/bar/upper_field/';
     elseif  barLocation == 'l';
         savePath = '../data/illusionSize/corticalBlindness/bar/lower_field/';
-    elseif  barLocation == 'normal';
+    elseif  barLocation == 'n';
         savePath = '../data/illusionSize/corticalBlindness/bar/normal/';
     end
 end

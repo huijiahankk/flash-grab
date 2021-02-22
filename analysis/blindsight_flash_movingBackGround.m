@@ -2,12 +2,16 @@
 clear all;
 % huangwenxiang1 only have the illusion to the normal vision field
 % huangwenxiang  have the data in both directions  the flash on the edge 
-sbjnames = {'wuzhigang'} ;
+
+% this program is not fit for wuzhigang 
+
+
+sbjnames = {'huangwenxiang2'} ;
 
 addpath '../function';
 
 
-cd '../data/illusionSize/corticalBlindness/bar/lower_field/'
+cd '../data/illusionSize/corticalBlindness/bar/upper_field/'
 
 
 
@@ -49,10 +53,25 @@ for sbjnum = 1:length(sbjnames)
     %----------------------------------------------------------------------
     %                    average illusion shift
     %----------------------------------------------------------------------
+    
+    if barLocation == 'u'
+        % tilt right
+        illusionTiltDirectionIndexRight = find(data.flashTiltDirection(:,2:2:trialNumber) == 2);
+        % tilt left
+        illusionTiltDirectionIndexLeft = find(data.flashTiltDirection(:,2:2:trialNumber) == 1);
+        
+    elseif barLocation == 'l' 
+        illusionTiltDirectionIndexLeft = find(data.flashTiltDirection(:,2:2:trialNumber) == 2);
+        % tilt left
+        illusionTiltDirectionIndexRight = find(data.flashTiltDirection(:,2:2:trialNumber) == 1);
+    
+    end
+    
+    
     % illusion degree
     illusionTiltDegree = data.wedgeTiltEachBlock(:,2:2:trialNumber);
-    illusionTiltDirectionIndexRight = find(data.flashTiltDirection(:,2:2:trialNumber) == 1);
-    illusionTiltDirectionIndexLeft = find(data.flashTiltDirection(:,2:2:trialNumber) == 2);
+%     illusionTiltDirectionIndexRight = find(data.flashTiltDirection(:,2:2:trialNumber) == 1);
+%     illusionTiltDirectionIndexLeft = find(data.flashTiltDirection(:,2:2:trialNumber) == 2);
     
     % average illusion
     illusionTiltRightDegree = illusionTiltDegree(illusionTiltDirectionIndexRight);
@@ -78,7 +97,7 @@ h_error = errorbar(1:4,y,y_error,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','
 set(gca, 'XTick', 1:4, 'XTickLabels', {'Flash' 'Illusion'  'Tilt left' 'Tilt right'},'fontsize',30,'FontWeight','bold');
 set(gcf,'color','w');
 set(gca,'box','off');
-title('upper visual field bar shift','FontSize',40);
+title('Upper visual field bar shift','FontSize',40);
 
 
 [H1,P1,CI1] = ttest2(illusionTiltLeftDegree,flashTiltDegreeRow(2:end));

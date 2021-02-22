@@ -21,7 +21,7 @@ if 1
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
     dotOrWedgeFlag = 'b';
-    barLocation = 'u';  % u for  upper visual field  l for lower   n  for normal visual field
+    barLocation = 'l';  % u for  upper visual field  l for lower   n  for normal visual field
     
 else
     
@@ -272,7 +272,7 @@ for block = 1 : blockNumber
         %     while respToBeMade
         flashPresentFlag = 0;
         prekeyIsDown = 0;
-        data.flashTiltDirection(block,trial) = back.flashTiltDirectionMat(trial);
+        data.flashTiltDirection(block,trial) = back.flashTiltDirectionMatShuff(trial);
 
         
         
@@ -284,7 +284,6 @@ for block = 1 : blockNumber
             elseif barLocation == 'n'
                 wedgeTiltNow = wedgeTiltStartNormal;%-90
             end
-            
         else
             wedgeTiltNow = data.wedgeTiltEachBlock(block,trial - 1) + randWedgeTiltNoiseMat(trial);
         end

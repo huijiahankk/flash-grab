@@ -7,7 +7,7 @@
 
 clear all;
 
-sbjnames = {'zhangpeng'}; % 'guofanhua','huijiahan1','wangye','zhaona','songyunjie' 'zhangpeng'
+sbjnames = {'zhangpeng','guofanhua','huijiahan1'}; % 'zhangpeng','guofanhua','huijiahan1','wangye','zhaona','songyunjie' 'zhangpeng'
 addpath '../function';
 
 % s = what('flash-grab');
@@ -36,9 +36,9 @@ for sbjnum = 1:length(sbjnames)
         tiltRightIndex = find( data.flashTiltDirection(n,:) == 1 );
         tiltLeftIndex = find( data.flashTiltDirection(n,:) == 2 );
         
-        for  m = 1:size(data.mouseMoveDegreeMat,2)/2            
+        for  m = 1:size(data.mouseMoveDegreeMat,2)/2
             illusionSizeR(n,m) = data.mouseMoveDegreeMat(n,tiltRightIndex(m));
-            illusionSizeL(n,m) = data.mouseMoveDegreeMat(n,tiltLeftIndex(m));            
+            illusionSizeL(n,m) = data.mouseMoveDegreeMat(n,tiltLeftIndex(m));
         end
     end
     
@@ -46,16 +46,24 @@ for sbjnum = 1:length(sbjnames)
     aveIllusionSizeL(:,sbjnum)= mean(illusionSizeL,2);
     aveIllusionSizeR(:,sbjnum) = abs(mean(illusionSizeR,2));
     
-    aveIllusionSize(:,sbjnum) = (aveIllusionSizeL(:,sbjnum) + aveIllusionSizeR(:,sbjnum))/2;
+    
+    if back.contrastTrend == '1'
+        aveIllusionSize(:,sbjnum) = (aveIllusionSizeL(:,sbjnum) + aveIllusionSizeR(:,sbjnum))/2;
+    elseif back.contrastTrend == '2'  % 1 low - high   2  high - low
+        aveIllusionSize(:,sbjnum) = flip((aveIllusionSizeL(:,sbjnum) + aveIllusionSizeR(:,sbjnum))/2);
+    end
+        
 end
+
+aveIllusionSize
 
 X = categorical({'Background contrast'});
 
 % legend('Dot','Wedge');
 % bar([aveIllusionSizeAll(1) aveIllusionSizeAll(2)],0.4,'r');
-bar([mean(aveIllusionSize,2)],'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
+% bar([mean(aveIllusionSize,2)],'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
 % h = bar([aveIllusionSizeL aveIllusionSizeR aveIllusionSize],30,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
-ylim([0 50]);
+% ylim([0 50]);
 set(gca, 'XTick', 1:5, 'XTickLabels', {'0.06' '0.12' '0.24' '0.48' '0.96'},'fontsize',20,'FontWeight','bold');
 set(gcf,'color','w');
 set(gca,'box','off');
@@ -63,5 +71,5 @@ title('Flash shift at different background contrast','FontSize',25);
 
 aveIllusionSize_ste = ste(aveIllusionSize,2);
 hold on;
-h_error = errorbar(mean(aveIllusionSize,2),aveIllusionSize_ste,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','none');
+% h_error = errorbar(mean(aveIllusionSize,2),aveIllusionSize_ste,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','none');
 
