@@ -1,0 +1,1 @@
+function cmap = rgb2cmapramp(dirRGB,mnRGB,contrast,numEntries,gamInv)if(abs(contrast) > 0)	steps = linspace(-1, 1, numEntries);else	steps = zeros(1,numEntries);enddirRGB = steps' * dirRGB;cmap = rgb2cmap(dirRGB,mnRGB,contrast,gamInv);

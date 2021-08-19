@@ -46,7 +46,7 @@ fixsize = 10/2;
 % ppm = screensize/resolution % pixel per mm. In principle, ppm(1) == ppm(2).
 
 % distance = 60*10; % unit: mm.
-% fovea = 10 % unit: °.
+% fovea = 10 % unit: ï¿½.
 % rLength = ppm(1) distance * atan(fovea);
 
 SF = (1/40)*2; % spatial frequency
@@ -192,5 +192,5 @@ for blocks=1:size(VisualField,2)
         Screen('Flip',wptr);
     end
     display(GetSecs - ScanOnset);
-end
+% end
 sca;

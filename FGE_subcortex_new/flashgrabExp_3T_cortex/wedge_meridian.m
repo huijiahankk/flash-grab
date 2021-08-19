@@ -1,4 +1,4 @@
-clear all;
+ 12sclear all;
 %% set globle parameters
 try
 BackColor=[64,64,64];

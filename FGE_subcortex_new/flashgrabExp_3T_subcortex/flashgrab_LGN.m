@@ -1,4 +1,4 @@
-% time=(12+12+12+12)*6+12=300,TR=2s,152TR
+ % time=(12+12+12+12)*6+12=300,TR=2s,152TR
 %% fMRI parameter (6 scans 6 blocks)
 % Bandawidth=1200(<1000);
 % TE=30;

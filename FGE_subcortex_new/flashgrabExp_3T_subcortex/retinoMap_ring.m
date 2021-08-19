@@ -1,4 +1,4 @@
-%% 
+ %% 
 % time=48*6+4=292, TR=2s, 146TR
 %% fMRI parameter (6 scans 6 blocks)
 %
