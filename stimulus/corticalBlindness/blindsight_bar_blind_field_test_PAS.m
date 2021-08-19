@@ -21,7 +21,7 @@ if 1
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
     dotOrWedgeFlag = 'b';
-%     barLocation = 'u';
+    %     barLocation = 'u';
     
 else
     
@@ -30,7 +30,7 @@ else
     dotOrWedgeFlag = input('>>>Use dot flash Or wedge flash or bar flash? (d/w/b):  ','s');
     % flash represent for 3 frames
     flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
-%     barLocation = input('>>>Flash bar location? (u for upper\l for lower\lowerleft for lower left):  ','s');
+    %     barLocation = input('>>>Flash bar location? (u for upper\l for lower\lowerleft for lower left):  ','s');
 end
 
 
@@ -213,7 +213,7 @@ back.FlagSpinDirecA = 0;  % flash tilt right
 back.FlagSpinDirecB = 0;  % flash tilt left
 wedgeTiltStart = 0;
 wedgeTiltStep = 1; %2.8125   1.40625;
-back.alpha = 0; % background transparence 
+back.alpha = 0; % background transparence
 wedgeTiltStartLowerRight = 15;
 wedgeTiltStartUpperRight = - 15;
 % wedgeTiltIncre = 0;
@@ -224,7 +224,7 @@ back.ReverseAngle = 90; % duration frame of checkerboard
 % different contrast same direction sequence
 back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
 
-
+% data.RespPAS = [];
 % if barLocation == 'l'
 %     % back.flashTiltDirection = 2 is tilt left
 %     back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
@@ -280,7 +280,7 @@ for block = 1 : blockNumber
     %     end
     
     %     data.flashTiltDirection(block,:) = Shuffle(back.flashTiltDirectionMat)';
-%     data.wedgeTiltEachBlock(block,1) = 0;
+    %     data.wedgeTiltEachBlock(block,1) = 0;
     back.flashTiltDirectionMatShuff = Shuffle(back.flashTiltDirectionMat)';
     
     for trial = 1:trialNumber
@@ -288,16 +288,17 @@ for block = 1 : blockNumber
         %                      background rotate
         %----------------------------------------------------------------------
         respToBeMade = true;
+        respToBeMadePAS = true;
         %     while respToBeMade
         flashPresentFlag = 0;
         prekeyIsDown = 0;
         data.flashTiltDirection(block,trial) = back.flashTiltDirectionMatShuff(trial);
         
-        % the first row is for upper field        
+        % the first row is for upper field
         if block == 1
             barLocation = 'u';
             wedgeTiltNow = wedgeTiltStartUpperRight;
-        % the second row is for lower field
+            % the second row is for lower field
         elseif block == 2
             barLocation = 'l';
             wedgeTiltNow = wedgeTiltStartLowerRight;
@@ -456,7 +457,31 @@ for block = 1 : blockNumber
             
         end
         
+        textPAS = 'Perceptual awareness scale test.\n\n Press 1/2/3/4 to describe your experience. \n\n (1) no experience of the stimulus; \n\n (2) brief glimpse; \n\n (3) almost clear experience; and \n\n (4) clear experience';
+        DrawFormattedText(wptr, textPAS, 'center', 'center', blackcolor);
+        Screen('Flip', wptr);
         
+        while respToBeMadePAS 
+            if keyCode(KbName('ESCAPE'))
+                ShowCursor;
+                sca;
+                return
+            elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
+                RespPAS = 1
+                respToBeMadePAS = false;
+            elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
+                RespPAS = 2
+                respToBeMadePAS = false;
+            elseif keyCode(KbName('3')) || keyCode(KbName('3#'))
+                RespPAS = 3
+                respToBeMadePAS = false;
+            elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
+                RespPAS = 4
+                respToBeMadePAS = false;
+            end           
+        end
+        
+        data.RespPAS(block,trial) = RespPAS;
         data.wedgeTiltEachBlock(block,trial) = wedgeTiltNow;
         WaitSecs (1);
         
@@ -480,7 +505,7 @@ display(GetSecs - ScanOnset);
 if dotOrWedgeFlag == 'd'
     savePath = '../data/illusionSize/corticalBlindness/dot/';
 elseif dotOrWedgeFlag == 'b'
-        savePath = '../data/illusionSize/corticalBlindness/bar/blindField/';
+    savePath = '../data/illusionSize/corticalBlindness/bar/blindField/';
     
 end
 

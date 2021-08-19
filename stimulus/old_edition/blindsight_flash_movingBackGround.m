@@ -38,8 +38,8 @@ end
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
 
-addpath ../function;
-addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
+addpath ../../function;
+addpath ../../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
@@ -78,7 +78,7 @@ bluecolor = [0 0 200];
 %                adjust screen rgb to map linear  ramp
 %----------------------------------------------------------------------
 
-load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
+load ../../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 
 dacsize = 10;  %How many bits per pixel#
 maxcol = 2.^dacsize-1;

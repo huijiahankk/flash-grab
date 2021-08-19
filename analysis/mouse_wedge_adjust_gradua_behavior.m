@@ -7,7 +7,7 @@
 
 clear all;
 
-sbjnames = {'zhangpeng','guofanhua','huijiahan1'}; % 'zhangpeng','guofanhua','huijiahan1','wangye','zhaona','songyunjie' 'zhangpeng'
+sbjnames = {'guofanhua','huangsiyuan','huijiahan2','songyunjie','wangye','zhangpeng','zhaona'}; % 'guofanhua','huijiahan1'  half trail 
 addpath '../function';
 
 % s = what('flash-grab');
@@ -26,7 +26,8 @@ for sbjnum = 1:length(sbjnames)
     Files = dir([s3]);
     load (Files.name);
     
-    
+    illusionSizeL = [];
+    illusionSizeR = [];
     %----------------------------------------------------------------------
     %                    average illusion size
     %----------------------------------------------------------------------
@@ -52,15 +53,30 @@ for sbjnum = 1:length(sbjnames)
     elseif back.contrastTrend == '2'  % 1 low - high   2  high - low
         aveIllusionSize(:,sbjnum) = flip((aveIllusionSizeL(:,sbjnum) + aveIllusionSizeR(:,sbjnum))/2);
     end
+    
+   
         
 end
 
-aveIllusionSize
+% real average date
+aveSub = mean(aveIllusionSize,2)
+bar(aveSub,0.4);
 
-X = categorical({'Background contrast'});
+
+% normalized data 
+normAveIllusionSize = normalize(aveIllusionSize,'norm');
+aveNorm = mean(normAveIllusionSize,2);
+
+
+aveNorm_ste = ste(normAveIllusionSize,2);
+bar(aveNorm,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
+hold on;
+errorbar(aveNorm,aveNorm_ste,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','none');
+
+
 
 % legend('Dot','Wedge');
-% bar([aveIllusionSizeAll(1) aveIllusionSizeAll(2)],0.4,'r');
+
 % bar([mean(aveIllusionSize,2)],'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
 % h = bar([aveIllusionSizeL aveIllusionSizeR aveIllusionSize],30,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
 % ylim([0 50]);
@@ -68,8 +84,5 @@ set(gca, 'XTick', 1:5, 'XTickLabels', {'0.06' '0.12' '0.24' '0.48' '0.96'},'font
 set(gcf,'color','w');
 set(gca,'box','off');
 title('Flash shift at different background contrast','FontSize',25);
-
-aveIllusionSize_ste = ste(aveIllusionSize,2);
-hold on;
-% h_error = errorbar(mean(aveIllusionSize,2),aveIllusionSize_ste,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','none');
+X = categorical({'Background contrast'});
 

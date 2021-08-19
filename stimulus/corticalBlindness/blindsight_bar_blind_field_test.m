@@ -21,17 +21,16 @@ if 1
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
     dotOrWedgeFlag = 'b';
-    barLocation = 'u';
+%     barLocation = 'u';
     
 else
-       
+    
     sbjname = input('>>>Please input the subject''s name:   ','s');
     debug = input('>>>Debug? (y/n):  ','s');
-    dotOrWedgeFlag = 'b';
-%     dotOrWedgeFlag = input('>>>Use dot flash Or wedge flash or bar flash? (d/w/b):  ','s');
+    dotOrWedgeFlag = input('>>>Use dot flash Or wedge flash or bar flash? (d/w/b):  ','s');
     % flash represent for 3 frames
     flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
-    barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
+%     barLocation = input('>>>Flash bar location? (u for upper\l for lower\lowerleft for lower left):  ','s');
 end
 
 
@@ -44,12 +43,12 @@ addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
-screenNumber = max(screens);
+screenNumber = min(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -152,17 +151,17 @@ redSectorRect = [xCenter - sectorRadius_out_pixel yCenter - sectorRadius_out_pix
 InnerSectorRect = [xCenter - sectorRadius_in_pixel  yCenter - sectorRadius_in_pixel  xCenter + sectorRadius_in_pixel  yCenter + sectorRadius_in_pixel];
 sectorArcAngle = 360/sectorNumber;
 
-%----------------------------------------------------------------------
-%%%   draw radial lines on the backgound for mouse point
-%----------------------------------------------------------------------
-radial_line_number_long = 5;
-radial_line_length_long = 15;
-startDistanceFromCenter = sectorRadius_out_pixel + 5;
-radial_line_number_short = 25;
-radial_line_length_short = 5;
-
-[radial_line_mat_long] = drawRadialLinesMat(radial_line_number_long,radial_line_length_long,startDistanceFromCenter);
-[radial_line_mat_short] = drawRadialLinesMat(radial_line_number_short,radial_line_length_short,startDistanceFromCenter);
+% %----------------------------------------------------------------------
+% %%%   draw radial lines on the backgound for mouse point
+% %----------------------------------------------------------------------
+% radial_line_number_long = 5;
+% radial_line_length_long = 15;
+% startDistanceFromCenter = sectorRadius_out_pixel + 5;
+% radial_line_number_short = 25;
+% radial_line_length_short = 5;
+% 
+% [radial_line_mat_long] = drawRadialLinesMat(radial_line_number_long,radial_line_length_long,startDistanceFromCenter);
+% [radial_line_mat_short] = drawRadialLinesMat(radial_line_number_short,radial_line_length_short,startDistanceFromCenter);
 
 %----------------------------------------------------------------------
 %%%                     parameters of red dot  and red bar
@@ -192,7 +191,7 @@ barMat(:,:,3) = barMat(:,:,2);
 
 % % % Make the rectangle into a texure
 barTexture = Screen('MakeTexture', wptr, barMat);
-bartRect = Screen('Rect',barTexture);
+barRect = Screen('Rect',barTexture);
 
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
@@ -201,11 +200,10 @@ bartRect = Screen('Rect',barTexture);
 % VisualField = [2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2];
 % VisualField = [1 1 1 1];
 
-trialNumber = 4;
+trialNumber = 2;
 blockNumber = 2;
 % back.contrastratio = 1;
 % trialNumber = 3;
-randWedgeTiltNoiseMat = rand(trialNumber,1)*2;
 back.CurrentAngle = 0;
 % back.AngleRange = 180;
 
@@ -213,20 +211,30 @@ back.CurrentAngle = 0;
 back.SpinDirec = 1; % 1 means clockwise     -1 means counter-clockwise
 back.FlagSpinDirecA = 0;  % flash tilt right
 back.FlagSpinDirecB = 0;  % flash tilt left
-% wedgeTiltStart = 0;
+wedgeTiltStart = 0;
 wedgeTiltStep = 1; %2.8125   1.40625;
-back.alpha = 1; % background transparence 
-
-wedgeTiltStartUpperRight = - 23;  
-wedgeTiltStartLowerRight = 12.5;
-wedgeTiltStartNormal = - 90;
+back.alpha = 0; % background transparence 
+wedgeTiltStartLowerRight = 15;
+wedgeTiltStartUpperRight = - 15;
 % wedgeTiltIncre = 0;
-back.SpinSpeed = 3;% 2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
+back.SpinSpeed = 6;% 2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
 back.velocity = back.SpinSpeed * framerate;
 back.ReverseAngle = 90; % duration frame of checkerboard
 % each experiment generate the same sequence for flash direction,
 % different contrast same direction sequence
 back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
+
+
+% if barLocation == 'l'
+%     % back.flashTiltDirection = 2 is tilt left
+%     back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
+% elseif barLocation == 'u'
+%     % back.flashTiltDirection = 1 is tilt left
+%     back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
+% elseif barLocation == 'lowerleft'
+%     % back.flashTiltDirection = 1 is tilt right
+%     back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
+% end
 
 
 
@@ -285,28 +293,18 @@ for block = 1 : blockNumber
         prekeyIsDown = 0;
         data.flashTiltDirection(block,trial) = back.flashTiltDirectionMatShuff(trial);
         
-                
-        if barLocation == 'u'
-            if trial == 1
-                wedgeTiltNow = wedgeTiltStartUpperRight;
-            else
-                wedgeTiltNow = data.wedgeTiltEachBlock(block,trial - 1) + randWedgeTiltNoiseMat(trial);
-            end
-            
-        elseif barLocation == 'l'
-            if trial == 1
-                wedgeTiltNow = wedgeTiltStartLowerRight;
-            else
-                wedgeTiltNow = data.wedgeTiltEachBlock(block,trial - 1) + randWedgeTiltNoiseMat(trial);
-            end
-        elseif barLocation == 'n'
-            if trial == 1
-                wedgeTiltNow = wedgeTiltStartNormal;
-            else
-                wedgeTiltNow = data.wedgeTiltEachBlock(block,trial - 1) + randWedgeTiltNoiseMat(trial);
-            end
+        % the first row is for upper field        
+        if block == 1
+            barLocation = 'u';
+            wedgeTiltNow = wedgeTiltStartUpperRight;
+        % the second row is for lower field
+        elseif block == 2
+            barLocation = 'l';
+            wedgeTiltNow = wedgeTiltStartLowerRight;
         end
-              
+        
+        data.wedgeTiltEachBlock(block,trial) = wedgeTiltNow;
+        
         
         while respToBeMade
             
@@ -344,15 +342,15 @@ for block = 1 : blockNumber
                     Screen('FillArc',wptr,redcolor,redSectorRect,back.CurrentAngle + 90 - 2*adjustAngleR,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRect,back.CurrentAngle + 90 - 2*adjustAngleR,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                 elseif dotOrWedgeFlag == 'b'
-                    if barLocation == 'l' | barLocation == 'n'
+                    if barLocation == 'l' | barLocation == 'lowerleft'
                         % vertical bar lower visual field
-                        barDestinationRect = CenterRectOnPoint(bartRect,xCenter + dotRadius2Center * sind(wedgeTiltNow), yCenter + dotRadius2Center * cosd(wedgeTiltNow));
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(wedgeTiltNow), yCenter + dotRadius2Center * cosd(wedgeTiltNow));
                     elseif  barLocation == 'u'
                         % vertical bar upper visual field
-                        barDestinationRect = CenterRectOnPoint(bartRect,xCenter - dotRadius2Center * sind(wedgeTiltNow), yCenter - dotRadius2Center * cosd(wedgeTiltNow));
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(wedgeTiltNow), yCenter - dotRadius2Center * cosd(wedgeTiltNow));
                         
                     end
-                    Screen('DrawTexture',wptr,barTexture,bartRect,barDestinationRect,back.CurrentAngle);
+                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,back.CurrentAngle);
                 end
                 flashPresentFlag = 1;
                 % present flash tilt left
@@ -372,15 +370,15 @@ for block = 1 : blockNumber
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRect,back.CurrentAngle - 90 - 2*adjustAngleL,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
                     
                 elseif dotOrWedgeFlag == 'b'
-                    if barLocation == 'l' | barLocation == 'n'
+                    if barLocation == 'l' | barLocation == 'lowerleft'
                         % vertical bar lower visual field
-                        barDestinationRect = CenterRectOnPoint(bartRect,xCenter + dotRadius2Center * sind(wedgeTiltNow), yCenter + dotRadius2Center * cosd(wedgeTiltNow));
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(wedgeTiltNow), yCenter + dotRadius2Center * cosd(wedgeTiltNow));
                     elseif barLocation == 'u'
                         % vertical bar upper visual field
-                        barDestinationRect = CenterRectOnPoint(bartRect,xCenter - dotRadius2Center * sind(wedgeTiltNow), yCenter - dotRadius2Center * cosd(wedgeTiltNow));
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(wedgeTiltNow), yCenter - dotRadius2Center * cosd(wedgeTiltNow));
                         
                     end
-                    Screen('DrawTexture',wptr,barTexture,bartRect,barDestinationRect,back.CurrentAngle);
+                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,back.CurrentAngle);
                 end
                 
                 flashPresentFlag = 1;
@@ -412,29 +410,29 @@ for block = 1 : blockNumber
                     return
                     % the bar was on the left of the gabor
                 elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
-                    if barLocation == 'l'| barLocation == 'n'
+                    if barLocation == 'l'| barLocation == 'lowerleft'
                         wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
                     elseif barLocation == 'u'
                         wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
                     end
                 elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
-                    if barLocation == 'l'| barLocation == 'n'
+                    if barLocation == 'l'| barLocation == 'lowerleft'
                         wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
                     elseif barLocation == 'u'
                         wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
                     end
                 elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
-                    if barLocation == 'l'| barLocation == 'n'
+                    if barLocation == 'l'| barLocation == 'lowerleft'
                         wedgeTiltNow = wedgeTiltNow - 2 * wedgeTiltStep;
                     elseif barLocation == 'u'
                         wedgeTiltNow = wedgeTiltNow + 2 * wedgeTiltStep;
                     end
                     
                 elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        wedgeTiltNow = wedgeTiltNow + 2 * wedgeTiltStep;
+                    if barLocation == 'l'| barLocation == 'lowerleft'
+                        wedgeTiltNow = wedgeTiltNow + 5 * wedgeTiltStep;
                     elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow - 2 * wedgeTiltStep;
+                        wedgeTiltNow = wedgeTiltNow - 5 * wedgeTiltStep;
                     end
                     
                 elseif keyCode(KbName('Space'))
@@ -460,7 +458,7 @@ for block = 1 : blockNumber
         
         
         data.wedgeTiltEachBlock(block,trial) = wedgeTiltNow;
-        WaitSecs (0.5);
+        WaitSecs (1);
         
     end
     
@@ -478,30 +476,12 @@ display(GetSecs - ScanOnset);
 %----------------------------------------------------------------------
 %                      save parameters files
 %----------------------------------------------------------------------
-% time = clock;
-% RespMat = [event.TypeNumericIdAll  event.InterTimeAll  flashTimePointAll];
-% fileName = ['../data/' sbjname '-' num2str(time(1)) '-' num2str(time(2)) '-' num2str(time(3)) '-' num2str(time(4)) '-' num2str(time(5)) '.mat'];
-% % save(fileName,'RespMat','meanSubIlluDegree','time','all','gauss','cueVerDisDegree','gabor','viewingDistance','trialNumber','blockNumber');
-% save(fileName,'RespMat');
-
-
-
-% dir = sprintf(['../data/' '%s/'],sbjname);
-% if ~isdir(dir)
-%     mkdir(dir)
-% end
 
 if dotOrWedgeFlag == 'd'
-    savePath = '../data/illusionSize/blindsight/dot/';
+    savePath = '../data/illusionSize/corticalBlindness/dot/';
 elseif dotOrWedgeFlag == 'b'
-    %     savePath = '../data/illusionSize/blindsight/bar/';
-    if  barLocation == 'u';
-        savePath = '../data/illusionSize/corticalBlindness/bar/upper_field/';
-    elseif  barLocation == 'l';
-        savePath = '../data/illusionSize/corticalBlindness/bar/lower_field/';
-    elseif  barLocation == 'n';
-        savePath = '../data/illusionSize/corticalBlindness/bar/normal/';
-    end
+        savePath = '../data/illusionSize/corticalBlindness/bar/blindField/';
+    
 end
 
 time = clock;
@@ -515,26 +495,9 @@ save(filename2);
 %                    average illusion size
 %----------------------------------------------------------------------
 
-% tilt right
-illusionTiltIndexRight = find(data.flashTiltDirection(:,:) == 1);
-illusionTiltRightDegree = data.wedgeTiltEachBlock(illusionTiltIndexRight);
-illusionAveTiltRight = mean(illusionTiltRightDegree);
-
-% tilt left
-illusionTiltIndexLeft = find(data.flashTiltDirection(:,:) == 2);
-illusionTiltLeftDegree = data.wedgeTiltEachBlock(illusionTiltIndexLeft);
-illusionAveTiltLeft = mean(illusionTiltLeftDegree);
-
-illusionAve = (abs(illusionAveTiltRight) + abs(illusionAveTiltLeft))/2;
+blindFieldUpper = mean(data.wedgeTiltEachBlock(1,:))
+blindFieldLower = mean(data.wedgeTiltEachBlock(2,:))
 
 
-
-
-y = [illusionAve illusionAveTiltLeft illusionAveTiltRight];
-h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
-set(gca, 'XTick', 1:3, 'XTickLabels', {'average'  'tilt left'  'tilt right' },'fontsize',20,'FontWeight','bold');
-set(gcf,'color','w');
-set(gca,'box','off');
-title('Illusion size','FontSize',25);
 
 sca;

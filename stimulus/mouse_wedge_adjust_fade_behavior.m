@@ -273,7 +273,7 @@ elseif back.contrastTrend == '2'     %'lower'
 end
 
 
-trialNumber = 4;
+trialNumber = 2;
 blockNumber = length(back.ground_alphaMat);
 % back.contrastratio = 1;
 % trialNumber = 3;

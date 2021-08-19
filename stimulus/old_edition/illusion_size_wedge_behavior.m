@@ -115,18 +115,18 @@ visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 
 visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
 
 
-%----------------------------------------------------------------------
-%                adjust screen rgb to map linear  ramp
-%----------------------------------------------------------------------
-
-load ../function/Calibration-psychphysics2-CRT-2020-9-7-9-29.mat;  % this is for 7T screen on the black mac pro
-
-dacsize = 10;  %How many bits per pixel#
-maxcol = 2.^dacsize-1;
-ncolors = 256; % see details in makebkg.m
-newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
-newclut(1:ncolors,:) = newcmap./maxcol;
-newclut(isnan(newclut)) = 0;
+% %----------------------------------------------------------------------
+% %                adjust screen rgb to map linear  ramp
+% %----------------------------------------------------------------------
+% 
+% load ../function/Calibration-psychphysics2-CRT-2020-9-7-9-29.mat;  % this is for 7T screen on the black mac pro
+% 
+% dacsize = 10;  %How many bits per pixel#
+% maxcol = 2.^dacsize-1;
+% ncolors = 256; % see details in makebkg.m
+% newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
+% newclut(1:ncolors,:) = newcmap./maxcol;
+% newclut(isnan(newclut)) = 0;
 
 
 %----------------------------------------------------------------------
@@ -301,19 +301,10 @@ TR = 2; % second
 
 
 %----------------------------------------------------------------------
-%                       optseq parameters
+%                       stimulus parameters
 %----------------------------------------------------------------------
-% [timepoint,stim_type,SOA,~,~] = read_optseq2_data(['optimal_seq/' fileName '/par-00' run_no '.par']);
 
-% event.TypeNumericIdMat = [0 1 2];  % 0 no sector checkerboard(scb) 1 checkerboard tilt left and perceived right  2 checkerboard tilt right and perceived left
-% event.InterTimeMat = [4 4 4];
 testDuration = 10000;
-
-
-% for k = 1:length(event.InterTimeMat)
-%     % each block time contain how many round of background
-%     ShowUpTimesMat(k) = floor(event.InterTimeMat(k)/sectorTimeRound);
-% end
 
 
 
