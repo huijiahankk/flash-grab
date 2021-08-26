@@ -7,7 +7,7 @@
 % experiemt
 % the physical location of the red wedge is subject's  perceived location
 % in the flash-grab illusion behavior exam, the task of the subject is to
-% press keyboard 1 when the color of the fixation changed
+% tell the wedge is on the left or right side of the screen
 
 % flash tilt right:   data.flashTiltDirection(block,trial) == 1  && back.FlagSpinDirecA ==  - 1
 % flash perceived tilt left :   data.flashTiltDirection(block,trial) == 2  && back.FlagSpinDirecB ==  1
@@ -91,25 +91,25 @@ fixCrossDimPix = 10;
 respSwitch = 0;
 
 
-%----------------------------------------------------------------------
-%                adjust screen rgb to map linear  ramp
-%----------------------------------------------------------------------
-
-load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
-
-dacsize = 10;  %How many bits per pixel#
-maxcol = 2.^dacsize-1;
-ncolors = 256; % see details in makebkg.m
-newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
-newclut(1:ncolors,:) = newcmap./maxcol;
-newclut(isnan(newclut)) = 0;
+% %----------------------------------------------------------------------
+% %                adjust screen rgb to map linear  ramp
+% %----------------------------------------------------------------------
+%
+% load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
+%
+% dacsize = 10;  %How many bits per pixel#
+% maxcol = 2.^dacsize-1;
+% ncolors = 256; % see details in makebkg.m
+% newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
+% newclut(1:ncolors,:) = newcmap./maxcol;
+% newclut(isnan(newclut)) = 0;
 
 
 %----------------------------------------------------------------------
 %     load subject illusion size data
 %----------------------------------------------------------------------
 
-cd '../data/7T/illusionSize_7T/';
+cd '../data/7T/illusionSize/';
 illusionSizeFileName = strcat(sbjname,'*.mat');
 Files = dir([illusionSizeFileName]);
 load (Files.name);
@@ -191,63 +191,23 @@ TR = 2; % second
 filePrefixName = 'FGI-00' ;
 
 %----------------------------------------------------------------------
-%          adjust the fixation cross
+%        load the screen adjust parameters
 %----------------------------------------------------------------------
-respToBeMade = true;
+cd '../data/7T/screen_adjust_parameter/';
+illusionSizeFileName = strcat(sbjname,'*.mat');
+Files = dir([illusionSizeFileName]);
+load (Files.name);
 
-while respToBeMade
-    
-    resp = 0;
-    prekeyIsDown = 0;
-    [keyIsDown,secs,keyCode] = KbCheck(-1);
-    if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
-        if keyCode(KbName('ESCAPE'))
-            ShowCursor;
-            sca;
-            return
-            
-        elseif keyCode(KbName('1!'))||keyCode(KbName('1'))
-            resp = - 1;
-            
-        elseif keyCode(KbName('2')) ||keyCode(KbName('2@'))
-            resp = 1;
-            
-        elseif keyCode(KbName('3')) ||keyCode(KbName('3#'))
-            respSwitch = 1;
-            
-        elseif keyCode(KbName('4')) ||keyCode(KbName('4$'))
-            respToBeMade = false;
-        end
-        
-    end
-    prekeyIsDown = keyIsDown;
-    
-    
-    
-    if  respSwitch == 0
-        centerMoveHoriPix = centerMoveHoriPix + resp * 1;
-    elseif  respSwitch == 1
-        centerMoveVertiPix = centerMoveVertiPix + resp * 1;
-    end
-    
-    % Now we set the coordinates (these are all relative to zero we will let
-    % the drawing routine center the cross in the center of our monitor for us)
-    xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
-    yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
-    allCoords = [xCoords; yCoords];
-    
-    % Set the line width for our fixation cross
-    lineWidthPix = 4;
-    
-    sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
-    Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
-    
-    % Draw the fixation cross in white, set it to the center of our screen and
-    % set good quality antialiasing
-    Screen('DrawLines', wptr, allCoords,lineWidthPix, whiteColor, [xCenter + centerMoveHoriPix yCenter + centerMoveVertiPix]);
-    Screen('Flip',wptr);
-    
-end
+cd '../../../stimulus/'
+
+sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+% Now we set the coordinates (these are all relative to zero we will let
+% the drawing routine center the cross in the center of our monitor for us)
+xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
+yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
+allCoords = [xCoords; yCoords];
+% Set the line width for our fixation cross
+lineWidthPix = 4;
 
 
 %----------------------------------------------------------------------
@@ -278,6 +238,10 @@ cd '../optimal_seq'
 fileName = strcat(filePrefixName,run_no,'.par');
 % [timepoint,stim_type,SOA,~,~] = read_optseq2_data([fileName]);
 [stimonset,stimtype,stimlength,junk,stimname] =  textread(fileName,'%f%n%f%s%s','delimiter',' ');   %textread
+
+
+data.flashTiltDirection = stimtype;
+
 
 % [timepoint,stim_type,SOA,~,~] = read_optseq2_data(['optimal_seq/' fileName '00' run_no '.par']);
 
@@ -332,275 +296,199 @@ end
 %----------------------------------------------------------------------
 WaitSecs(0); % dummy scan
 scanOnset = GetSecs;
+flashPresentTimesTotal = 0;
 
 
 
-
-for block = 1 : blockNumber
+for trial = 1:length(stimtype)
+    %----------------------------------------------------------------------
+    %                      background rotate
+    %----------------------------------------------------------------------
+    trialOnset(trial) = GetSecs;
+    respToBeMade = true;
+    %     while respToBeMade
+    %         flashPresentFlag = 0;
+    response = - 1;
+    %         responseFlag = 0;
+    wedgeTiltNow = wedgeTiltStart;
+    
+    adjustAngle = 360/2/sectorNumber;
     
     
-    %     data.flashTiltDirection(block,:) = Shuffle(back.flashTiltDirectionMat)';
-    %     data.flashTiltDirection(block,:) = back.flashTiltDirectionMat';
-    data.flashTiltDirection(:,block) = stimtype;
+    back.RotateTimes = 0;
+    flashPresentTimesTrial = 0;
     
     
-    for trial = 1:trialNumber
-        %----------------------------------------------------------------------
-        %                      background rotate
-        %----------------------------------------------------------------------
-        trialOnset(trial) = GetSecs;
-        respToBeMade = true;
-        %     while respToBeMade
-        %         flashPresentFlag = 0;
-         response = - 1;
-        %         responseFlag = 0;
-        wedgeTiltNow = wedgeTiltStart;
-        
-        adjustAngle = 360/2/sectorNumber;
+    testDuration = stimlength(trial);
+    prekeyIsDown = 0;
+    
+    % setting switching time of the color of the fixation
+%     colorSwitchTimeMat = sort(randperm(testDuration,colorSwitchTimes));
+    flashPresentFlag = 0;
+    
+    while GetSecs - trialOnset(trial) < testDuration  % back.RotateTimes < testDuration %  % &&  respToBeMade
+        %             mouseclick_frame = mouseclick_frame + 1;
+        %             HideCursor;
         
         
-        back.RotateTimes = 0;
-        flashPresentTimes = 0;
-        
-        
-        testDuration = stimlength(trial);
-        prekeyIsDown = 0;
-        
-        % setting switching time of the color of the fixation 
-        colorSwitchTimeMat = sort(randperm(testDuration,colorSwitchTimes));
-         flashPresentFlag = 0;
-        
-        while GetSecs - trialOnset(trial) < testDuration  % back.RotateTimes < testDuration %  % &&  respToBeMade
-            %             mouseclick_frame = mouseclick_frame + 1;
-            %             HideCursor;
+        % tilt right  background first rotate clockwise until to the reverse angle
+        if back.CurrentAngle >= back.ReverseAngle + adjustAngle + aveIlluSizeR % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+            back.SpinDirec = - 1;
+            back.FlagSpinDirecA = back.SpinDirec;
+            back.RotateTimes = back.RotateTimes + 1;
             
-           
-            % tilt right  background first rotate clockwise until to the reverse angle
-            if back.CurrentAngle >= back.ReverseAngle + adjustAngle + aveIlluSizeR % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
-                back.SpinDirec = - 1;
-                back.FlagSpinDirecA = back.SpinDirec;
-                back.RotateTimes = back.RotateTimes + 1;
-                
-                % tilt left
-            elseif back.CurrentAngle <= - back.ReverseAngle + adjustAngle + aveIlluSizeL  %  +R wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
-                back.SpinDirec = 1;
-                back.FlagSpinDirecB = back.SpinDirec;
-                back.RotateTimes = back.RotateTimes + 1;
-                
-            end
-            
-            %    draw background each frame
-            %             Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
-            
-            
-            %----------------------------------------------------------------------
-            %       flash at reverse onset
-            %----------------------------------------------------------------------
-            
-            if illusion == 'y'
-                % present flash tilt right
-                if data.flashTiltDirection(trial,block) == 1  && back.FlagSpinDirecA ==  - 1  && flashPresentTimes < (flashPresentTimesCeiling) % flash tilt right
-                    
-                    % background on the vertical meridian the left part is always
-                    % white and the right part is always black
-                    %  the location of the red dot is present in the middle of annlus (between outer and inner radii)
-                    
-                    
-                    % draw red wedge
-                    Screen('FillArc',wptr,redcolor,redSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
-                    flashPresentTimes = flashPresentTimes + 1;
-                    flashPresentFlag = 1;
-                    
-                    flashTimePoint = GetSecs - scanOnset;
-                    flashOnset = GetSecs;
-                    if trial > 1
-                        flashInterval = GetSecs - scanOnset - flashTimePointMat((trial+1)/2 - 1,block);
-                    elseif trial == 1
-                        flashInterval = GetSecs - trialOnset(trial);
-                    end
-                    display(flashTimePoint);
-                    
-                    % present flash tilt left
-                elseif data.flashTiltDirection(trial,block) == 2  && back.FlagSpinDirecB ==  1  && flashPresentTimes < (flashPresentTimesCeiling)  % flash tilt left
-                    
-                    
-                    % draw red wedge
-                    Screen('FillArc',wptr,redcolor,redSectorRectAdjust,back.CurrentAngle - 90 - 2*adjustAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,back.CurrentAngle - 90 - 2*adjustAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
-                    flashPresentTimes = flashPresentTimes + 1;
-                    flashPresentFlag = 1;
-                    
-                    flashTimePoint = GetSecs - scanOnset;
-                    flashOnset = GetSecs;
-                    
-                    if trial > 1
-                        flashInterval = GetSecs - scanOnset - flashTimePointMat((trial+1)/2 - 1,block);
-                    elseif trial == 1
-                        flashInterval = GetSecs - trialOnset(trial);
-                    end
-                    display(flashTimePoint);
-                    back.CurrentAngle
-                    
-                elseif data.flashTiltDirection(trial,block) == 0
-                    flashPresentFlag = 0;
-                    
-                end
-                
-                %--------------------------------------------
-                %       flash at ongoing rotate
-                %--------------------------------------------
-                
-            elseif  illusion == 'n'
-                %                 back.CurrentAngle = 0  right field horizontal
-                
-                
-                if data.flashTiltDirection(block,trial) == 1  && back.CurrentAngle ==  sbjIllusionSizeRight + back.ReverseAngle + adjustAngle + 1.5  - sectorArcAngle && flashPresentTimes < (flashPresentTimesCeiling) % flash tilt right
-                    
-                    % background on the vertical meridian the left part is always
-                    % white and the right part is always black
-                    %  the location of the red dot is present in the middle of annlus (between outer and inner radii)
-                    
-                    % draw red wedge
-                    Screen('FillArc',wptr,redcolor,redSectorRect,back.CurrentAngle + 90 - 2*adjustAngle + sectorArcAngle ,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRect,back.CurrentAngle + 90 - 2*adjustAngle + sectorArcAngle ,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
-                    flashPresentTimes = flashPresentTimes + 1;
-                    flashPresentFlag = 1;
-                    
-                    flashTimePoint = GetSecs - scanOnset;
-                    flashOnset = GetSecs;
-                    if trial > 1
-                        flashInterval = GetSecs - scanOnset - flashTimePointMat((trial+1)/2 - 1,block);
-                    elseif trial == 1
-                        flashInterval = GetSecs - trialOnset(trial);
-                    end
-                    display(flashTimePoint);
-                    %                     display(flashInterval);
-                    
-                    % present flash tilt left
-                elseif data.flashTiltDirection(block,trial) == 2  && back.CurrentAngle ==  sbjIllusionSizeLeft - back.ReverseAngle + adjustAngle + 1.5  - sectorArcAngle && flashPresentTimes < (flashPresentTimesCeiling)  % flash tilt left
-                    
-                    % draw red wedge
-                    Screen('FillArc',wptr,redcolor,redSectorRect,back.CurrentAngle - 90 - 2*adjustAngle + sectorArcAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRect,back.CurrentAngle - 90 - 2*adjustAngle + sectorArcAngle, sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
-                    flashPresentTimes = flashPresentTimes + 1;
-                    flashPresentFlag = 1;
-                    
-                    flashTimePoint = GetSecs - scanOnset;
-                    flashOnset = GetSecs;
-                    
-                    if trial > 1
-                        flashInterval = GetSecs - scanOnset - flashTimePointMat((trial+1)/2 - 1,block);
-                    elseif trial == 1
-                        flashInterval = GetSecs - trialOnset(trial);
-                    end
-                    display(flashTimePoint);
-                    %                     display(flashInterval);
-                    
-                else
-                    flashPresentFlag = 0;
-                end
-                
-                
-            end
-            
-            
-            
-            
-            back.FlagSpinDirecA = 0;
-            back.FlagSpinDirecB = 0;
-            
-            
-            
-            
-            % the first run background rotate clockwise the second run
-            % rotate counter-clockwise
-            %             if mod(run_no,2) == 1
-            %                 back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
-            %             elseif mod(run_no,2) == 0
-            %                 back.CurrentAngle = back.CurrentAngle - back.SpinDirec * back.SpinSpeed;
-            %             end
-            
-            back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
-            
-            
-            
-            colorSwitchOnset = GetSecs;
-            
-            %
-            if colorSwitchTimeMat(1) < colorSwitchOnset - trialOnset(trial) && colorSwitchOnset - trialOnset(trial) < colorSwitchTimeMat(2)
-                fixationColor = white;
-                %          GetSecs - trialOnset(trial) < colorSwitchTimeMat(1) |  GetSecs - trialOnset(trial) > colorSwitchTimeMat(1)
-                %             fixationColor = black;
-            else
-                fixationColor = black;
-            end
-            
-            %             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMoveHoriPix,xCenter+fixsize,yCenter+fixsize-centerMoveVertiPix]); % fixation
-            Screen('DrawLines', wptr, allCoords,lineWidthPix, black, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
-            Screen('Flip',wptr);
-            
-            % define the present frame of the flash
-            if flashPresentFlag
-                WaitSecs((1/framerate) * flashRepresentFrame);
-                
-            end
-            
-            
-            %----------------------------------------------------------------------
-            %                      Response record
-            %----------------------------------------------------------------------
-            
-            [keyIsDown,secs,keyCode] = KbCheck(-1);
-            if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
-                if keyCode(KbName('ESCAPE'))
-                    ShowCursor;
-                    sca;
-                    return
-                    % the bar was on the left of the gabor
-                elseif keyCode(KbName('LeftArrow'))
-                    response = 1;
-                    
-                elseif keyCode(KbName('RightArrow'))
-                    response = 2;
-                    
-                elseif keyCode(KbName('Space'))
-                    response = 0;
-                    respToBeMade = false;
-                    %                     prekeyIsDown = 1;
-                    %                 WaitSecs(0.5);
-                end
-                
-                
-                %             KbStrokeWait;
-            end
-            
-            prekeyIsDown = keyIsDown;
-            
-            % for debug when flash present the simulus halt
-            if debug== 'y' && flashPresentFlag
-                KbWait;
-            end
+            % tilt left
+        elseif back.CurrentAngle <= - back.ReverseAngle + adjustAngle + aveIlluSizeL  %  +R wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+            back.SpinDirec = 1;
+            back.FlagSpinDirecB = back.SpinDirec;
+            back.RotateTimes = back.RotateTimes + 1;
             
         end
-        %         WaitSecs(1);
         
-        %
-        %         if data.flashTiltDirection(trial,block) == 0
-        %             flashTimePointMat(trial,block) = 0;
-        %             flashIntervalMat(trial,block) = 0;
-        %         else
-        if mod(trial,2) == 1
-            flashTimePointMat((trial+1)/2,block) = flashTimePoint;
-            flashIntervalMat((trial+1)/2,block) = flashInterval;
+        %    draw background each frame
+        %             Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
+        
+        
+        %----------------------------------------------------------------------
+        %       flash at reverse onset
+        %----------------------------------------------------------------------
+        
+        % present flash tilt right
+        if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1  &&  ~flashPresentTimesTrial % flashPresentTimes < (flashPresentTimesCeiling) % flash tilt right
+            
+            % background on the vertical meridian the left part is always
+            % white and the right part is always black
+            %  the location of the red dot is present in the middle of annlus (between outer and inner radii)
+            
+            
+            % draw red wedge
+            Screen('FillArc',wptr,redcolor,redSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
+            Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
+            flashPresentTimesTrial = 1;
+            flashPresentFlag = 1;
+            flashPresentTimesTotal = flashPresentTimesTotal + 1;
+            
+            flashTimePoint = GetSecs - scanOnset;
+            flashOnset = GetSecs;
+            
+            display(flashTimePoint);
+            
+            % present flash tilt left
+        elseif data.flashTiltDirection(trial) == 2  && back.FlagSpinDirecB ==  1  && ~flashPresentTimesTrial % flashPresentTimes < (flashPresentTimesCeiling)  % flash tilt left
+            
+            
+            % draw red wedge
+            Screen('FillArc',wptr,redcolor,redSectorRectAdjust,back.CurrentAngle - 90 - 2*adjustAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
+            Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,back.CurrentAngle - 90 - 2*adjustAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
+            flashPresentTimesTrial = 1;
+            flashPresentFlag = 1;
+            flashPresentTimesTotal = flashPresentTimesTotal + 1;
+            
+            flashTimePoint = GetSecs - scanOnset;
+            flashOnset = GetSecs;
+            
+
+            display(flashTimePoint);
+            
+            
+        elseif data.flashTiltDirection(trial) == 0
+            flashPresentFlag = 0;
+            
         end
         
-        responseMat(trial,block) = response;
-        %         display(GetSecs - scanOnset);
         
+        back.FlagSpinDirecA = 0;
+        back.FlagSpinDirecB = 0;
+        
+        
+        
+        
+        % the first run background rotate clockwise the second run
+        % rotate counter-clockwise
+        %             if mod(run_no,2) == 1
+        %                 back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
+        %             elseif mod(run_no,2) == 0
+        %                 back.CurrentAngle = back.CurrentAngle - back.SpinDirec * back.SpinSpeed;
+        %             end
+        
+        back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
+        
+        
+        
+%         colorSwitchOnset = GetSecs;
+%         
+%         %
+%         if colorSwitchTimeMat(1) < colorSwitchOnset - trialOnset(trial) && colorSwitchOnset - trialOnset(trial) < colorSwitchTimeMat(2)
+%             fixationColor = white;
+%             %          GetSecs - trialOnset(trial) < colorSwitchTimeMat(1) |  GetSecs - trialOnset(trial) > colorSwitchTimeMat(1)
+%             %             fixationColor = black;
+%         else
+%             fixationColor = black;
+%         end
+        
+        %             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMoveHoriPix,xCenter+fixsize,yCenter+fixsize-centerMoveVertiPix]); % fixation
+        Screen('DrawLines', wptr, allCoords,lineWidthPix, black, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
+        Screen('Flip',wptr);
+        
+        % define the present frame of the flash
+        if flashPresentFlag
+            WaitSecs((1/framerate) * flashRepresentFrame);
+            
+        end
+        
+        
+        %----------------------------------------------------------------------
+        %                      Response record
+        %----------------------------------------------------------------------
+        
+        [keyIsDown,secs,keyCode] = KbCheck(-1);
+        if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
+            if keyCode(KbName('ESCAPE'))
+                ShowCursor;
+                sca;
+                return
+                % the bar was on the left of the gabor
+            elseif keyCode(KbName('LeftArrow'))
+                response = 1;
+                
+            elseif keyCode(KbName('RightArrow'))
+                response = 2;
+                
+            elseif keyCode(KbName('Space'))
+                response = 0;
+                respToBeMade = false;
+                %                     prekeyIsDown = 1;
+                %                 WaitSecs(0.5);
+            end
+            
+            
+            %             KbStrokeWait;
+        end
+        
+        prekeyIsDown = keyIsDown;
+        
+        % for debug when flash present the simulus halt
+        if debug== 'y' && flashPresentFlag
+            KbWait;
+        end
         
     end
+    %         WaitSecs(1);
     
+    %
+    %         if data.flashTiltDirection(trial,block) == 0
+    %             flashTimePointMat(trial,block) = 0;
+    %             flashIntervalMat(trial,block) = 0;
+    %         else
+%     if mod(trial,2) == 1
+%         flashTimePointMat((trial+1)/2,block) = flashTimePoint;
+%         flashIntervalMat((trial+1)/2,block) = flashInterval;
+%     end
+    
+    flashTimePointMat(flashPresentTimesTotal) = flashTimePoint;
+    trialOnsetMat(trial) = trialOnset(trial) - scanOnset;
+    responseMat(trial) = response;
+    %         display(GetSecs - scanOnset);
     
     
 end
@@ -629,7 +517,7 @@ end
 % end
 
 
-savePath = '../data/7T/';
+savePath = '../data/7T/control/';
 
 
 time = clock;

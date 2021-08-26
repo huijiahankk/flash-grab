@@ -66,14 +66,18 @@ bar(aveSub,0.4);
 % normalized data 
 normAveIllusionSize = normalize(aveIllusionSize,'norm');
 aveNorm = mean(normAveIllusionSize,2);
-
-
 aveNorm_ste = ste(normAveIllusionSize,2);
+
+aveIllusionSize_ste = ste(aveIllusionSize,2);
+
+
 bar(aveNorm,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
 hold on;
 errorbar(aveNorm,aveNorm_ste,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','none');
 
-
+bar(aveSub,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
+hold on;
+errorbar(aveSub,aveIllusionSize_ste,'color',[0 .9 .9],'LineWidth',1.5,'LineStyle','none');
 
 % legend('Dot','Wedge');
 

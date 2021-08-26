@@ -30,7 +30,7 @@ grey = white / 2;
 
 % Open an on screen window
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber,...
-    grey, [0 0 1024 768], 32, 2, [], [], kPsychNeed32BPCFloat);    % [0 0 1024 768]
+    grey, [], 32, 2, [], [], kPsychNeed32BPCFloat);    % [0 0 1024 768]
 
 % Query the frame duration
 ifi = Screen('GetFlipInterval', window);
@@ -99,7 +99,7 @@ vbl = Screen('Flip', window);
 
 
 % the duration of checkerboard flickering in seconds
-checkerboardFlickDura = 12; % seconds
+checkerboardFlickDura = 8; % seconds
 colorSwitchTimesMain = 2;  % during the checkerboard flickering the color of fixation switch twice
 
 % fixation

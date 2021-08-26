@@ -5,6 +5,7 @@
 
 % flash tilt right:   data.flashTiltDirection(block,trial) == 1  && back.FlagSpinDirecA ==  - 1
 % flash perceived tilt left : data.flashTiltDirection(block,trial) == 2  && back.FlagSpinDirecB ==  1
+% the result for 
 
 % clear all;
 clearvars;
@@ -35,7 +36,7 @@ addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
-screenNumber = max(screens);
+screenNumber = min(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
@@ -119,6 +120,7 @@ sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMoveP
 
 [sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
 
+
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
 %----------------------------------------------------------------------
@@ -155,67 +157,26 @@ back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
 data.flashTiltDirection = Shuffle(back.flashTiltDirectionMat);
 % data.flashTiltDirection = stimtype;
 
-
-
 %----------------------------------------------------------------------
-%          adjust the fixation cross
+%        load the screen adjust parameters
 %----------------------------------------------------------------------
-respToBeMade = true;
+cd '../data/7T/screen_adjust_parameter/';
+illusionSizeFileName = strcat(sbjname,'*.mat');
+Files = dir([illusionSizeFileName]);
+load (Files.name);
 
-while respToBeMade
-    
-    resp = 0;
-    prekeyIsDown = 0;
-    [keyIsDown,secs,keyCode] = KbCheck(-1);
-    if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
-        if keyCode(KbName('ESCAPE'))
-            ShowCursor;
-            sca;
-            return
-            
-        elseif keyCode(KbName('1!'))||keyCode(KbName('1'))
-            resp = - 1;
-            
-        elseif keyCode(KbName('2')) ||keyCode(KbName('2@'))
-            resp = 1;
-            
-        elseif keyCode(KbName('3')) ||keyCode(KbName('3#'))
-            respSwitch = 1;
-            
-        elseif keyCode(KbName('4')) ||keyCode(KbName('4$'))
-            respToBeMade = false;
-        end
-        
-    end
-    prekeyIsDown = keyIsDown;
-    
-    
-    
-    if  respSwitch == 0
-        centerMoveHoriPix = centerMoveHoriPix + resp * 1;
-    elseif  respSwitch == 1
-        centerMoveVertiPix = centerMoveVertiPix + resp * 1;
-    end
-    
-    % Now we set the coordinates (these are all relative to zero we will let
-    % the drawing routine center the cross in the center of our monitor for us)
-    xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
-    yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
-    allCoords = [xCoords; yCoords];
-    
-    % Set the line width for our fixation cross
-    lineWidthPix = 4;
-    
-    sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
-    Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
-    
-    % Draw the fixation cross in white, set it to the center of our screen and
-    % set good quality antialiasing
-    Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter + centerMoveHoriPix yCenter + centerMoveVertiPix]);
-    Screen('Flip',wptr);
-    
-end
+cd '../../../stimulus/'
 
+sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+% Now we set the coordinates (these are all relative to zero we will let
+% the drawing routine center the cross in the center of our monitor for us)
+xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
+yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
+allCoords = [xCoords; yCoords];
+% Set the line width for our fixation cross
+lineWidthPix = 4;
+
+    
 %----------------------------------------------------------------------
 %                      draw red wedge
 %----------------------------------------------------------------------
@@ -405,26 +366,6 @@ for trial = 1:trialNumber
     
 end
 
-
-
-%----------------------------------------------------------------------
-%                      save parameters files
-%----------------------------------------------------------------------
-% dir = sprintf(['../data/' '%s/'],sbjname);
-% if ~isdir(dir)
-%     mkdir(dir)
-% end
-
-
-savePath = '../data/7T/illusionSize_allvariable/';
-
-time = clock;
-
-filename = sprintf('%s_%02g_%02g_%02g_%02g_%02g',sbjname,time(1),time(2),time(3),time(4),time(5));
-filename1 = [savePath,filename];
-% save(filename2,'data','back');
-save(filename1);
-
 %----------------------------------------------------------------------
 %  average illusion size  save the variable to another folder for 7T exp
 %  load
@@ -439,7 +380,27 @@ illusionSizeL = data.wedgeTiltEachBlock(tiltLeftIndex);
 aveIlluSizeR = mean(illusionSizeR);
 aveIlluSizeL = mean(illusionSizeL);
 
-savePath = '../data/7T/illusionSize_7T/';
-filename2 = [savePath,filename];
-save(filename2,'aveIlluSizeL','aveIlluSizeR','sbjname');
-sca;
+%----------------------------------------------------------------------
+%                      save parameters files
+%----------------------------------------------------------------------
+% dir = sprintf(['../data/' '%s/'],sbjname);
+% if ~isdir(dir)
+%     mkdir(dir)
+% end
+
+
+savePath = '../data/7T/illusionSize/';
+
+time = clock;
+
+filename = sprintf('%s_%02g_%02g_%02g_%02g_%02g',sbjname,time(1),time(2),time(3),time(4),time(5));
+filename1 = [savePath,filename];
+% save(filename2,'data','back');
+save(filename1);
+
+
+
+% savePath = '../data/7T/illusionSize_7T/';
+% filename2 = [savePath,filename];
+% save(filename2,'aveIlluSizeL','aveIlluSizeR','sbjname');
+% sca;
