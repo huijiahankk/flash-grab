@@ -112,6 +112,8 @@ newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma
 newclut(1:ncolors,:) = newcmap./maxcol;
 newclut(isnan(newclut)) = 0;
 
+[Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
+Screen('LoadNormalizedGammaTable', wptr, newclut);
 
 %----------------------------------------------------------------------
 %                       Keyboard information

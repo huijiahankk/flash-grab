@@ -27,7 +27,7 @@
 clearvars;
 
 if 1
-    sbjname = 'hjh';
+    sbjname = 'huijiahan';
     debug = 'n';
     
     % have to be the mutiply of 3
@@ -60,7 +60,7 @@ black = BlackIndex(screenNumber);
 white = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -83,18 +83,23 @@ fixcolor = 200; % 0 255
 framerate = FrameRate(wptr);
 redcolor = [256 0 0];
 bluecolor = [0 0 200];
-blackColor = BlackIndex(screenNumber);
-whiteColor = WhiteIndex(screenNumber);
+blackcolor = BlackIndex(screenNumber);
+whitecolor = WhiteIndex(screenNumber);
 [centerMoveHoriPix, centerMoveVertiPix, resp] = deal(0);
 % Here we set the size of the arms of our fixation cross
 fixCrossDimPix = 10;
 respSwitch = 0;
 
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 %----------------------------------------------------------------------
 %                adjust screen rgb to map linear  ramp
 %----------------------------------------------------------------------
 
+<<<<<<< Updated upstream
 load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 
 dacsize = 10;  %How many bits per pixel#
@@ -103,18 +108,54 @@ ncolors = 256; % see details in makebkg.m
 newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
 newclut(1:ncolors,:) = newcmap./maxcol;
 newclut(isnan(newclut)) = 0;
+=======
 
+% load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;   %????????????????????????????????????????????????
+% % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
+% 
+% dacsize = 10;  %How many bits per pixel#
+% maxcol = 2.^dacsize-1;
+% ncolors = 256; % see details in makebkg.m
+% newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
+% newclut(1:ncolors,:) = newcmap./maxcol;
+% newclut(isnan(newclut)) = 0;
+%  
+% [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
+% Screen('LoadNormalizedGammaTable', wptr, newclut);
+%----------------------------------------------------------------------
+%        load the screen adjust parameters
+%----------------------------------------------------------------------
+cd '../data/7T/screen_adjust_parameter/';
+illusionSizeFileName = strcat(sbjname,'*.mat');
+Files = dir([illusionSizeFileName]);
+load (Files.name,'centerMoveHoriPix','centerMoveVertiPix');
+>>>>>>> Stashed changes
+
+cd '../../../stimulus/'
+
+sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+% Now we set the coordinates (these are all relative to zero we will let
+% the drawing routine center the cross in the center of our monitor for us)
+xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
+yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
+allCoords = [xCoords; yCoords];
+% Set the line width for our fixation cross
+lineWidthPix = 4;
 
 %----------------------------------------------------------------------
 %     load subject illusion size data
 %----------------------------------------------------------------------
 
+<<<<<<< Updated upstream
 cd '../data/7T/illusionSize_7T/';
+=======
+cd '../data/7T/illusionSize_memorized_illusion_adjust/small/';
+>>>>>>> Stashed changes
 illusionSizeFileName = strcat(sbjname,'*.mat');
 Files = dir([illusionSizeFileName]);
-load (Files.name);
+load (Files.name,'aveIlluSizeL','aveIlluSizeR');
 
-cd '../../../stimulus/'
+cd '../../../../stimulus/'
 
 %----------------------------------------------------------------------
 %                       Keyboard information
@@ -134,22 +175,26 @@ KbName('UnifyKeyNames');
 % width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
 % degree totally
 
-visualDegree = 10;
+visualDegreeOrig = 10;
+sectorRadius_in_out_magni = 1;
+visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
 visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75;
 visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
 visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
+
 
 %----------------------------------------------------------------------
 %                      draw background sector
 %----------------------------------------------------------------------
 
 sectorNumber = 8;
-sectorRadius_in_pixel = floor((visualHerghtIn7T_pixel - 200)/2);    % inner diameter of background annulus
 %         annnulus outer radius
 sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMovePix;   % outer radii of background annulus
 
-[sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, black, white,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
+sectorRadius_in_pixel = sectorRadius_out_pixel - 100 * sectorRadius_in_out_magni;    % inner diameter of background annulus
 
+dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
+[sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
 
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
@@ -190,6 +235,7 @@ TR = 2; % second
 % sectorTimeRound = back.AngleRange/(back.SpinSpeed * framerate);% how many second does the background rotate rightward and then leftward cost
 filePrefixName = 'FGI-00' ;
 
+<<<<<<< Updated upstream
 %----------------------------------------------------------------------
 %          adjust the fixation cross
 %----------------------------------------------------------------------
@@ -248,6 +294,8 @@ while respToBeMade
     Screen('Flip',wptr);
     
 end
+=======
+>>>>>>> Stashed changes
 
 
 %----------------------------------------------------------------------
@@ -521,7 +569,49 @@ for block = 1 : blockNumber
             %                 back.CurrentAngle = back.CurrentAngle - back.SpinDirec * back.SpinSpeed;
             %             end
             
+<<<<<<< Updated upstream
             back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
+=======
+        end
+        
+        
+        back.FlagSpinDirecA = 0;
+        back.FlagSpinDirecB = 0;
+        
+        
+        
+        
+        % the first run background rotate clockwise the second run
+        % rotate counter-clockwise
+        %             if mod(run_no,2) == 1
+        %                 back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
+        %             elseif mod(run_no,2) == 0
+        %                 back.CurrentAngle = back.CurrentAngle - back.SpinDirec * back.SpinSpeed;
+        %             end
+        
+        back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
+        
+        
+        
+%         colorSwitchOnset = GetSecs;
+%         
+%         %
+%         if colorSwitchTimeMat(1) < colorSwitchOnset - trialOnset(trial) && colorSwitchOnset - trialOnset(trial) < colorSwitchTimeMat(2)
+%             fixationColor = white;
+%             %          GetSecs - trialOnset(trial) < colorSwitchTimeMat(1) |  GetSecs - trialOnset(trial) > colorSwitchTimeMat(1)
+%             %             fixationColor = black;
+%         else
+%             fixationColor = black;
+%         end
+        
+        %             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMoveHoriPix,xCenter+fixsize,yCenter+fixsize-centerMoveVertiPix]); % fixation
+        Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
+        Screen('Flip',wptr);
+        
+        % define the present frame of the flash
+        if flashPresentFlag
+            WaitSecs((1/framerate) * flashRepresentFrame);
+>>>>>>> Stashed changes
             
             
             

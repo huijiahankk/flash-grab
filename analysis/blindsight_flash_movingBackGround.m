@@ -17,7 +17,7 @@ sbjnames = {'huangwenxiang2'} ;
 
 addpath '../function';
 
-folderNum = 2;
+folderNum = 3;
 folders = { 'normal_field', 'upper_field','lower_field'};
 path = '../data/illusionSize/corticalBlindness/bar';
 

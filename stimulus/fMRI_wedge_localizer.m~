@@ -40,11 +40,7 @@ fixationblack = black + 0.2;
 
 % Open an on screen window
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber,...
-<<<<<<< Updated upstream
-    grey, [0 0 1024 768], 32, 2, [], [], kPsychNeed32BPCFloat);    % [0 0 1024 768]
-=======
     grey, [], [], [], [],0);    % [0 0 1024 768]   kPsychNeed32BPCFloat
->>>>>>> Stashed changes
 
 % Query the frame duration
 ifi = Screen('GetFlipInterval', window);
@@ -147,15 +143,11 @@ vbl = Screen('Flip', window);
 
 
 % the duration of checkerboard flickering in seconds
-<<<<<<< Updated upstream
-checkerboardFlickDura = 12; % seconds
-colorSwitchTimesMain = 2;  % during the checkerboard flickering the color of fixation switch twice
-=======
 checkerboardFlickDura = 16; % seconds
 colorSwitchTimesMain = 3;  % during the checkerboard flickering the color of fixation switch times
 fixFlashTimesMat = repmat([2; 3],trialNumber/2,1);
 fixFlashTimesRand = fixFlashTimesMat(Shuffle(1:length(fixFlashTimesMat)));
-fixFlashDura = 0.5;
+fixFlashDura = 1;
 
 %----------------------------------------------------------------------
 %        load the screen adjust parameters
@@ -177,7 +169,6 @@ Files = dir(illusionSizeFileName);
 load (Files.name,'aveIlluSizeL','aveIlluSizeR');
 
 cd '../../../../stimulus/'
->>>>>>> Stashed changes
 
 
 
@@ -365,7 +356,7 @@ for trial  = 1:trialNumber
 %             frameCounterFixation            
             
             if  GetSecs - trialOnset(trial) <= fixFlashTimePoint(1)
-                fixationColor = fixationblack;
+                fixationColor = fixationwhite;
                 frameCounterFixation = 0; 
                 
             % from the first switch time  point the

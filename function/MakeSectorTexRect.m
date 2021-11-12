@@ -11,17 +11,17 @@ function [sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree,s
 % width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
 % degree totally
 
-visualDegree = 10;
-visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75;
-visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
-visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
-
-
-% sectorNumber = 8;
-sectorRadius_in_pixel = floor((visualHerghtIn7T_pixel - 200)/2);    % inner diameter of background annulus
-%         annnulus outer radius
-sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMovePix;   % outer radii of background annulus
-dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
+% % visualDegree = 10;
+% visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75;
+% visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
+% visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
+% 
+% 
+% % sectorNumber = 8;
+% sectorRadius_in_pixel = floor((visualHerghtIn7T_pixel - 200)/2);    % inner diameter of background annulus
+% %         annnulus outer radius
+% sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMovePix;   % outer radii of background annulus
+% dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 sectorDiam_in_cm = sectorRadius_in_pixel * (28/768);
 sectorDiam_out_cm = sectorRadius_out_pixel * (28/768);
 

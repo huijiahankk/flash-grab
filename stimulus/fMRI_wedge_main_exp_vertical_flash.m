@@ -18,18 +18,26 @@
 clearvars;
 
 if 1
+<<<<<<< Updated upstream:stimulus/fMRI_wedge_vertical_flash.m
     sbjname = 'k';
+=======
+    sbjname = 'huijiahan';
+>>>>>>> Stashed changes:stimulus/fMRI_wedge_main_exp_vertical_flash.m
     debug = 'n';
     % have to be the mutiply of 3
     sbjIllusionSizeLeft = 0;  % 5
     sbjIllusionSizeRight = 0;
     run_no = '1';
-    
+    trialNumber = 30;
 else
     run_no = input('>>>Please input the run number:   ','s');
     sbjname = input('>>>Please input the subject''s name:   ','s');
     debug = input('>>>Debug? (y/n):  ','s');
+<<<<<<< Updated upstream:stimulus/fMRI_wedge_vertical_flash.m
 %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
+=======
+    trialNumber = input('>>>trialNumber? (30):  ');
+>>>>>>> Stashed changes:stimulus/fMRI_wedge_main_exp_vertical_flash.m
     
 end
 
@@ -111,20 +119,33 @@ KbName('UnifyKeyNames');
 % width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
 % degree totally
 
-visualDegree = 10;
+visualDegreeOrig = 10;
+sectorRadius_in_out_magni = 1;
+visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
 visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75;
 visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
 visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
+<<<<<<< Updated upstream:stimulus/fMRI_wedge_vertical_flash.m
 % 
 % %----------------------------------------------------------------------
 % %                      draw background sector
 % %----------------------------------------------------------------------
 % 
+=======
+
+%----------------------------------------------------------------------
+%                      draw background sector
+%----------------------------------------------------------------------
+
+>>>>>>> Stashed changes:stimulus/fMRI_wedge_main_exp_vertical_flash.m
 sectorNumber = 8;
-sectorRadius_in_pixel = floor((visualHerghtIn7T_pixel - 200)/2);    % inner diameter of background annulus
 %         annnulus outer radius
 sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMovePix;   % outer radii of background annulus
 
+sectorRadius_in_pixel = sectorRadius_out_pixel - 100 * sectorRadius_in_out_magni;    % inner diameter of background annulus
+
+
+dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 [sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
 
 %----------------------------------------------------------------------
