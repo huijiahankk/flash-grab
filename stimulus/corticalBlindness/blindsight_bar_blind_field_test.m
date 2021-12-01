@@ -78,14 +78,20 @@ bluecolor = [0 0 200];
 %                adjust screen rgb to map linear  ramp
 %----------------------------------------------------------------------
 
-load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 
-dacsize = 10;  %How many bits per pixel#
-maxcol = 2.^dacsize-1;
-ncolors = 256; % see details in makebkg.m
-newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
-newclut(1:ncolors,:) = newcmap./maxcol;
-newclut(isnan(newclut)) = 0;
+% load ../../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;   %????????????????????????????????????????????????
+% % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
+% 
+% dacsize = 10;  %How many bits per pixel#
+% maxcol = 2.^dacsize-1;
+% ncolors = 256; % see details in makebkg.m
+% newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
+% newclut(1:ncolors,:) = newcmap./maxcol;
+% newclut(isnan(newclut)) = 0;
+% 
+% [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
+% Screen('LoadNormalizedGammaTable', wptr, newclut);
+
 
 
 %----------------------------------------------------------------------

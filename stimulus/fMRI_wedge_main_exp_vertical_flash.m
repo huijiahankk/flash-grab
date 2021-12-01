@@ -18,11 +18,10 @@
 clearvars;
 
 if 1
-<<<<<<< Updated upstream:stimulus/fMRI_wedge_vertical_flash.m
-    sbjname = 'k';
-=======
+   
+
     sbjname = 'huijiahan';
->>>>>>> Stashed changes:stimulus/fMRI_wedge_main_exp_vertical_flash.m
+   
     debug = 'n';
     % have to be the mutiply of 3
     sbjIllusionSizeLeft = 0;  % 5
@@ -33,11 +32,9 @@ else
     run_no = input('>>>Please input the run number:   ','s');
     sbjname = input('>>>Please input the subject''s name:   ','s');
     debug = input('>>>Debug? (y/n):  ','s');
-<<<<<<< Updated upstream:stimulus/fMRI_wedge_vertical_flash.m
-%     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
-=======
-    trialNumber = input('>>>trialNumber? (30):  ');
->>>>>>> Stashed changes:stimulus/fMRI_wedge_main_exp_vertical_flash.m
+    
+    %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
+    % input('>>>trialNumber? (30):  ');
     
 end
 
@@ -56,7 +53,7 @@ blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -92,7 +89,7 @@ respSwitch = 0;
 %----------------------------------------------------------------------
 
 % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
-% 
+%
 % dacsize = 10;  %How many bits per pixel#
 % maxcol = 2.^dacsize-1;
 % ncolors = 256; % see details in makebkg.m
@@ -110,7 +107,7 @@ respSwitch = 0;
 % a exit/reset key
 KbName('UnifyKeyNames');
 % spaceKey = KbName('space');
- 
+
 
 %----------------------------------------------------------------------
 %               7T Screen parameter
@@ -125,19 +122,12 @@ visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
 visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75;
 visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
 visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
-<<<<<<< Updated upstream:stimulus/fMRI_wedge_vertical_flash.m
-% 
-% %----------------------------------------------------------------------
-% %                      draw background sector
-% %----------------------------------------------------------------------
-% 
-=======
+
 
 %----------------------------------------------------------------------
 %                      draw background sector
 %----------------------------------------------------------------------
 
->>>>>>> Stashed changes:stimulus/fMRI_wedge_main_exp_vertical_flash.m
 sectorNumber = 8;
 %         annnulus outer radius
 sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMovePix;   % outer radii of background annulus
@@ -187,7 +177,7 @@ flashRepresentFrame = 2.2; % 2.2 means 3 frame
 cd '../optimal_seq'
 
 % run_no = '1';
-TR = 2; % second
+% TR = 2; % second
 % the sector first rotate rightward 90 degree and then leftward 180 degree
 % rightward 180 degree and so on
 % sectorTimeRound = back.AngleRange/(back.SpinSpeed * framerate);% how many second does the background rotate rightward and then leftward cost
@@ -209,59 +199,59 @@ data.flashTiltDirection = stimtype;
 respToBeMade = true;
 
 
-while respToBeMade
-    
-    resp = 0;
-    prekeyIsDown = 0;
-    [keyIsDown,secs,keyCode] = KbCheck(-1);
-    if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
-        if keyCode(KbName('ESCAPE'))
-            ShowCursor;
-            sca;
-            return
-            
-        elseif keyCode(KbName('1!'))||keyCode(KbName('1'))
-            resp = - 1;
-            
-        elseif keyCode(KbName('2')) ||keyCode(KbName('2@'))
-            resp = 1;
-            
-        elseif keyCode(KbName('3')) ||keyCode(KbName('3#'))
-            respSwitch = 1;
-            
-        elseif keyCode(KbName('4')) ||keyCode(KbName('4$'))
-            respToBeMade = false;
-        end
-        
-    end
-    prekeyIsDown = keyIsDown;
-    
-    
-    
-    if  respSwitch == 0
-        centerMoveHoriPix = centerMoveHoriPix + resp * 1;
-    elseif  respSwitch == 1
-        centerMoveVertiPix = centerMoveVertiPix + resp * 1;
-    end
-    
-    % Now we set the coordinates (these are all relative to zero we will let
-    % the drawing routine center the cross in the center of our monitor for us)
-    xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
-    yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
-    allCoords = [xCoords; yCoords];
-    
-    % Set the line width for our fixation cross
-    lineWidthPix = 4;
-    
-    sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
-    Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
-    
-    % Draw the fixation cross in white, set it to the center of our screen and
-    % set good quality antialiasing
-    Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter + centerMoveHoriPix yCenter + centerMoveVertiPix]);
-    Screen('Flip',wptr);
-    
-end
+% while respToBeMade
+%     
+%     resp = 0;
+%     prekeyIsDown = 0;
+%     [keyIsDown,secs,keyCode] = KbCheck(-1);
+%     if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
+%         if keyCode(KbName('ESCAPE'))
+%             ShowCursor;
+%             sca;
+%             return
+%             
+%         elseif keyCode(KbName('1!'))||keyCode(KbName('1'))
+%             resp = - 1;
+%             
+%         elseif keyCode(KbName('2')) ||keyCode(KbName('2@'))
+%             resp = 1;
+%             
+%         elseif keyCode(KbName('3')) ||keyCode(KbName('3#'))
+%             respSwitch = 1;
+%             
+%         elseif keyCode(KbName('4')) ||keyCode(KbName('4$'))
+%             respToBeMade = false;
+%         end
+%         
+%     end
+%     prekeyIsDown = keyIsDown;
+%     
+%     
+%     
+%     if  respSwitch == 0
+%         centerMoveHoriPix = centerMoveHoriPix + resp * 1;
+%     elseif  respSwitch == 1
+%         centerMoveVertiPix = centerMoveVertiPix + resp * 1;
+%     end
+%     
+%     % Now we set the coordinates (these are all relative to zero we will let
+%     % the drawing routine center the cross in the center of our monitor for us)
+%     xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
+%     yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
+%     allCoords = [xCoords; yCoords];
+%     
+%     % Set the line width for our fixation cross
+%     lineWidthPix = 4;
+%     
+%     sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+%     Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
+%     
+%     % Draw the fixation cross in white, set it to the center of our screen and
+%     % set good quality antialiasing
+%     Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter + centerMoveHoriPix yCenter + centerMoveVertiPix]);
+%     Screen('Flip',wptr);
+%     
+% end
 
 
 %----------------------------------------------------------------------
@@ -319,7 +309,7 @@ end
 %----------------------------------------------------------------------
 WaitSecs(0); % dummy scan
 scanOnset = GetSecs;
-response = - 1; % if the subject failed to press the key, record -1 
+response = - 1; % if the subject failed to press the key, record -1
 
 % for block = 1 : blockNumber
 
@@ -352,7 +342,7 @@ for trial = 1:trialNumber
     while GetSecs - trailOnset < testDuration  % back.RotateTimes < testDuration %  % &&  respToBeMade
         %             mouseclick_frame = mouseclick_frame + 1;
         %             HideCursor;
-         flashPresentFlag = 0;
+        flashPresentFlag = 0;
         % tilt right  background first rotate clockwise until to the reverse angle
         if back.CurrentAngle >= back.ReverseAngle + adjustAngle + wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
             back.SpinDirec = - 1;
@@ -432,7 +422,7 @@ for trial = 1:trialNumber
             %--------------------------------------------
             %       flash at ongoing rotate
             %--------------------------------------------
-        % illusion == n means flash not at the moment when background reversed    
+            % illusion == n means flash not at the moment when background reversed
         elseif  illusion == 'n'
             %                 back.CurrentAngle = 0  right field horizontal
             
@@ -546,7 +536,7 @@ for trial = 1:trialNumber
         end
         
     end
-
+    
     
     if mod(trial,2) == 1
         flashTimePointMat((trial+1)/2,block) = flashTimePoint;

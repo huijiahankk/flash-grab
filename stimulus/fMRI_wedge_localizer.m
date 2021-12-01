@@ -8,7 +8,7 @@
 
 % Clear the workspace
 close all;
-clearvars;
+clear all;
 sca;
 
 if 1
@@ -29,7 +29,7 @@ screens = Screen('Screens');
 commandwindow;
 
 % Draw to the external screen if avaliable
-screenNumber = min(screens);
+screenNumber = max(screens);
 
 % Define black and white
 white = WhiteIndex(screenNumber);
@@ -39,15 +39,11 @@ fixationwhite = 0.8 * white;
 fixationblack = black + 0.2;
 
 % Open an on screen window
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber,...
-<<<<<<< Updated upstream
-    grey, [0 0 1024 768], 32, 2, [], [], kPsychNeed32BPCFloat);    % [0 0 1024 768]
-=======
-    grey, [], [], [], [],0);    % [0 0 1024 768]   kPsychNeed32BPCFloat
->>>>>>> Stashed changes
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [0 0 1024 768], [], [], [],0);    % [0 0 1024 768]   kPsychNeed32BPCFloat
 
 % Query the frame duration
 ifi = Screen('GetFlipInterval', window);
+% framerate = FrameRate(window);
 
 % Screen resolution in Y
 screenYpix = windowRect(4);
@@ -147,15 +143,12 @@ vbl = Screen('Flip', window);
 
 
 % the duration of checkerboard flickering in seconds
-<<<<<<< Updated upstream
-checkerboardFlickDura = 12; % seconds
-colorSwitchTimesMain = 2;  % during the checkerboard flickering the color of fixation switch twice
-=======
+
 checkerboardFlickDura = 16; % seconds
-colorSwitchTimesMain = 3;  % during the checkerboard flickering the color of fixation switch times
+% colorSwitchTimesMain = 3;  % during the checkerboard flickering the color of fixation switch times
 fixFlashTimesMat = repmat([2; 3],trialNumber/2,1);
 fixFlashTimesRand = fixFlashTimesMat(Shuffle(1:length(fixFlashTimesMat)));
-fixFlashDura = 0.5;
+fixFlashDura = 1;  % time duration of fixation color change (total time of ramp up and ramp down)
 
 %----------------------------------------------------------------------
 %        load the screen adjust parameters
@@ -177,7 +170,6 @@ Files = dir(illusionSizeFileName);
 load (Files.name,'aveIlluSizeL','aveIlluSizeR');
 
 cd '../../../../stimulus/'
->>>>>>> Stashed changes
 
 
 
@@ -323,9 +315,9 @@ for trial  = 1:trialNumber
     %     colorMat = randi([0 checkerboardFlickDura],trialNumber,colorSwitchTimes);
     %     color = colorMat(trial,:);
     
-    % sorts the elements of A in ascending order
-    colorSwitchTimeMat = sort(randperm(checkerboardFlickDura,colorSwitchTimesMain));
-    colorSwitchWindows = checkerboardFlickDura/3;
+%     % sorts the elements of A in ascending order
+%     colorSwitchTimeMat = sort(randperm(checkerboardFlickDura,colorSwitchTimesMain));
+%     colorSwitchWindows = checkerboardFlickDura/3;
     
     
     while GetSecs - trialOnset(trial) <= checkerboardFlickDura
@@ -352,76 +344,50 @@ for trial  = 1:trialNumber
         
         
         
-%         fixaColorChangeCycleRadian = 0:pi/(fixFlashDura/ifi+2):pi/2; %pi*ifi/fixFlashDura
-        fixaColorChangeCycleRadian = 0:0.1:pi;
+        fixaColorChangeCycleRadian = 0:pi/(fixFlashDura/ifi+1):pi/2; %pi*ifi/fixFlashDura
+%         fixaColorChangeCycleRadian = 0:0.05:pi;
         %         if frameCounterFixation >= length(theta)
         %             frameCounterFixation = 0;
         %         end
-        if fixaColorChangeCycleRadian(frameCounterFixation+1) >= pi/2
-            frameCounterFixation = 0;
-        end
+%         if fixaColorChangeCycleRadian(frameCounterFixation+1) >= pi
+%             frameCounterFixation = 0;
+%         end
         
         if fixSwitchTimes == 2
-%             frameCounterFixation            
-            
-            if  GetSecs - trialOnset(trial) <= fixFlashTimePoint(1)
-                fixationColor = fixationblack;
-                frameCounterFixation = 0; 
-                
+
             % from the first switch time  point the
             % fixation color gradually change from white to black
-            elseif GetSecs - trialOnset(trial) > fixFlashTimePoint(1) &&  GetSecs - trialOnset(trial) <= (fixFlashTimePoint(1) + fixFlashDura)
+            if GetSecs - trialOnset(trial) > fixFlashTimePoint(1) &&  GetSecs - trialOnset(trial) <= (fixFlashTimePoint(1) + fixFlashDura)
                 frameCounterFixation = frameCounterFixation + 1;
                 fixationColor = fixationwhite * sin(fixaColorChangeCycleRadian(frameCounterFixation));
-                
-                % from the end of first time point to the start of second time point
-                % fixation color keeps black
-                
-            elseif GetSecs - trialOnset(trial) > (fixFlashTimePoint(1) + fixFlashDura) && GetSecs - trialOnset(trial) <= fixFlashTimePoint(2)+fixFlashTimeWinRange*3
-                fixationColor = fixationwhite;
-                frameCounterFixation = 0;
-                
+                                
                 % from the second time point the fixation color gradually change from black to white
             elseif GetSecs - trialOnset(trial) > fixFlashTimePoint(2)+fixFlashTimeWinRange*3 &&  GetSecs - trialOnset(trial) <= fixFlashTimePoint(2) +fixFlashTimeWinRange*3 + fixFlashDura
                 frameCounterFixation = frameCounterFixation + 1;
-                fixationColor = fixationwhite * sin(pi/2 - fixaColorChangeCycleRadian(frameCounterFixation));
+                fixationColor = fixationwhite * sin(fixaColorChangeCycleRadian(frameCounterFixation));
                 
-            elseif GetSecs - trialOnset(trial) > fixFlashTimePoint(2) +fixFlashTimeWinRange*3 + fixFlashDura
-                fixationColor = fixationblack;
-                frameCounterFixation = 0;                
+            else 
+                fixationColor = fixationwhite;
+                frameCounterFixation = 0; 
             end
             
         elseif fixSwitchTimes == 3            
-%             frameCounterFixation     
-            
-             if GetSecs - trialOnset(trial) <= fixFlashTimePoint(1)
-                 fixationColor = fixationblack;
-                frameCounterFixation = 0;    
-                
-             elseif GetSecs - trialOnset(trial) > fixFlashTimePoint(1) &&  GetSecs - trialOnset(trial) <= fixFlashTimePoint(1) + fixFlashDura
+                   
+             if GetSecs - trialOnset(trial) > fixFlashTimePoint(1) &&  GetSecs - trialOnset(trial) <= fixFlashTimePoint(1) + fixFlashDura
                 frameCounterFixation = frameCounterFixation + 1;
                 fixationColor = fixationwhite * sin(fixaColorChangeCycleRadian(frameCounterFixation));
-                
-            elseif  GetSecs - trialOnset(trial) > fixFlashTimePoint(1) + fixFlashDura  && GetSecs - trialOnset(trial) <= fixFlashTimePoint(2)+fixFlashTimeWinRange*3
-                fixationColor = fixationwhite;
-                frameCounterFixation = 0;
-                
-                
+                              
             elseif GetSecs - trialOnset(trial) > fixFlashTimePoint(2)+fixFlashTimeWinRange*3 &&  GetSecs - trialOnset(trial) <= fixFlashTimePoint(2)+fixFlashTimeWinRange*3 + fixFlashDura
                 frameCounterFixation = frameCounterFixation + 1;
-                fixationColor = fixationwhite * sin(pi/2 - fixaColorChangeCycleRadian(frameCounterFixation));
-                
-            elseif GetSecs - trialOnset(trial) > fixFlashTimePoint(2)+fixFlashTimeWinRange*3 + fixFlashDura  && GetSecs - trialOnset(trial) <= fixFlashTimePoint(3)+2*fixFlashTimeWinRange*3
-                fixationColor = fixationblack;
-                frameCounterFixation = 0;
+                fixationColor = fixationwhite * sin(fixaColorChangeCycleRadian(frameCounterFixation));
                 
             elseif GetSecs - trialOnset(trial) > fixFlashTimePoint(3)+2*fixFlashTimeWinRange*3 &&  GetSecs - trialOnset(trial) <= fixFlashTimePoint(3)+2*fixFlashTimeWinRange*3 + fixFlashDura
                 frameCounterFixation = frameCounterFixation + 1;
                 fixationColor = fixationwhite * sin(fixaColorChangeCycleRadian(frameCounterFixation));
-                
-            elseif  GetSecs - trialOnset(trial) > fixFlashTimePoint(3)+2*fixFlashTimeWinRange*3 + fixFlashDura
+
+            else
                 fixationColor = fixationwhite;
-                frameCounterFixation = 0;
+                frameCounterFixation = 0; 
                 
             end
         end

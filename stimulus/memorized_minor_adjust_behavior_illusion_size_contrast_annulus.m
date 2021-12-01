@@ -23,9 +23,9 @@ else
     
 end
 
-illusion = 'y';
+% illusion = 'y';
 trialNumber = 20;  % total min = 40 trial * 6s/try/60 = 4 min
-blockNumber = 5;
+blockNumber = 20;
 
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
@@ -42,7 +42,7 @@ whitecolor = WhiteIndex(screenNumber);
 bluecolor = [0 0 200];
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -110,27 +110,9 @@ KbName('UnifyKeyNames');
 % degree totally
 
 visualDegreeOrig = 10;
-sectorRadius_in_out_magni = 1;
-visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
+sectorRadius_in_out_magniMat = [1 2];
 visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75;
 visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
-visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
-
-
-
-%----------------------------------------------------------------------
-%                      draw background sector
-%----------------------------------------------------------------------
-
-sectorNumber = 8;
-%         annnulus outer radius
-sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMovePix;   % outer radii of background annulus
-
-sectorRadius_in_pixel = sectorRadius_out_pixel - 100 * sectorRadius_in_out_magni;    % inner diameter of background annulus
-
-
-dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
-[sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
 
 
 %----------------------------------------------------------------------
@@ -170,10 +152,11 @@ back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
 
 % data.flashTiltDirection = stimtype;
 
-back.contrastratioMat = [0.06; 0.12; 0.24; 0.48; 0.96]; % repmat([0.06; 0.12; 0.24; 0.48; 0.96],trialNumber/5,1);
-back.contrastratioRand = Shuffle(back.contrastratioMat); % back.contrastratioMat(Shuffle(1:length(back.contrastratioMat)));
+back.contrastratio = [0.06 0.06 0.12 0.12 0.24 0.24 0.48 0.48 0.96 0.96]; % repmat([0.06; 0.12; 0.24; 0.48; 0.96],trialNumber/5,1);
+back.contrastratioMat = [back.contrastratio fliplr(back.contrastratio)]; 
+% back.contrastratioRand = Shuffle(back.contrastratioMat); % back.contrastratioMat(Shuffle(1:length(back.contrastratioMat)));
 
-back.ground_alpha_step = back.contrastratioRand/(0.8*framerate);
+back.ground_alpha_step = back.contrastratioMat/(0.8*framerate);
 
 
 
@@ -194,12 +177,11 @@ degreeSetUpTiltRightStart = 0;
 %----------------------------------------------------------------------
 cd '../data/7T/screen_adjust_parameter/';
 illusionSizeFileName = strcat(sbjname,'*.mat');
-Files = dir([illusionSizeFileName]);
+Files = dir(illusionSizeFileName);
 load (Files.name);
 
 cd '../../../stimulus/'
 
-sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
 
 % Here we set the size of the arms of our fixation cross
 fixCrossDimPix = 10;
@@ -212,38 +194,18 @@ allCoords = [xCoords; yCoords];
 lineWidthPix = 4;
 
 
-%----------------------------------------------------------------------
-%                      draw red wedge
-%----------------------------------------------------------------------
 
-coverSectorShrink = 4; % 2 big cover sector 4 small cover sector
-
-% coverSectorRect = [xCenter + centerMoveHoriPix - xCenter/coverSectorShrink yCenter + centerMoveVertiPix - xCenter/coverSectorShrink...
-%     xCenter + centerMoveHoriPix  + xCenter/coverSectorShrink  yCenter + centerMoveVertiPix + xCenter/coverSectorShrink];
-
-redSectorRect = [xCenter - sectorRadius_out_pixel yCenter - sectorRadius_out_pixel...
-    xCenter  + sectorRadius_out_pixel  yCenter + sectorRadius_out_pixel];
-
-redSectorRectAdjust = CenterRectOnPoint(redSectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
-
-InnerSectorRect = [xCenter  - sectorRadius_in_pixel  yCenter - sectorRadius_in_pixel...
-    xCenter + sectorRadius_in_pixel  yCenter + sectorRadius_in_pixel];
-
-InnerSectorRectAdjust = CenterRectOnPoint(InnerSectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
-
-sectorArcAngle = 360/sectorNumber;
-
-%----------------------------------------------------------------------
-%%%   draw radial lines on the backgound for mouse point
-%----------------------------------------------------------------------
-radial_line_number_long = 5;  %5
-radial_line_length_long = 15; %15
-startDistanceFromCenter = sectorRadius_out_pixel + 5;
-radial_line_number_short = 25;%25
-radial_line_length_short = 5; %5
-
-[radial_line_mat_long] = drawRadialLinesMat(radial_line_number_long,radial_line_length_long,startDistanceFromCenter);
-[radial_line_mat_short] = drawRadialLinesMat(radial_line_number_short,radial_line_length_short,startDistanceFromCenter);
+% %----------------------------------------------------------------------
+% %%%   draw radial lines on the backgound for mouse point
+% %----------------------------------------------------------------------
+% radial_line_number_long = 5;  %5
+% radial_line_length_long = 15; %15
+% startDistanceFromCenter = sectorRadius_out_pixel + 5;
+% radial_line_number_short = 25;%25
+% radial_line_length_short = 5; %5
+%
+% [radial_line_mat_long] = drawRadialLinesMat(radial_line_number_long,radial_line_length_long,startDistanceFromCenter);
+% [radial_line_mat_short] = drawRadialLinesMat(radial_line_number_short,radial_line_length_short,startDistanceFromCenter);
 
 
 %----------------------------------------------------------------------
@@ -302,13 +264,55 @@ for block = 1:blockNumber
     KbStrokeWait;
     data.flashTiltDirection(block,:) = Shuffle(back.flashTiltDirectionMat);
     
+    
+    %----------------------------------------------------------------------
+    %               7T Screen parameter
+    %----------------------------------------------------------------------
+    % the first present annlus is small and the second is large and so
+    % on
+    sectorRadius_in_out_magni = sectorRadius_in_out_magniMat(1);
+    visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
+    visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
+    
+    
+    sectorRadius_in_out_magniMat = fliplr(sectorRadius_in_out_magniMat);
+    %----------------------------------------------------------------------
+    %                      draw background sector
+    %----------------------------------------------------------------------
+    
+    sectorNumber = 8;
+    %         annnulus outer radius
+    sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMovePix;   % outer radii of background annulus
+    sectorRadius_in_pixel = sectorRadius_out_pixel - 100 * sectorRadius_in_out_magni;    % inner diameter of background annulus
+    [sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
+    sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+    %----------------------------------------------------------------------
+    %                      draw red wedge
+    %----------------------------------------------------------------------
+    
+    coverSectorShrink = 4; % 2 big cover sector 4 small cover sector
+    % coverSectorRect = [xCenter + centerMoveHoriPix - xCenter/coverSectorShrink yCenter + centerMoveVertiPix - xCenter/coverSectorShrink...
+    %     xCenter + centerMoveHoriPix  + xCenter/coverSectorShrink  yCenter + centerMoveVertiPix + xCenter/coverSectorShrink];
+    redSectorRect = [xCenter - sectorRadius_out_pixel yCenter - sectorRadius_out_pixel...
+        xCenter  + sectorRadius_out_pixel  yCenter + sectorRadius_out_pixel];
+    redSectorRectAdjust = CenterRectOnPoint(redSectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+    InnerSectorRect = [xCenter  - sectorRadius_in_pixel  yCenter - sectorRadius_in_pixel...
+        xCenter + sectorRadius_in_pixel  yCenter + sectorRadius_in_pixel];
+    InnerSectorRectAdjust = CenterRectOnPoint(InnerSectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+    sectorArcAngle = 360/sectorNumber;
+    
+    
+    
     for trial = 1:trialNumber
+        
+        
+        
         %----------------------------------------------------------------------
         %                      background rotate
         %----------------------------------------------------------------------
         %     trailOnset = GetSecs;
         respToBeMade = true;
-        back.ground_alpha = back.contrastratioRand(block);
+        back.ground_alpha = back.contrastratioMat(block);
         
         flashPresentTimes = 0;
         
@@ -484,7 +488,7 @@ for block = 1:blockNumber
                 elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
                     wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
                     %                 keyPress = 1;
-                elseif keyCode(KbName('3')) || keyCode(KbName('3#'))
+                elseif keyCode(KbName('space'))
                     respToBeMade = false;
                     %                     WaitSecs(0.5);
                 end
@@ -539,7 +543,7 @@ for block = 1:blockNumber
                 elseif flashTiltRightTimes ~= 0
                     degreeSetupTiltRight = degreeSetupTiltRightMat(flashTiltRightTimes - 1) + minorAdjustDegree(block,trial);
                 end
-                 
+                
                 
                 % draw flash - red wedge
                 Screen('FillArc',wptr,redcolor,redSectorRectAdjust,180 - 360/sectorNumber/2 + wedgeTiltNow + degreeSetupTiltRight,sectorArcAngle);
@@ -579,10 +583,10 @@ end
 
 % tiltRightIndex = find( data.flashTiltDirection(:,:) == 1 );
 % tiltLeftIndex = find( data.flashTiltDirection(:,:) == 2 );
-% 
+%
 % illusionSizeR = data.wedgeMoveDegreeMat(tiltRightIndex);
 % illusionSizeL = data.wedgeMoveDegreeMat(tiltLeftIndex);
-% 
+%
 % aveIlluSizeR = mean(illusionSizeR);
 % aveIlluSizeL = mean(illusionSizeL);
 
@@ -594,11 +598,11 @@ end
 %     mkdir(dir)
 % end
 
-if sectorRadius_in_out_magni == 1
-    savePath = '../data/illusionSize/ContrastHierarchy/memorized_minor_adjust_contrast/';
-else
-    savePath = '../data/7T/illusionSize_memorized_illusion_adjust/magnification/';
-end
+% if sectorRadius_in_out_magni == 1
+savePath = '../data/illusionSize/ContrastHierarchy/memorized_minor_adjust_contrast_annulus/';
+% else
+%     savePath = '../data/7T/illusionSize_memorized_illusion_adjust/magnification/';
+% end
 
 time = clock;
 
