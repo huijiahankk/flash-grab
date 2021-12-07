@@ -7,7 +7,7 @@
 
 clear all;
 
-sbjnames = {'dingyingshi','huijiahan','dingyingshi','tangkunyi','niulei','mojiayi'}; % ,'huijiahan','dingyingshi'
+sbjnames = {'dingyingshi','huijiahan','dingyingshi','tangkunyi','niulei','mojiayi','chenchen'}; % 'dingyingshi','huijiahan','dingyingshi','tangkunyi','niulei','mojiayi','chenchen'
 addpath '../function';
 
 cd '../data/illusionSize/ContrastHierarchy/memorized_minor_adjust_behavior_illusion_size_contrast_annulus/';

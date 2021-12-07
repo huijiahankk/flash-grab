@@ -14,7 +14,8 @@
 % Dim=64*64;
 % grappa=off;
 %%
-clear all;close all;
+clear all;
+close all;
 
 if 1
     sbjname = 'k';
@@ -59,8 +60,10 @@ PsychImaging('PrepareConfiguration');
 % command doesn't apply to a specific view, but is a general requirement.
 PsychImaging('AddTask','AllViews','SideBySideCompressedStereo');
 
-stereoMode = 102;  %goggle
-[wptr winRect] = PsychImaging('OpenWindow',screenNumber,grey,[],[],[],stereoMode);
+stereoMode = 1; %102;  %goggle
+[wptr, winRect] = PsychImaging('OpenWindow',screenNumber,grey,[],[],[],stereoMode);
+
+% [wptr,winRect]=Screen('OpenWindow',screenNumber,grey,[],[],[],stereoMode);
 %     gammaTable = [0.5 0.5 0.5];
 %     Screen('LoadNormalizedGammaTable', window, gammaTable);
 AssertOpenGL;
@@ -146,6 +149,13 @@ sectorRect = Screen('Rect',sectorTex);
 sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter,yCenter-centerMovePix);
 Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+% if mask for Gaussian border CFS it needs  alpha blendfunction
+% Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+% Screen('DrawTexture',window,CFSTex(w),[],CFSloca); % CFSloca_R
+% Screen('BlendFunction', window, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+
+
+
 %----------------------------------------------------------------------
 %                      draw red wedge
 %----------------------------------------------------------------------
@@ -174,17 +184,24 @@ CFSwidth = 80; %30;
 CFScont = 0.1;
 CFSoffFrame = 15;  % 176ms
 
-CFS.outSecCirMat = ones(sectorRadius_out_pixel,sectorRadius_out_pixel) * 2;
-CFS.innerSecCirMat = ones(sectorRadius_in_pixel,sectorRadius_in_pixel);
+% CFS.outSecCirMat = ones(sectorRadius_out_pixel,sectorRadius_out_pixel) * 2;
+% CFS.innerSecCirMat = ones(sectorRadius_in_pixel,sectorRadius_in_pixel);
 
+% We create a Alpha matrix for use as transparency mask
+ms=128;
+[x,y]=meshgrid((-ms+1):ms, (-ms+1):ms);
 
+% mask for sharp border CFS
+maskblob= (x.^2+y.^2) <= 128^2; 
+% Have a look at the mask
+% spy(maskblob);
 
 
 for i=1:CFSFrames
     CFSMatMovie{i} =CFScont*(CFSMatMovie{i}-128)+128;
     CFSImage=CFSMatMovie{i};%.*mask+ContraN;
     %     CFSImage(:,:,4)=mask2*255;
-    
+     CFSImage(:,:,4) = maskblob * 255; 
     %     CFSImage = CFSImage((256/2-128*CFSsize_scale):(256/2+128*CFSsize_scale),(256/2-128*CFSsize_scale):(256/2+128*CFSsize_scale),:);
     CFSTex(i)=Screen('MakeTexture',wptr,CFSImage);
 end
@@ -212,7 +229,7 @@ barRect = [-barLength/2  -barWidth/2  barLength/2  barWidth/2];
 
 % Define a vertical red rectangle
 barMat(:,:,1) = repmat(255, barWidth, barLength);
-barMat(:,:,2) = repmat(0,  barWidth, barLength);
+barMat(:,:,2) = zeros(barWidth, barLength);  % repmat(0,  barWidth, barLength);
 barMat(:,:,3) = barMat(:,:,2);
 
 % % Define a horizontal red rectangle
@@ -279,8 +296,6 @@ for block = 1 : blockNumber
 
     KbStrokeWait;
     
-    %     data.flashTiltDirection(block,:) = Shuffle(back.flashTiltDirectionMat)';
-    %     data.wedgeTiltEachBlock(block,1) = 0;
     back.flashTiltDirectionMatShuff = Shuffle(back.flashTiltDirectionMat)';
     
     for trial = 1:trialNumber
@@ -335,7 +350,7 @@ for block = 1 : blockNumber
            %%%      draw rotation background on one eye 
            %----------------------------------------------------------------------            
             
-            Screen('SelectStereoDrawBuffer', window, eyeCFS(1));
+            Screen('SelectStereoDrawBuffer', wptr, eyeCFS(1));
             
             %    draw background each frame
             Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.alpha); %  + backGroundRota
@@ -359,7 +374,7 @@ for block = 1 : blockNumber
                     Screen('FillArc',wptr,redcolor,redSectorRect,back.CurrentAngle + 90 - 2*adjustAngleR,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRect,back.CurrentAngle + 90 - 2*adjustAngleR,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                 elseif dotOrWedgeFlag == 'b'
-                    if barLocation == 'l' | barLocation == 'n'
+                    if barLocation == 'l' || barLocation == 'n'
                         % vertical bar lower visual field
                         barDestinationRect = CenterRectOnPoint(bartRect,xCenter + dotRadius2Center * sind(wedgeTiltNow), yCenter + dotRadius2Center * cosd(wedgeTiltNow));
                     elseif  barLocation == 'u'
@@ -417,19 +432,26 @@ for block = 1 : blockNumber
            %%%      draw CFS on the other eye 
            %----------------------------------------------------------------------              
             
-            Screen('SelectStereoDrawBuffer', window, eyeCFS(2));
+            Screen('SelectStereoDrawBuffer', wptr, eyeCFS(2));
             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-%             maskSectorRect = [xCenter - sectorRadius_out_pixel yCenter - sectorRadius_out_pixel...
-%                          xCenter  + sectorRadius_out_pixel  yCenter + sectorRadius_out_pixel];
-%             maskSectorRectAdjust = CenterRectOnPoint(maskSectorRect,xCenter,yCenter);
-%             maskSectorArcAngle = 315;
-%             maskInnerSectorRect = [xCenter  - sectorRadius_in_pixel  yCenter - sectorRadius_in_pixel...
-%                          xCenter + sectorRadius_in_pixel  yCenter + sectorRadius_in_pixel];
+            maskSectorRect = [xCenter - sectorRadius_out_pixel yCenter - sectorRadius_out_pixel...
+                         xCenter  + sectorRadius_out_pixel  yCenter + sectorRadius_out_pixel];
+%             maskSectorRect = CenterRectOnPoint(maskSectorRect,xCenter,yCenter);
+            maskSectorArcAngle = 315;
+            maskInnerSectorArcAngle = 45;
+            maskInnerSectorRect = [xCenter  - sectorRadius_in_pixel  yCenter - sectorRadius_in_pixel...
+                         xCenter + sectorRadius_in_pixel  yCenter + sectorRadius_in_pixel];
+            InnerSectorRect = CenterRectOnPoint(InnerSectorRect,xCenter,yCenter);
             
-%             Screen('DrawTexture',window,CFSTex(w),[],redSectorRect); 
-%             Screen('FillArc',wptr,grey,maskSectorRectAdjust,180, maskSectorArcAngle);
-%             Screen('FillArc',wptr,grey,maskInnerSectorRectAdjust,180 - 45, maskInnerSectorArcAngle);
-
+            w = randi(100,1);
+%             Screen('BlendFunction', window, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+            Screen('DrawTexture',wptr,CFSTex(w),[],redSectorRect); 
+            Screen('FillArc',wptr,grey,maskSectorRect,135,275);
+            Screen('FillArc',wptr,grey,InnerSectorRect,45,90);
+            
+%             Screen('FillArc',wptr,grey,maskSectorRectAdjust,180-45, maskSectorArcAngle);
+%             Screen('FillArc',wptr,grey,maskInnerSectorRectAdjust,45, maskInnerSectorArcAngle);
+            
             Screen('Flip',wptr);
             
             %----------------------------------------------------------------------

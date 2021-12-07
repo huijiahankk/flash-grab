@@ -9,6 +9,7 @@
 % Clear the workspace
 close all;
 clear all;
+
 sca;
 
 if 1

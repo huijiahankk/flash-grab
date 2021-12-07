@@ -24,8 +24,8 @@ else
 end
 
 % illusion = 'y';
-trialNumber = 4;  % total min = 40 trial * 6s/try/60 = 4 min
-blockNumber = 20;
+trialNumber = 32;  % total min = 40 trial * 6s/try/60 = 4 min
+blockNumber = 1;
 
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
@@ -152,11 +152,11 @@ back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
 
 % data.flashTiltDirection = stimtype;
 
-back.contrastratio = [0.06 0.06 0.12 0.12 0.24 0.24 0.48 0.48 0.96 0.96]; % repmat([0.06; 0.12; 0.24; 0.48; 0.96],trialNumber/5,1);
-back.contrastratioMat = [back.contrastratio fliplr(back.contrastratio)]; 
+% back.contrastratio = [0.24]; % repmat([0.06; 0.12; 0.24; 0.48; 0.96],trialNumber/5,1);
+% back.contrastratioMat = [back.contrastratio fliplr(back.contrastratio)]; 
 % back.contrastratioRand = Shuffle(back.contrastratioMat); % back.contrastratioMat(Shuffle(1:length(back.contrastratioMat)));
 
-back.ground_alpha_step = back.contrastratioMat/(0.8*framerate);
+
 
 
 
@@ -312,7 +312,8 @@ for block = 1:blockNumber
         %----------------------------------------------------------------------
         %     trailOnset = GetSecs;
         respToBeMade = true;
-        back.ground_alpha = back.contrastratioMat(block);
+        back.ground_alpha = 0.24; % back.contrastratioMat(block);
+        back.ground_alpha_step = back.ground_alpha/(0.8*framerate);  % back.contrastratioMat/(0.8*framerate);
         
         flashPresentTimes = 0;
         
@@ -599,7 +600,7 @@ end
 % end
 
 % if sectorRadius_in_out_magni == 1
-savePath = '../data/illusionSize/ContrastHierarchy/memorized_minor_adjust_contrast_annulus/';
+savePath = '../data/7T/illusionSize_7T/';
 % else
 %     savePath = '../data/7T/illusionSize_memorized_illusion_adjust/magnification/';
 % end

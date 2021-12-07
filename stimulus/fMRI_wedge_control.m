@@ -27,7 +27,7 @@
 clearvars;
 
 if 1
-    sbjname = 'huijiahan';
+    sbjname = 'hjh';
     debug = 'n';
     
     % have to be the mutiply of 3
@@ -59,8 +59,8 @@ screenNumber = max(screens);
 black = BlackIndex(screenNumber);
 white = WhiteIndex(screenNumber);
 %     mask for change contrast
-bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+grey = 128; %(whitecolor + blackcolor) / 2; % 128
+[wptr,rect]=Screen('OpenWindow',screenNumber,grey,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -104,17 +104,6 @@ newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma
 newclut(1:ncolors,:) = newcmap./maxcol;
 newclut(isnan(newclut)) = 0;
 
-
-% load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;   %????????????????????????????????????????????????
-% % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
-% 
-% dacsize = 10;  %How many bits per pixel#
-% maxcol = 2.^dacsize-1;
-% ncolors = 256; % see details in makebkg.m
-% newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
-% newclut(1:ncolors,:) = newcmap./maxcol;
-% newclut(isnan(newclut)) = 0;
-%  
 [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
 Screen('LoadNormalizedGammaTable', wptr, newclut);
 
@@ -125,7 +114,7 @@ cd '../data/7T/screen_adjust_parameter/';
 illusionSizeFileName = strcat(sbjname,'*.mat');
 Files = dir([illusionSizeFileName]);
 load (Files.name,'centerMoveHoriPix','centerMoveVertiPix');
->>>>>>> Stashed changes
+
 
 cd '../../../stimulus/'
 
@@ -142,16 +131,15 @@ lineWidthPix = 4;
 %     load subject illusion size data
 %----------------------------------------------------------------------
 
-<<<<<<< Updated upstream
 cd '../data/7T/illusionSize_7T/';
-=======
-cd '../data/7T/illusionSize_memorized_illusion_adjust/small/';
->>>>>>> Stashed changes
+
+% cd '../data/7T/illusionSize_memorized_illusion_adjust/small/';
+
 illusionSizeFileName = strcat(sbjname,'*.mat');
 Files = dir([illusionSizeFileName]);
 load (Files.name,'aveIlluSizeL','aveIlluSizeR');
 
-cd '../../../../stimulus/'
+cd '../../../stimulus/'
 
 %----------------------------------------------------------------------
 %                       Keyboard information
@@ -231,67 +219,65 @@ TR = 2; % second
 % sectorTimeRound = back.AngleRange/(back.SpinSpeed * framerate);% how many second does the background rotate rightward and then leftward cost
 filePrefixName = 'FGI-00' ;
 
-<<<<<<< Updated upstream
 %----------------------------------------------------------------------
 %          adjust the fixation cross
 %----------------------------------------------------------------------
 respToBeMade = true;
 
-while respToBeMade
-    
-    resp = 0;
-    prekeyIsDown = 0;
-    [keyIsDown,secs,keyCode] = KbCheck(-1);
-    if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
-        if keyCode(KbName('ESCAPE'))
-            ShowCursor;
-            sca;
-            return
-            
-        elseif keyCode(KbName('1!'))||keyCode(KbName('1'))
-            resp = - 1;
-            
-        elseif keyCode(KbName('2')) ||keyCode(KbName('2@'))
-            resp = 1;
-            
-        elseif keyCode(KbName('3')) ||keyCode(KbName('3#'))
-            respSwitch = 1;
-            
-        elseif keyCode(KbName('4')) ||keyCode(KbName('4$'))
-            respToBeMade = false;
-        end
-        
-    end
-    prekeyIsDown = keyIsDown;
-    
-    
-    
-    if  respSwitch == 0
-        centerMoveHoriPix = centerMoveHoriPix + resp * 1;
-    elseif  respSwitch == 1
-        centerMoveVertiPix = centerMoveVertiPix + resp * 1;
-    end
-    
-    % Now we set the coordinates (these are all relative to zero we will let
-    % the drawing routine center the cross in the center of our monitor for us)
-    xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
-    yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
-    allCoords = [xCoords; yCoords];
-    
-    % Set the line width for our fixation cross
-    lineWidthPix = 4;
-    
-    sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
-    Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
-    
-    % Draw the fixation cross in white, set it to the center of our screen and
-    % set good quality antialiasing
-    Screen('DrawLines', wptr, allCoords,lineWidthPix, whiteColor, [xCenter + centerMoveHoriPix yCenter + centerMoveVertiPix]);
-    Screen('Flip',wptr);
-    
-end
-=======
->>>>>>> Stashed changes
+% while respToBeMade
+%     
+%     resp = 0;
+%     prekeyIsDown = 0;
+%     [keyIsDown,secs,keyCode] = KbCheck(-1);
+%     if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
+%         if keyCode(KbName('ESCAPE'))
+%             ShowCursor;
+%             sca;
+%             return
+%             
+%         elseif keyCode(KbName('1!'))||keyCode(KbName('1'))
+%             resp = - 1;
+%             
+%         elseif keyCode(KbName('2')) ||keyCode(KbName('2@'))
+%             resp = 1;
+%             
+%         elseif keyCode(KbName('3')) ||keyCode(KbName('3#'))
+%             respSwitch = 1;
+%             
+%         elseif keyCode(KbName('4')) ||keyCode(KbName('4$'))
+%             respToBeMade = false;
+%         end
+%         
+%     end
+%     prekeyIsDown = keyIsDown;
+%     
+%     
+%     
+%     if  respSwitch == 0
+%         centerMoveHoriPix = centerMoveHoriPix + resp * 1;
+%     elseif  respSwitch == 1
+%         centerMoveVertiPix = centerMoveVertiPix + resp * 1;
+%     end
+%     
+%     % Now we set the coordinates (these are all relative to zero we will let
+%     % the drawing routine center the cross in the center of our monitor for us)
+%     xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
+%     yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
+%     allCoords = [xCoords; yCoords];
+%     
+%     % Set the line width for our fixation cross
+%     lineWidthPix = 4;
+%     
+%     sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+%     Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
+%     
+%     % Draw the fixation cross in white, set it to the center of our screen and
+%     % set good quality antialiasing
+%     Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter + centerMoveHoriPix yCenter + centerMoveVertiPix]);
+%     Screen('Flip',wptr);
+%     
+% end
+
 
 
 %----------------------------------------------------------------------
@@ -452,7 +438,7 @@ for block = 1 : blockNumber
                     
                     % draw red wedge
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
+                    Screen('FillArc',wptr,grey,InnerSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     flashPresentTimes = flashPresentTimes + 1;
                     flashPresentFlag = 1;
                     
@@ -471,7 +457,7 @@ for block = 1 : blockNumber
                     
                     % draw red wedge
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,back.CurrentAngle - 90 - 2*adjustAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,back.CurrentAngle - 90 - 2*adjustAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
+                    Screen('FillArc',wptr,grey,InnerSectorRectAdjust,back.CurrentAngle - 90 - 2*adjustAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
                     flashPresentTimes = flashPresentTimes + 1;
                     flashPresentFlag = 1;
                     
@@ -507,7 +493,7 @@ for block = 1 : blockNumber
                     
                     % draw red wedge
                     Screen('FillArc',wptr,redcolor,redSectorRect,back.CurrentAngle + 90 - 2*adjustAngle + sectorArcAngle ,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRect,back.CurrentAngle + 90 - 2*adjustAngle + sectorArcAngle ,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
+                    Screen('FillArc',wptr,grey,InnerSectorRect,back.CurrentAngle + 90 - 2*adjustAngle + sectorArcAngle ,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     flashPresentTimes = flashPresentTimes + 1;
                     flashPresentFlag = 1;
                     
@@ -526,7 +512,7 @@ for block = 1 : blockNumber
                     
                     % draw red wedge
                     Screen('FillArc',wptr,redcolor,redSectorRect,back.CurrentAngle - 90 - 2*adjustAngle + sectorArcAngle,sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRect,back.CurrentAngle - 90 - 2*adjustAngle + sectorArcAngle, sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
+                    Screen('FillArc',wptr,grey,InnerSectorRect,back.CurrentAngle - 90 - 2*adjustAngle + sectorArcAngle, sectorArcAngle); % wedgeTiltNow - 360/sectorNumber/2
                     flashPresentTimes = flashPresentTimes + 1;
                     flashPresentFlag = 1;
                     
@@ -565,9 +551,8 @@ for block = 1 : blockNumber
             %                 back.CurrentAngle = back.CurrentAngle - back.SpinDirec * back.SpinSpeed;
             %             end
             
-<<<<<<< Updated upstream
             back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
-=======
+
         end
         
         
@@ -607,7 +592,7 @@ for block = 1 : blockNumber
         % define the present frame of the flash
         if flashPresentFlag
             WaitSecs((1/framerate) * flashRepresentFrame);
->>>>>>> Stashed changes
+
             
             
             

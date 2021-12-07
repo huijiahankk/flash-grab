@@ -18,10 +18,10 @@
 clearvars;
 
 if 1
-   
-
+    
+    
     sbjname = 'huijiahan';
-   
+    
     debug = 'n';
     % have to be the mutiply of 3
     sbjIllusionSizeLeft = 0;  % 5
@@ -88,7 +88,9 @@ respSwitch = 0;
 %                adjust screen rgb to map linear  ramp
 %----------------------------------------------------------------------
 
-% load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
+
+% load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;   %????????????????????????????????????????????????
+% % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 %
 % dacsize = 10;  %How many bits per pixel#
 % maxcol = 2.^dacsize-1;
@@ -96,6 +98,30 @@ respSwitch = 0;
 % newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
 % newclut(1:ncolors,:) = newcmap./maxcol;
 % newclut(isnan(newclut)) = 0;
+%
+% [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
+% Screen('LoadNormalizedGammaTable', wptr, newclut);
+
+%----------------------------------------------------------------------
+%        load the screen adjust parameters
+%----------------------------------------------------------------------
+cd '../data/7T/screen_adjust_parameter/';
+illusionSizeFileName = strcat(sbjname,'*.mat');
+Files = dir(illusionSizeFileName);
+load (Files.name);
+
+cd '../../../stimulus/'
+
+
+% Here we set the size of the arms of our fixation cross
+fixCrossDimPix = 10;
+% Now we set the coordinates (these are all relative to zero we will let
+% the drawing routine center the cross in the center of our monitor for us)
+xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
+yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
+allCoords = [xCoords; yCoords];
+% Set the line width for our fixation cross
+lineWidthPix = 4;
 
 
 %----------------------------------------------------------------------
@@ -193,14 +219,14 @@ data.flashTiltDirection = stimtype;
 
 
 
-%----------------------------------------------------------------------
-%          adjust the fixation cross
-%----------------------------------------------------------------------
-respToBeMade = true;
+% %----------------------------------------------------------------------
+% %          adjust the fixation cross
+% %----------------------------------------------------------------------
+% respToBeMade = true;
 
 
 % while respToBeMade
-%     
+%
 %     resp = 0;
 %     prekeyIsDown = 0;
 %     [keyIsDown,secs,keyCode] = KbCheck(-1);
@@ -209,49 +235,78 @@ respToBeMade = true;
 %             ShowCursor;
 %             sca;
 %             return
-%             
+%
 %         elseif keyCode(KbName('1!'))||keyCode(KbName('1'))
 %             resp = - 1;
-%             
+%
 %         elseif keyCode(KbName('2')) ||keyCode(KbName('2@'))
 %             resp = 1;
-%             
+%
 %         elseif keyCode(KbName('3')) ||keyCode(KbName('3#'))
 %             respSwitch = 1;
-%             
+%
 %         elseif keyCode(KbName('4')) ||keyCode(KbName('4$'))
 %             respToBeMade = false;
 %         end
-%         
+%
 %     end
 %     prekeyIsDown = keyIsDown;
-%     
-%     
-%     
+%
+%
+%
 %     if  respSwitch == 0
 %         centerMoveHoriPix = centerMoveHoriPix + resp * 1;
 %     elseif  respSwitch == 1
 %         centerMoveVertiPix = centerMoveVertiPix + resp * 1;
 %     end
-%     
+%
 %     % Now we set the coordinates (these are all relative to zero we will let
 %     % the drawing routine center the cross in the center of our monitor for us)
 %     xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
 %     yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
 %     allCoords = [xCoords; yCoords];
-%     
+%
 %     % Set the line width for our fixation cross
 %     lineWidthPix = 4;
-%     
+%
 %     sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
 %     Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.ground_alpha); %  + backGroundRota
-%     
+%
 %     % Draw the fixation cross in white, set it to the center of our screen and
 %     % set good quality antialiasing
 %     Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter + centerMoveHoriPix yCenter + centerMoveVertiPix]);
 %     Screen('Flip',wptr);
-%     
+%
 % end
+%----------------------------------------------------------------------
+%               7T Screen parameter
+%----------------------------------------------------------------------
+
+% for 7T scanner the resolution of the screen is 1024*768   the height and
+% width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
+% degree totally
+
+visualDegreeOrig = 10;
+sectorRadius_in_out_magniMat = 2;
+visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75;
+visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
+
+sectorRadius_in_out_magni = sectorRadius_in_out_magniMat(1);
+visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
+visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
+
+
+sectorRadius_in_out_magniMat = fliplr(sectorRadius_in_out_magniMat);
+%----------------------------------------------------------------------
+%                      draw background sector
+%----------------------------------------------------------------------
+
+sectorNumber = 8;
+%         annnulus outer radius
+sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - 20)/2);%  + centerMovePix;   % outer radii of background annulus
+sectorRadius_in_pixel = sectorRadius_out_pixel - 100 * sectorRadius_in_out_magni;    % inner diameter of background annulus
+[sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
+sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
 
 
 %----------------------------------------------------------------------
@@ -318,11 +373,10 @@ for trial = 1:trialNumber
     %----------------------------------------------------------------------
     %                      background rotate
     %----------------------------------------------------------------------
-    trailOnset = GetSecs;
+    trialOnset = GetSecs;
     respToBeMade = true;
     prekeyIsDown = 0;
     wedgeTiltNow = wedgeTiltStart;
-    trialOnset = GetSecs;
     
     adjustAngle = 360/2/sectorNumber;
     
@@ -333,13 +387,13 @@ for trial = 1:trialNumber
     back.FlagSpinDirecB = 0;% flash tilt left
     
     
-    testDuration = stimlength(trial)
+    testDuration = stimlength(trial);
     
-    trial
+   
     %                 HideCursor;
     flashPresentFlag = 0;
     
-    while GetSecs - trailOnset < testDuration  % back.RotateTimes < testDuration %  % &&  respToBeMade
+    while GetSecs - trialOnset < testDuration  % back.RotateTimes < testDuration %  % &&  respToBeMade
         %             mouseclick_frame = mouseclick_frame + 1;
         %             HideCursor;
         flashPresentFlag = 0;
