@@ -1,0 +1,46 @@
+optseq2
+$Id: optseq2.c,v 2.15 2009/05/26 18:13:45 greve Exp $
+NoSearch  = 0
+nSearch  = 1000
+nKeep    = 4
+PctUpdate  = 10.000000
+nCB1Opt  = 0
+seed     = 62374
+Ntp  = 160
+TR   = 2
+TPreScan   = 0
+PSD Window   = 2 10 2
+nEvTypes = 2
+EvNo    Label Duration nRepsNom
+ 1       left  2.000   16
+ 2      right  2.000   16
+PctVarEvReps = 0
+VarEvRepsPerCond = 0
+PolyOrder = -1
+tNullMax = 10
+tNullMin = 6
+AR1 = 0
+No refractory penalty
+Cost = eff
+OutStem = FGI
+Summary File = FGI.sum
+
+Pct nSrch MinSrch Cost Eff Cb1Err VRFAvg VRFStd VRFMin VRFMax VRFRange nSince
+
+BeginUpdateLog
+ 0       1     0.0   2  2  0.0312  16  0  16  16  0 62.4 0
+ 0       6     0.0   2  2  0.0312  16  0  16  16  0 62.4 1
+ 0       6     0.0   2  2  0.0312  16  0  16  16  0 62.4 0
+11     110     0.0   2  2  0.0312  16  0  16  16  0 62.4 104
+22     220     0.0   2  2  0.0312  16  0  16  16  0 62.4 214
+33     330     0.0   2  2  0.0312  16  0  16  16  0 62.4 324
+44     440     0.0   2  2  0.0312  16  0  16  16  0 62.4 434
+55     550     0.0   2  2  0.0312  16  0  16  16  0 62.4 544
+66     660     0.0   2  2  0.0312  16  0  16  16  0 62.4 654
+77     770     0.0   2  2  0.0312  16  0  16  16  0 62.4 764
+88     880     0.0   2  2  0.0312  16  0  16  16  0 62.4 874
+99     990     0.0   2  2  0.0312  16  0  16  16  0 62.4 984
+100    1000     0.0   2  2  0.0312  16  0  16  16  0 62.4 994
+EndUpdateLog
+
+Done

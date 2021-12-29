@@ -18,11 +18,11 @@ clear all;
 close all;
 
 if 1
-    sbjname = 'k';
+    sbjname = 'sunnan';
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
     dotOrWedgeFlag = 'b';   % b  means bar
-    barLocation = 'u'; % n for normal vision field   
+    barLocation = 'u'; % n for normal vision field
     
 else
     
@@ -105,6 +105,22 @@ redcolor = [256 0 0];
 % [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
 % Screen('LoadNormalizedGammaTable', wptr, newclut);
 
+%----------------------------------------------------------------------
+%     load patient blind visual field data
+%----------------------------------------------------------------------
+
+cd '../../data/corticalBlindness/bar/blindField/';
+
+
+illusionSizeFileName = strcat(sbjname,'*.mat');
+Files = dir([illusionSizeFileName]);
+load (Files.name,'data');
+
+blindFieldUpper = mean(data.wedgeTiltEachBlock(1,:));   % minus means in the upper visual field from 0 to right hemifield
+blindFieldLower = mean(data.wedgeTiltEachBlock(2,:));   % means in the lower visual field from veritical meridian to right hemifield
+
+
+cd '../../../../stimulus/corticalBlindness/'
 
 
 %----------------------------------------------------------------------
@@ -147,7 +163,7 @@ dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 sectorTex = Screen('MakeTexture', wptr, sector);
 sectorRect = Screen('Rect',sectorTex);
 sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter,yCenter-centerMovePix);
-Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+% Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 % if mask for Gaussian border CFS it needs  alpha blendfunction
 % Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
@@ -172,7 +188,7 @@ sectorArcAngle = 360/sectorNumber;
 %----------------------------------------------------------------------
 %%%                     generate  CFS
 %----------------------------------------------------------------------
-load /Users/jia/Documents/matlab/DD_illusion/myGabor/function/CFS/CFSMatMovie1.mat
+load ../../../DD_illusion/myGabor/function/CFS/CFSMatMovie1.mat
 % CFSFrequency= 8;
 CFSMatMovie=Shuffle(CFSMatMovie);
 CFSFrames = 100;
@@ -181,7 +197,7 @@ CFSwidth = 80; %30;
 % center of gabor start point
 % CFScoverGabor = gabor.DimPix/2;
 % CFScoverGabor = 25;
-CFScont = 0.1;
+CFScont = 1;
 CFSoffFrame = 15;  % 176ms
 
 % CFS.outSecCirMat = ones(sectorRadius_out_pixel,sectorRadius_out_pixel) * 2;
@@ -192,7 +208,7 @@ ms=128;
 [x,y]=meshgrid((-ms+1):ms, (-ms+1):ms);
 
 % mask for sharp border CFS
-maskblob= (x.^2+y.^2) <= 128^2; 
+maskblob= (x.^2+y.^2) <= 128^2;
 % Have a look at the mask
 % spy(maskblob);
 
@@ -201,10 +217,13 @@ for i=1:CFSFrames
     CFSMatMovie{i} =CFScont*(CFSMatMovie{i}-128)+128;
     CFSImage=CFSMatMovie{i};%.*mask+ContraN;
     %     CFSImage(:,:,4)=mask2*255;
-     CFSImage(:,:,4) = maskblob * 255; 
+    CFSImage(:,:,4) = maskblob * 255;
     %     CFSImage = CFSImage((256/2-128*CFSsize_scale):(256/2+128*CFSsize_scale),(256/2-128*CFSsize_scale):(256/2+128*CFSsize_scale),:);
     CFSTex(i)=Screen('MakeTexture',wptr,CFSImage);
 end
+
+% image(CFSMatMovie{50})
+% imShow(CFSMatMovie{50})
 
 eyeCFS = [0 1];  %0 mean left eye
 w = randi(100,1);
@@ -244,7 +263,7 @@ bartRect = Screen('Rect',barTexture);
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
 %----------------------------------------------------------------------
-trialNumber = 4;
+trialNumber = 10;
 blockNumber = 2;
 % back.contrastratio = 1;
 
@@ -285,18 +304,34 @@ for block = 1 : blockNumber
     %----------------------------------------------------------------------
     %       present a start screen and wait for a key-press
     %----------------------------------------------------------------------
-    
-    formatSpec = 'This is the %dth of %d block. Press Any Key To Begin';
-    A1 = block;
-    A2 = blockNumber;
-    str = sprintf(formatSpec,A1,A2);
-    DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
-    
-    Screen('Flip', wptr);
-
-    KbStrokeWait;
+    %
+    %     formatSpec = 'This is the %dth of %d block. Press Any Key To Begin';
+    %     A1 = block;
+    %     A2 = blockNumber;
+    %     str = sprintf(formatSpec,A1,A2);
+    %     DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
+    %
+    %     Screen('Flip', wptr);
+    %
+    %     KbStrokeWait;
+    if block == 1
+        formatSpec = 'This is the %d of %d block. \n\n Press Any Key To Begin';
+        if block ~= 1
+            formatSpec = 'You could have a rest. \n\n This is the %d of %d block. \n\n Press Any Key To Begin';
+        end
+        A1 = block;
+        A2 = blockNumber;
+        str = sprintf(formatSpec,A1,A2);
+        Screen('SelectStereoDrawBuffer', wptr, 0);
+        DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
+        Screen('SelectStereoDrawBuffer', wptr, 1);
+        DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
+        Screen('Flip', wptr);
+        KbStrokeWait;
+    end
     
     back.flashTiltDirectionMatShuff = Shuffle(back.flashTiltDirectionMat)';
+    
     
     for trial = 1:trialNumber
         %----------------------------------------------------------------------
@@ -346,15 +381,22 @@ for block = 1 : blockNumber
             end
             
             
-           %----------------------------------------------------------------------
-           %%%      draw rotation background on one eye 
-           %----------------------------------------------------------------------            
+            %----------------------------------------------------------------------
+            %%%      draw rotation background on one eye
+            %----------------------------------------------------------------------
             
             Screen('SelectStereoDrawBuffer', wptr, eyeCFS(1));
             
+            % if mask for Gaussian border CFS it needs  alpha blendfunction
+            % Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+            % Screen('DrawTexture',window,CFSTex(w),[],CFSloca); % CFSloca_R
+            % Screen('BlendFunction', window, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
+            
+            Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+             
             %    draw background each frame
             Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.alpha); %  + backGroundRota
-            
+            %             Screen('BlendFunction', wptr, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
             
             
             % present flash tilt right
@@ -428,29 +470,35 @@ for block = 1 : blockNumber
             %             Screen('DrawLine',window,blackColor,xCenter-fixationSize,yCenter,xCenter+fixationSize,yCenter,5);
             %             Screen('DrawLine',window,blackColor,xCenter,yCenter-fixationSize,xCenter,yCenter+fixationSize,5);
             
-           %----------------------------------------------------------------------
-           %%%      draw CFS on the other eye 
-           %----------------------------------------------------------------------              
+            %----------------------------------------------------------------------
+            %%%      draw CFS on the other eye
+            %----------------------------------------------------------------------
             
             Screen('SelectStereoDrawBuffer', wptr, eyeCFS(2));
             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-            maskSectorRect = [xCenter - sectorRadius_out_pixel yCenter - sectorRadius_out_pixel...
-                         xCenter  + sectorRadius_out_pixel  yCenter + sectorRadius_out_pixel];
-%             maskSectorRect = CenterRectOnPoint(maskSectorRect,xCenter,yCenter);
-            maskSectorArcAngle = 315;
-            maskInnerSectorArcAngle = 45;
-            maskInnerSectorRect = [xCenter  - sectorRadius_in_pixel  yCenter - sectorRadius_in_pixel...
-                         xCenter + sectorRadius_in_pixel  yCenter + sectorRadius_in_pixel];
+            maskSectorRect = [xCenter - sectorRadius_out_pixel-5 yCenter - sectorRadius_out_pixel-5 ...
+                xCenter  + sectorRadius_out_pixel+5  yCenter + sectorRadius_out_pixel+5];
+            %             maskSectorRect = CenterRectOnPoint(maskSectorRect,xCenter,yCenter);
+            %             maskSectorArcAngle = 315;
+            %             maskInnerSectorArcAngle = 45;
+            %             maskInnerSectorRect = [xCenter  - sectorRadius_in_pixel  yCenter - sectorRadius_in_pixel...
+            %                          xCenter + sectorRadius_in_pixel  yCenter + sectorRadius_in_pixel];
             InnerSectorRect = CenterRectOnPoint(InnerSectorRect,xCenter,yCenter);
             
             w = randi(100,1);
-%             Screen('BlendFunction', window, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
-            Screen('DrawTexture',wptr,CFSTex(w),[],redSectorRect); 
-            Screen('FillArc',wptr,grey,maskSectorRect,135,275);
-            Screen('FillArc',wptr,grey,InnerSectorRect,45,90);
+            % Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+            % Screen('DrawTexture',window,CFSTex(w),[],CFSloca); % CFSloca_R
+            % Screen('BlendFunction', window, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
             
-%             Screen('FillArc',wptr,grey,maskSectorRectAdjust,180-45, maskSectorArcAngle);
-%             Screen('FillArc',wptr,grey,maskInnerSectorRectAdjust,45, maskInnerSectorArcAngle);
+            
+            Screen('DrawTexture',wptr,CFSTex(w),[],redSectorRect);
+            
+            
+            Screen('FillArc',wptr,grey,maskSectorRect,180 - blindFieldLower,360 + blindFieldUpper); % blindFieldLower
+            Screen('FillArc',wptr,grey,InnerSectorRect,-blindFieldUpper, 180 - blindFieldLower + blindFieldLower);
+            
+            %             Screen('FillArc',wptr,grey,maskSectorRectAdjust,180-45, maskSectorArcAngle);
+            %             Screen('FillArc',wptr,grey,maskInnerSectorRectAdjust,45, maskInnerSectorArcAngle);
             
             Screen('Flip',wptr);
             
