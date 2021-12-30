@@ -362,7 +362,7 @@ for trial = 1:trialNumber
        
     frameCounter = 0;
     
-    while GetSecs - scanOnset < stimlength(trial)+stimonset(trail)  % back.RotateTimes < testDuration %  % &&  respToBeMade
+    while GetSecs - scanOnset < stimlength(trial)+stimonset(trial)  % back.RotateTimes < testDuration %  % &&  respToBeMade
         frameCounter = frameCounter + 1;
         if frameCounter > 120
             frameCounter = frameCounter-120;
@@ -381,39 +381,16 @@ for trial = 1:trialNumber
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     
                     if frameCounter == 61
-                        flashOnset = GetSecs;
-                        flashPresentTimes = flashPresentTimes + 1;
-                        flashPresentFlag = 1;
-
-                        flashTimePoint = GetSecs - scanOnset;
-
-                        if trial > 1
-                            flashInterval = GetSecs - scanOnset - flashTimePointMat((trial+1)/2 - 1,block);
-                        elseif trial == 1
-                            flashInterval = GetSecs - trialOnset;
-                        end
-                        display(flashTimePoint);
-                        display(flashInterval);
+                        flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
                 end
             else
                 if frameCounter>0.5 && frameCounter<3.5
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
-                    if frameCounter==1
-                        flashOnset = GetSecs;
-                        flashPresentTimes = flashPresentTimes + 1;
-                        flashPresentFlag = 1;
-
-                        flashTimePoint = GetSecs - scanOnset;
-
-                        if trial > 1
-                            flashInterval = GetSecs - scanOnset - flashTimePointMat((trial+1)/2 - 1,block);
-                        elseif trial == 1
-                            flashInterval = GetSecs - trialOnset;
-                        end
-                        display(flashTimePoint);
-                        display(flashInterval);
+                    
+                    if frameCounter == 1
+                        flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
                 end
             end
@@ -461,11 +438,7 @@ for trial = 1:trialNumber
     
     
 
-    if mod(trial,2) == 1
-        flashTimePointMat((trial+1)/2,block) = flashTimePoint;
-        flashIntervalMat((trial+1)/2,block) = flashInterval;
-    end
-    
+
     
     responseMat(trial) = response;
     
@@ -507,17 +480,6 @@ save(filename2);
 sca;
 
 frameinterval = frametimepoint(2:end)-frametimepoint(1:end-1);
-
-frameintervalue = nonzeros(frameinterval(2:end,:));
-plot(1:size(frameintervalue,1),frameintervalue);
-
-% [stimonset,stimtype,stimlength,junk,stimname] =  textread(fileName,'%f%n%f%s%s','delimiter',' ');
-
-
-stimIndex = find(stimtype);
-scatter(1:size(stimonset(stimIndex),1),stimonset(stimIndex));
-hold on;
-scatter(1:size(flashTimePointMat,1),flashTimePointMat);
-        
+figure; plot(frameinterval);
 
 

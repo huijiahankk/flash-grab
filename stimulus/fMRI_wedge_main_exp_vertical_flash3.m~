@@ -346,10 +346,11 @@ scanOnset = GetSecs;
 response = - 1; % if the subject failed to press the key, record -1
 responseMat = zeros(1,trialNumber);
 [flashTimePointMat,flashIntervalMat] = deal(zeros(trialNumber/2,1));
-frameskippercounter = 0;
+% frameskippercounter = 0;
 % for block = 1 : blockNumber
 flashTimePoint = [];
 flashInterval = [];
+frametimepoint = scanOnset;
 
 for trial = 1:trialNumber
     %----------------------------------------------------------------------
@@ -358,26 +359,10 @@ for trial = 1:trialNumber
     trialOnset = GetSecs;
     respToBeMade = true;
     prekeyIsDown = 0;
-    wedgeTiltNow = wedgeTiltStart;
-    
-%     adjustAngle = 360/2/sectorNumber;
-    
-    back.RotateTimes = 0;
-    flashPresentTimes = 0;
-    
-    back.FlagSpinDirecA = 0;% flash tilt right
-    back.FlagSpinDirecB = 0;% flash tilt left
-
-    
-    flashPresentFlag = 0;
+       
     frameCounter = 0;
     
-    if data.flashTiltDirection(1,block) == 1
-        back.SpinDirec = - 1;
-    end
-    
-    
-    while GetSecs - scanOnset < sum(stimlength(1:trial))  % back.RotateTimes < testDuration %  % &&  respToBeMade
+    while GetSecs - scanOnset < stimlength(trial)+stimonset(trial)  % back.RotateTimes < testDuration %  % &&  respToBeMade
         frameCounter = frameCounter + 1;
         if frameCounter > 120
             frameCounter = frameCounter-120;
@@ -396,39 +381,15 @@ for trial = 1:trialNumber
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     
                     if frameCounter == 61
-                        flashOnset = GetSecs;
-                        flashPresentTimes = flashPresentTimes + 1;
-                        flashPresentFlag = 1;
-
-                        flashTimePoint = GetSecs - scanOnset;
-
-                        if trial > 1
-                            flashInterval = GetSecs - scanOnset - flashTimePointMat((trial+1)/2 - 1,block);
-                        elseif trial == 1
-                            flashInterval = GetSecs - trialOnset;
-                        end
-                        display(flashTimePoint);
-                        display(flashInterval);
+                        flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
                 end
             else
                 if frameCounter>0.5 && frameCounter<3.5
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
-                    if frameCounter==1
-                        flashOnset = GetSecs;
-                        flashPresentTimes = flashPresentTimes + 1;
-                        flashPresentFlag = 1;
-
-                        flashTimePoint = GetSecs - scanOnset;
-
-                        if trial > 1
-                            flashInterval = GetSecs - scanOnset - flashTimePointMat((trial+1)/2 - 1,block);
-                        elseif trial == 1
-                            flashInterval = GetSecs - trialOnset;
-                        end
-                        display(flashTimePoint);
-                        display(flashInterval);
+                    if frameCounter == 61
+                        flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
                 end
             end
@@ -437,19 +398,8 @@ for trial = 1:trialNumber
         Screen('DrawLines', wptr, allCoords,lineWidthPix, fixationwhite, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
         
         Screen('Flip',wptr);
-        
-        % to check if the frame skip during the experiment
-        if frameCounter == 1
-            frameinterval(frameCounter,trial) = GetSecs;
-            frametimepoint(frameCounter,trial) = GetSecs;
-        else
-            frametimepoint(frameCounter,trial) = GetSecs;
-            frameinterval(frameCounter,trial) = GetSecs - frametimepoint(frameCounter - 1,trial);
-        end
-        
-        
-        
-        
+        frametimepoint = [frametimepoint GetSecs];
+                
         
         %----------------------------------------------------------------------
         %                      Response record
@@ -532,6 +482,7 @@ save(filename2);
 
 sca;
 
+frameinterval = frametimepoint(2:end)-frametimepoint(1:end-1);
 
 frameintervalue = nonzeros(frameinterval(2:end,:));
 plot(1:size(frameintervalue,1),frameintervalue);
