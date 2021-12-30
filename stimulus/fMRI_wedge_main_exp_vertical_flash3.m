@@ -350,6 +350,7 @@ responseMat = zeros(1,trialNumber);
 % for block = 1 : blockNumber
 flashTimePoint = [];
 flashInterval = [];
+frametimepoint = scanOnset;
 
 for trial = 1:trialNumber
     %----------------------------------------------------------------------
@@ -358,24 +359,8 @@ for trial = 1:trialNumber
     trialOnset = GetSecs;
     respToBeMade = true;
     prekeyIsDown = 0;
-    wedgeTiltNow = wedgeTiltStart;
-    
-%     adjustAngle = 360/2/sectorNumber;
-    
-    back.RotateTimes = 0;
-    flashPresentTimes = 0;
-    
-    back.FlagSpinDirecA = 0;% flash tilt right
-    back.FlagSpinDirecB = 0;% flash tilt left
-
-    
-    flashPresentFlag = 0;
+       
     frameCounter = 0;
-    
-    if data.flashTiltDirection(1,block) == 1
-        back.SpinDirec = - 1;
-    end
-    
     
     while GetSecs - scanOnset < stimlength(trial)+stimonset(trail)  % back.RotateTimes < testDuration %  % &&  respToBeMade
         frameCounter = frameCounter + 1;
@@ -437,19 +422,8 @@ for trial = 1:trialNumber
         Screen('DrawLines', wptr, allCoords,lineWidthPix, fixationwhite, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
         
         Screen('Flip',wptr);
-        
-        % to check if the frame skip during the experiment
-        if frameCounter == 1
-            frameinterval(frameCounter,trial) = GetSecs;
-            frametimepoint(frameCounter,trial) = GetSecs;
-        else
-            frametimepoint(frameCounter,trial) = GetSecs;
-            frameinterval(frameCounter,trial) = GetSecs - frametimepoint(frameCounter - 1,trial);
-        end
-        
-        
-        
-        
+        frametimepoint = [frametimepoint GetSecs];
+                
         
         %----------------------------------------------------------------------
         %                      Response record
@@ -532,6 +506,7 @@ save(filename2);
 
 sca;
 
+frameinterval = frametimepoint(2:end)-frametimepoint(1:end-1);
 
 frameintervalue = nonzeros(frameinterval(2:end,:));
 plot(1:size(frameintervalue,1),frameintervalue);
