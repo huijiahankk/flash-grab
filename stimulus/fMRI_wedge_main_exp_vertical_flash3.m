@@ -544,5 +544,5 @@ scatter(1:size(stimonset(stimIndex),1),stimonset(stimIndex));
 hold on;
 scatter(1:size(flashTimePointMat,1),flashTimePointMat);
         
-plot(stimonset() - flashTimePointMat) 
+
 
