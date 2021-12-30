@@ -393,7 +393,7 @@ for trial = 1:trialNumber
             if stimtype(trial) == stimtype(1)
                 if frameCounter>60.5 && frameCounter<63.5
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
+                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     
                     if frameCounter == 61
                         flashOnset = GetSecs;
@@ -413,8 +413,8 @@ for trial = 1:trialNumber
                 end
             else
                 if frameCounter>0.5 && frameCounter<3.5
-                    Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
+                    Screen('FillArc',wptr,redcolor,redSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
+                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,back.CurrentAngle + 90 - 2*adjustAngle,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     if frameCounter==1
                         flashOnset = GetSecs;
                         flashPresentTimes = flashPresentTimes + 1;
