@@ -619,12 +619,12 @@ display(totalTime);
 % end
 
 
-savePath = '../data/7T/main_exp/';
+savePath = '../data/7T/control/';
 
 
 time = clock;
 
-filename = sprintf('%s_%02g_%02g_%02g_%02g_%02g',sbjname,time(1),time(2),time(3),time(4),time(5));
+filename = sprintf('%s_%s_%02g_%02g_%02g_%02g_%02g',sbjname,run_no,time(1),time(2),time(3),time(4),time(5));
 filename2 = [savePath,filename];
 % save(filename2,'data','back');
 save(filename2);
