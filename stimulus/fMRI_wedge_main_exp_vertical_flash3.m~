@@ -346,7 +346,7 @@ scanOnset = GetSecs;
 response = - 1; % if the subject failed to press the key, record -1
 responseMat = zeros(1,trialNumber);
 [flashTimePointMat,flashIntervalMat] = deal(zeros(trialNumber/2,1));
-% frameskippercounter = 0;
+frameskippercounter = 0;
 % for block = 1 : blockNumber
 flashTimePoint = [];
 flashInterval = [];
@@ -377,7 +377,7 @@ for trial = 1:trialNumber
     end
     
     
-    while GetSecs - scanOnset < stimlength(trial)+stimonset(trail)  % back.RotateTimes < testDuration %  % &&  respToBeMade
+    while GetSecs - scanOnset < sum(stimlength(1:trial))  % back.RotateTimes < testDuration %  % &&  respToBeMade
         frameCounter = frameCounter + 1;
         if frameCounter > 120
             frameCounter = frameCounter-120;
