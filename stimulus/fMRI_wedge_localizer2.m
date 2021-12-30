@@ -131,10 +131,10 @@ textureCue = [1 2];
 % vbl = Screen('Flip', window);
 
 
-if run_no == "1"
+if run_no == '1'
     % 2 types of localizer  1 left and 2 right  and 3 control nothing
     localizerMat = repmat([1; 3; 2; 3],trialNumber/2,1);
-elseif run_no == "2"
+elseif run_no == '2'
     localizerMat = repmat([2; 3; 1; 3],trialNumber/2,1);
 end
 % localizerMatRand = localizerMat(Shuffle(1:length(localizerMat)));
@@ -144,11 +144,11 @@ checkerboardFlickDura = 16; % seconds
 % colorSwitchTimesMain = 3;  % during the checkerboard flickering the color of fixation switch times
 
 % make sure the response switch number change over runs
-if run_no == "1"
+if run_no == '1'
     localizerSwitchTimeSeg = [2; 3; 3; 3];
-elseif run_no == "2"
+elseif run_no == '2'
     localizerSwitchTimeSeg = [2; 2; 3; 3];
-elseif run_no == "3"
+elseif run_no == '3'
     localizerSwitchTimeSeg = [2; 2; 2; 3];
 end
 
@@ -413,6 +413,8 @@ for trial  = 1:trialNumber
         
     end
 end
+
+display(GetSecs - scanOnset);
 %----------------------------------------------------------------------
 %                      Response record
 %----------------------------------------------------------------------
