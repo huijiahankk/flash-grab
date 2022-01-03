@@ -388,7 +388,8 @@ for trial = 1:trialNumber
                 if frameCounter>0.5 && frameCounter<3.5
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
-                    if frameCounter == 61
+                    
+                    if frameCounter == 1
                         flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
                 end
@@ -437,11 +438,7 @@ for trial = 1:trialNumber
     
     
 
-    if mod(trial,2) == 1
-        flashTimePointMat((trial+1)/2,block) = flashTimePoint;
-        flashIntervalMat((trial+1)/2,block) = flashInterval;
-    end
-    
+
     
     responseMat(trial) = response;
     
@@ -483,17 +480,6 @@ save(filename2);
 sca;
 
 frameinterval = frametimepoint(2:end)-frametimepoint(1:end-1);
-
-frameintervalue = nonzeros(frameinterval(2:end,:));
-plot(1:size(frameintervalue,1),frameintervalue);
-
-% [stimonset,stimtype,stimlength,junk,stimname] =  textread(fileName,'%f%n%f%s%s','delimiter',' ');
-
-
-stimIndex = find(stimtype);
-scatter(1:size(stimonset(stimIndex),1),stimonset(stimIndex));
-hold on;
-scatter(1:size(flashTimePointMat,1),flashTimePointMat);
-        
+figure; plot(frameinterval);
 
 
