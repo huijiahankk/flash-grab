@@ -247,7 +247,7 @@ end
 
 
 scanOnset = GetSecs;
-
+frametimepoint = scanOnset;
 trialOnset = zeros(trialNumber);
 
 for trial  = 1:trialNumber
@@ -387,15 +387,10 @@ for trial  = 1:trialNumber
 %         vbl = Screen('Flip', window, vbl + (waitframes - 0.5) * ifi);
                         Screen('Flip', window);
         
+        frametimepoint = [frametimepoint GetSecs];                
+                        
         frameCounter = frameCounter + 1;
-        % to check if the frame skip during the experiment
-        if frameCounter == 1
-            frameinterval(frameCounter,trial) = GetSecs;
-            frametimepoint(frameCounter,trial) = GetSecs;
-        else
-            frametimepoint(frameCounter-1,trial) = GetSecs;
-            frameinterval(frameCounter-1,trial) = GetSecs - frametimepoint(frameCounter - 1,trial);
-        end
+        
                         
                         
                         
@@ -453,6 +448,7 @@ while  respToBeMade
     
     Screen('Flip', window);
     
+    
 end
 
 colorChangeTimesMat = colorChangeTimes;
@@ -479,4 +475,6 @@ save(filename1);
 
 % Clear up and leave the building
 sca;
-close all;
+
+frameinterval = frametimepoint(2:end)-frametimepoint(1:end-1);
+plot(frameinterval);

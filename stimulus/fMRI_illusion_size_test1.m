@@ -25,7 +25,7 @@ end
 
 debug = 'n';
 % illusion = 'y';
-trialNumber = 32;  % 32  total min = 40 trial * 6s/try/60 = 4 min
+trialNumber = 12;  % 32  total min = 40 trial * 6s/try/60 = 4 min
 blockNumber = 1;
 
 %----------------------------------------------------------------------
