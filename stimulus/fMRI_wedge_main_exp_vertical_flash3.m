@@ -228,7 +228,9 @@ fileName = strcat(filePrefixName,run_no,'.par');
 % [timepoint,stim_type,SOA,~,~] = read_optseq2_data([fileName]);
 [stimonset,stimtype,stimlength,junk,stimname] =  textread(fileName,'%f%n%f%s%s','delimiter',' '); %textread
 runNum = str2num(run_no);
-if runNum == 1 || runNum ==3
+% make sure the first stimulus flash at the same timepoint from the trial
+% onset. so if first stimulus flash on the 
+if runNum == 1 || runNum == 3  % optseq first stimtype of the 4 document in sub1 is 2 1 1 1 so we reverse all the stimtype 
     if stimtype(1)==2
         stimtype(stimtype==1) = 3;
         stimtype(stimtype==2) = 1;
@@ -304,9 +306,9 @@ sectorArcAngle = 360/sectorNumber;
 %----------------------------------------------------------------------
 %       write the sequence
 %----------------------------------------------------------------------
-if stimtype(1)==1
+if stimtype(1)==1    % rotate leftward  
     rotation_sequence = [22.5 22.5 22.5:-180/57:-157.5 -157.5 -157.5 -157.5:180/57:22.5];
-else
+else     % stimtype(1) == 2 rotate rightward 
     rotation_sequence = [22.5 22.5 22.5:180/57:202.5 202.5 202.5 202.5:-180/57:22.5];
 end
 
@@ -376,6 +378,7 @@ for trial = 1:trialNumber
         %----------------------------------------------------------------------
         if stimtype(trial)>0
             if stimtype(trial) == stimtype(1)
+                % illusion tilt left 
                 if frameCounter>60.5 && frameCounter<63.5
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
@@ -385,6 +388,7 @@ for trial = 1:trialNumber
                     end
                 end
             else
+                % illusion tilt right
                 if frameCounter>0.5 && frameCounter<3.5
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
