@@ -8,6 +8,7 @@
 % the result for
 
 % clear all;
+
 clearvars;
 
 if 0
@@ -25,7 +26,7 @@ end
 
 debug = 'n';
 % illusion = 'y';
-trialNumber = 12;  % 32  total min = 40 trial * 6s/try/60 = 4 min
+trialNumber = 32;  % 32  total min = 40 trial * 6s/try/60 = 4 min
 blockNumber = 1;
 
 %----------------------------------------------------------------------
@@ -43,7 +44,7 @@ whitecolor = WhiteIndex(screenNumber);
 % fixationwhite = 0.8 * whitecolor;
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1920 1080]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1920 1080],[],[],0); %set window to ,[0 0 1920 1080]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -109,6 +110,7 @@ KbName('UnifyKeyNames');
 % for 7T scanner the resolution of the screen is 1024*768   the height and
 % width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
 % degree totally
+% for 3T Scanner the resolution of the screen is 0 0 1920 1080 
 
 visualDegreeOrig = 10;
 sectorRadius_in_out_magniMat = 1;
@@ -259,9 +261,9 @@ for block = 1:blockNumber
     sectorNumber = 8;
     outpara = 2 * xCenter*2/192;
     %         annnulus outer radius
-    sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - outpara)/2);%  + centerMovePix;   % outer radii of background annulus
+    sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - outpara)/2);% outpara = 20 + centerMovePix;   % outer radii of background annulus
     inpara = 10 * xCenter*2/192;
-    sectorRadius_in_pixel = sectorRadius_out_pixel - inpara * sectorRadius_in_out_magni;    % inner diameter of background annulus
+    sectorRadius_in_pixel = sectorRadius_out_pixel - inpara * sectorRadius_in_out_magni; % inpara = 100   % inner diameter of background annulus
     [sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
     sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
     %----------------------------------------------------------------------

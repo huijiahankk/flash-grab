@@ -5,19 +5,28 @@
 % checkerboard wedge  alternate present left and right visual field in the
 % perceived location of the subject
 
-
-% Clear the workspace
-close all;
-clear all;
+function  fMRI_localizer(sbjname,run_no)
 
 
-if 0
-    sbjname = 'huijiahan';
-    run_no = '1';
-else    
-    run_no = input('>>>The number of the run:   ','s');
-    sbjname = input('>>>Please input the subject''s name:   ','s');
+if nargin < 1
+    sbjname = 'hjh';
+    run_no='1';
+else
+    sbjname=sbjname;
+    run_no=run_no;
 end
+% Clear the workspace
+% close all;
+% clear all;
+
+
+% if 0
+%     sbjname = 'huijiahan';
+%     run_no = '1';
+% else    
+%     run_no = input('>>>The number of the run:   ','s');
+%     sbjname = input('>>>Please input the subject''s name:   ','s');
+% end
 
 trialNumber = 20;
 
@@ -46,7 +55,7 @@ fixationwhite = 0.8 * white;
 fixationblack = black + 0.3; 
 
 % Open an on screen window
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [], [], [], [],0);    % [0 0 1024 768]   kPsychNeed32BPCFloat
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [0 0 1280 720], [], [], [],0);    % [0 0 1280 720]   kPsychNeed32BPCFloat
 
 % Query the frame duration
 ifi = Screen('GetFlipInterval', window);
@@ -478,3 +487,5 @@ sca;
 
 frameinterval = frametimepoint(2:end)-frametimepoint(1:end-1);
 plot(frameinterval);
+
+end 

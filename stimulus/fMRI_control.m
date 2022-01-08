@@ -14,28 +14,39 @@
 % Dim=64*64;
 % grappa=off;
 %%
-clear all;
+% clear all;
+
+function  fMRI_control(sbjname,run_no)
+
+
+if nargin < 1
+    sbjname = 'hjh';
+    run_no='1';
+else
+    sbjname=sbjname;
+    run_no=run_no;
+end
 % clearvars;
 
-if 0
-    
-    sbjname = 'huijiahan';
-    
-%     debug = 'n';
-    % have to be the mutiply of 3
-    sbjIllusionSizeLeft = 0;  % 5
-    sbjIllusionSizeRight = 0;
-    run_no = '1';
-    
-else
-    run_no = input('>>>Please input the run number:   ','s');
-    sbjname = input('>>>Please input the subject''s name:   ','s');
-%     debug = input('>>>Debug? (y/n):  ','s');
-    
-    %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
-    % input('>>>trialNumber? (30):  ');
-    
-end
+% if 0
+%     
+%     sbjname = 'huijiahan';
+%     
+% %     debug = 'n';
+%     % have to be the mutiply of 3
+%     sbjIllusionSizeLeft = 0;  % 5
+%     sbjIllusionSizeRight = 0;
+%     run_no = '1';
+%     
+% else
+%     run_no = input('>>>Please input the run number:   ','s');
+%     sbjname = input('>>>Please input the subject''s name:   ','s');
+% %     debug = input('>>>Debug? (y/n):  ','s');
+%     
+%     %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
+%     % input('>>>trialNumber? (30):  ');
+%     
+% end
 
 debug = 'n';
 illusion = 'y';
@@ -59,7 +70,7 @@ fixationblack = blackcolor + 0.3;
 
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1920 1080],[],[],0); %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -129,7 +140,16 @@ allCoords = [xCoords; yCoords];
 % Set the line width for our fixation cross
 lineWidthPix = 4;
 
+%----------------------------------------------------------------------
+%     load subject illusion size data
+%----------------------------------------------------------------------
 
+cd '../data/7T/illusionSize_7T/';
+illusionSizeFileName = strcat(sbjname,'*.mat');
+Files = dir(illusionSizeFileName);
+load (Files.name,'aveIlluSizeL','aveIlluSizeR');
+
+cd '../../../stimulus/'
 %----------------------------------------------------------------------
 %                       Keyboard information
 %----------------------------------------------------------------------
@@ -228,9 +248,8 @@ fileName = strcat(filePrefixName,run_no,'.par');
 % [timepoint,stim_type,SOA,~,~] = read_optseq2_data([fileName]);
 [stimonset,stimtype,stimlength,junk,stimname] =  textread(fileName,'%f%n%f%s%s','delimiter',' '); %textread
 runNum = str2num(run_no);
-% make sure the first stimulus flash at the same timepoint from the trial
-% onset. so if first stimulus flash on the 
-if runNum == 1 || runNum == 3  % optseq first stimtype of the 4 document in sub1 is 2 1 1 1 so we reverse all the stimtype 
+
+if runNum == 1 || runNum ==3   % optseq first stimtype of the 4 document in sub1 is 2 1 1 1 so we reverse all the stimtype
     if stimtype(1)==2
         stimtype(stimtype==1) = 3;
         stimtype(stimtype==2) = 1;
@@ -306,9 +325,9 @@ sectorArcAngle = 360/sectorNumber;
 %----------------------------------------------------------------------
 %       write the sequence
 %----------------------------------------------------------------------
-if stimtype(1)==1    % rotate leftward  
+if stimtype(1)==1
     rotation_sequence = [22.5 22.5 22.5:-180/57:-157.5 -157.5 -157.5 -157.5:180/57:22.5];
-else     % stimtype(1) == 2 rotate rightward 
+else
     rotation_sequence = [22.5 22.5 22.5:180/57:202.5 202.5 202.5 202.5:-180/57:22.5];
 end
 
@@ -370,7 +389,7 @@ for trial = 1:trialNumber
             frameCounter = frameCounter-120;
         end
 
-        Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,rotation_sequence(frameCounter),[],back.ground_alpha); %  + backGroundRota
+%         Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,rotation_sequence(frameCounter),[],back.ground_alpha); %  + backGroundRota
         
         
         %----------------------------------------------------------------------
@@ -380,18 +399,18 @@ for trial = 1:trialNumber
             if stimtype(trial) == stimtype(1)
                 % illusion tilt left 
                 if frameCounter>60.5 && frameCounter<63.5
-                    Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
+                    Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5 + aveIlluSizeL,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
+                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5 + aveIlluSizeL,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     
                     if frameCounter == 61
                         flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
                 end
             else
-                % illusion tilt right
                 if frameCounter>0.5 && frameCounter<3.5
-                    Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
-                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
+                    %  illusion tilt right 
+                    Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5 + aveIlluSizeR,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
+                    Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5 + aveIlluSizeR,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     
                     if frameCounter == 1
                         flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
@@ -471,7 +490,7 @@ display(totalTime);
 % end
 
 
-savePath = '../data/7T/main_exp/';
+savePath = '../data/7T/control/';
 
 
 time = clock;
@@ -486,4 +505,4 @@ sca;
 frameinterval = frametimepoint(2:end)-frametimepoint(1:end-1);
 figure; plot(frameinterval);
 
-
+end 
