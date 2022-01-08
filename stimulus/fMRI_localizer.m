@@ -55,7 +55,7 @@ fixationwhite = 0.8 * white;
 fixationblack = black + 0.3; 
 
 % Open an on screen window
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [0 0 1280 720], [], [], [],0);    % [0 0 1280 720]   kPsychNeed32BPCFloat
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [], [], [], [],0);    % [0 0 1280 720]   kPsychNeed32BPCFloat
 
 % Query the frame duration
 ifi = Screen('GetFlipInterval', window);
