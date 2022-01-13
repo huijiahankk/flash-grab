@@ -33,7 +33,7 @@ trialNumber = 20;
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
-Screen('Preference', 'SkipSyncTests', 1);
+% Screen('Preference', 'SkipSyncTests', 1);
 % Here we call some default settings for setting up Psychtoolbox
 PsychDefaultSetup(2);
 
@@ -55,8 +55,8 @@ fixationwhite = 0.8 * white;
 fixationblack = black + 0.3; 
 
 % Open an on screen window
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [], [], [], [],0);    % [0 0 1280 720]   kPsychNeed32BPCFloat
-
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [], [], [], [],0)   % [0 0 1280 720]   kPsychNeed32BPCFloat  PsychImaging
+Screen('FrameRate')
 % Query the frame duration
 ifi = Screen('GetFlipInterval', window);
 % framerate = FrameRate(window);

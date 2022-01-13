@@ -14,38 +14,38 @@
 % Dim=64*64;
 % grappa=off;
 %%
-function  fMRI_main_exp_vertical_flash(sbjname,run_no)
+% function  fMRI_main_exp_vertical_flash(sbjname,run_no)
 
 
-if nargin < 1
-    sbjname = 'hjh';
-    run_no='1';
-else
-    sbjname=sbjname;
-    run_no=run_no;
-end
+% if nargin < 1
+%     sbjname = 'hjh';
+%     run_no='1';
+% else
+%     sbjname=sbjname;
+%     run_no=run_no;
+% end
 
 % clearvars;
 
-% if 0
-%     
-%     sbjname = 'huijiahan';
-%     
-% %     debug = 'n';
-%     % have to be the mutiply of 3
-%     sbjIllusionSizeLeft = 0;  % 5
-%     sbjIllusionSizeRight = 0;
-%     run_no = '1';
-%     
-% else
-%     run_no = input('>>>Please input the run number:   ','s');
-%     sbjname = input('>>>Please input the subject''s name:   ','s');
-% %     debug = input('>>>Debug? (y/n):  ','s');
-%     
-%     %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
-%     % input('>>>trialNumber? (30):  ');
-%     
-% end
+if 0
+    
+    sbjname = 'huijiahan';
+    
+%     debug = 'n';
+    % have to be the mutiply of 3
+    sbjIllusionSizeLeft = 0;  % 5
+    sbjIllusionSizeRight = 0;
+    run_no = '1';
+    
+else
+    run_no = input('>>>Please input the run number:   ','s');
+    sbjname = input('>>>Please input the subject''s name:   ','s');
+%     debug = input('>>>Debug? (y/n):  ','s');
+    
+    %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
+    % input('>>>trialNumber? (30):  ');
+    
+end
 
 debug = 'n';
 illusion = 'y';
@@ -53,6 +53,12 @@ illusion = 'y';
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
+% 
+% PsychImaging('PrepareConfiguration');
+% PsychImaging('AddTask','General','UseRetinaResolution');
+
+
+
 
 addpath ../function;
 % addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
@@ -69,7 +75,9 @@ fixationblack = blackcolor + 0.3;
 
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1920 1080],[],[],0); %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
+% [wptr,rect] = PsychImaging('OpenWindow',screenNumber,bottomcolor,[],[],[],0);
+
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1920 1080],[],[],0) %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -285,10 +293,10 @@ sectorRadius_in_out_magniMat = fliplr(sectorRadius_in_out_magniMat);
 %----------------------------------------------------------------------
 
 sectorNumber = 8;
-outpara = 2 * xCenter*2/192;
+outpara = 20;% 2 * xCenter*2/192;
 %         annnulus outer radius
 sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - outpara)/2);%  + centerMovePix;   % outer radii of background annulus
-inpara = 10 * xCenter*2/192;
+inpara = 100;% 10 * xCenter*2/192;
 sectorRadius_in_pixel = sectorRadius_out_pixel - inpara * sectorRadius_in_out_magni;    % inner diameter of background annulus
 [sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
 sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);

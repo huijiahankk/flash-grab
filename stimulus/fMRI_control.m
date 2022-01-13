@@ -182,11 +182,11 @@ visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
 
 sectorNumber = 8;
 
-outpara = 2 * xCenter*2/192;
+outpara = 20;% 2 * xCenter*2/192;
 %         annnulus outer radius
 sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - outpara)/2);%  + centerMovePix; outpara = 20  % outer radii of background annulus
 
-inpara = 10 * xCenter*2/192;
+inpara = 100;% 10 * xCenter*2/192;
 sectorRadius_in_pixel = sectorRadius_out_pixel - inpara * sectorRadius_in_out_magni; % inpara = 100   % inner diameter of background annulus
 
 
