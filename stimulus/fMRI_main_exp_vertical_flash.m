@@ -14,49 +14,28 @@
 % Dim=64*64;
 % grappa=off;
 %%
-% function  fMRI_main_exp_vertical_flash(sbjname,run_no)
+function  fMRI_main_exp_vertical_flash(sbjname,run_no)
 
 
-% if nargin < 1
-%     sbjname = 'hjh';
-%     run_no='1';
-% else
-%     sbjname=sbjname;
-%     run_no=run_no;
-% end
+if nargin < 1
+    sbjname = 'hjh';
+    run_no='1';
+else
+    sbjname=sbjname;
+    run_no=run_no;
+end
 
 % clearvars;
 
-<<<<<<< Updated upstream
-if 0
-    
-    sbjname = 'huijiahan';
-    
-%     debug = 'n';
-    % have to be the mutiply of 3
-    sbjIllusionSizeLeft = 0;  % 5
-    sbjIllusionSizeRight = 0;
-    run_no = '1';
-    
-else
-    run_no = input('>>>Please input the run number:   ','s');
-    sbjname = input('>>>Please input the subject''s name:   ','s');
-%     debug = input('>>>Debug? (y/n):  ','s');
-    
-    %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
-    % input('>>>trialNumber? (30):  ');
-    
-end
-=======
 % if 0
 %     
 %     sbjname = 'huijiahan';
-%     run_no = '1';
+%     
 % %     debug = 'n';
 %     % have to be the mutiply of 3
 %     sbjIllusionSizeLeft = 0;  % 5
 %     sbjIllusionSizeRight = 0;
-
+%     run_no = '1';
 %     
 % else
 %     run_no = input('>>>Please input the run number:   ','s');
@@ -67,7 +46,6 @@ end
 %     % input('>>>trialNumber? (30):  ');
 %     
 % end
->>>>>>> Stashed changes
 
 debug = 'n';
 illusion = 'y';
@@ -79,7 +57,7 @@ illusion = 'y';
 % PsychImaging('PrepareConfiguration');
 % PsychImaging('AddTask','General','UseRetinaResolution');
 
-PsychDefaultSetup(2);
+PsychDefaultSetup(1);
 
 
 addpath ../function;
@@ -385,7 +363,7 @@ end
 %----------------------------------------------------------------------
 %                       Experimental loop
 %----------------------------------------------------------------------
-WaitSecs(0); % dummy scan
+WaitSecs(4); % dummy scan
 scanOnset = GetSecs;
 response = - 1; % if the subject failed to press the key, record -1
 responseMat = zeros(1,trialNumber);

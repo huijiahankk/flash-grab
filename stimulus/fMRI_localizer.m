@@ -5,28 +5,28 @@
 % checkerboard wedge  alternate present left and right visual field in the
 % perceived location of the subject
 
-% function  fMRI_localizer(sbjname,run_no)
+function  fMRI_localizer(sbjname,run_no)
 
 
-% if nargin < 1
-%     sbjname = 'hjh';
-%     run_no='1';
-% else
-%     sbjname=sbjname;
-%     run_no=run_no;
-% end
+if nargin < 1
+    sbjname = 'hjh';
+    run_no='1';
+else
+    sbjname=sbjname;
+    run_no=run_no;
+end
 % Clear the workspace
 % close all;
 % clear all;
 
 
-if 0
-    sbjname = 'huijiahan';
-    run_no = '1';
-else    
-    run_no = input('>>>The number of the run:   ','s');
-    sbjname = input('>>>Please input the subject''s name:   ','s');
-end
+% if 0
+%     sbjname = 'huijiahan';
+%     run_no = '1';
+% else    
+%     run_no = input('>>>The number of the run:   ','s');
+%     sbjname = input('>>>Please input the subject''s name:   ','s');
+% end
 
 trialNumber = 20;
 
@@ -105,10 +105,10 @@ visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
 %----------------------------------------------------------------------
 %
 sectorNumber = 8;
-outpara = 2 * xCenter*2/192;
+outpara = 10;%  2 * xCenter*2/192;
 %         annnulus outer radius
 sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - outpara)/2);%  + centerMovePix;   % outer radii of background annulus
-inpara = 10 * xCenter*2/192;
+inpara = 100;% 10 * xCenter*2/192;
 sectorRadius_in_pixel = sectorRadius_out_pixel - inpara * sectorRadius_in_out_magni;    % inner diameter of background annulus
 
 
@@ -254,7 +254,7 @@ while checkflag
     end
 end
 
-
+WaitSecs(4); % dummy scan
 scanOnset = GetSecs;
 frametimepoint = scanOnset;
 trialOnset = zeros(trialNumber);

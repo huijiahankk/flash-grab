@@ -54,7 +54,6 @@ illusion = 'y';
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
-PsychDefaultSetup(2);
 
 addpath ../function;
 % addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
@@ -65,15 +64,13 @@ screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 
-
-
 fixationwhite = 0.8 * whitecolor;
 fixationblack = blackcolor + 0.3; 
 
 
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1920 1080],[],[],0); %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -365,7 +362,7 @@ end
 %----------------------------------------------------------------------
 %                       Experimental loop
 %----------------------------------------------------------------------
-WaitSecs(0); % dummy scan
+WaitSecs(4); % dummy scan
 scanOnset = GetSecs;
 response = - 1; % if the subject failed to press the key, record -1
 responseMat = zeros(1,trialNumber);
