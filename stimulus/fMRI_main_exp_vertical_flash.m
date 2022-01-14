@@ -57,7 +57,7 @@ illusion = 'y';
 % PsychImaging('PrepareConfiguration');
 % PsychImaging('AddTask','General','UseRetinaResolution');
 
-
+PsychDefaultSetup(2);
 
 
 addpath ../function;
@@ -77,7 +77,7 @@ fixationblack = blackcolor + 0.3;
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
 % [wptr,rect] = PsychImaging('OpenWindow',screenNumber,bottomcolor,[],[],[],0);
 
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1920 1080],[],[],0) %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0) %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 

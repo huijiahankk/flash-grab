@@ -32,6 +32,7 @@ blockNumber = 1;
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
+PsychDefaultSetup(2);
 
 addpath ../function;
 addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;

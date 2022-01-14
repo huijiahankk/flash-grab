@@ -54,6 +54,7 @@ illusion = 'y';
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
+PsychDefaultSetup(2);
 
 addpath ../function;
 % addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
@@ -63,6 +64,8 @@ screens = Screen('Screens');
 screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
+
+
 
 fixationwhite = 0.8 * whitecolor;
 fixationblack = blackcolor + 0.3; 

@@ -5,28 +5,28 @@
 % checkerboard wedge  alternate present left and right visual field in the
 % perceived location of the subject
 
-function  fMRI_localizer(sbjname,run_no)
+% function  fMRI_localizer(sbjname,run_no)
 
 
-if nargin < 1
-    sbjname = 'hjh';
-    run_no='1';
-else
-    sbjname=sbjname;
-    run_no=run_no;
-end
+% if nargin < 1
+%     sbjname = 'hjh';
+%     run_no='1';
+% else
+%     sbjname=sbjname;
+%     run_no=run_no;
+% end
 % Clear the workspace
 % close all;
 % clear all;
 
 
-% if 0
-%     sbjname = 'huijiahan';
-%     run_no = '1';
-% else    
-%     run_no = input('>>>The number of the run:   ','s');
-%     sbjname = input('>>>Please input the subject''s name:   ','s');
-% end
+if 0
+    sbjname = 'huijiahan';
+    run_no = '1';
+else    
+    run_no = input('>>>The number of the run:   ','s');
+    sbjname = input('>>>Please input the subject''s name:   ','s');
+end
 
 trialNumber = 20;
 
@@ -56,7 +56,7 @@ fixationblack = black + 0.3;
 
 % Open an on screen window
 [window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [], [], [], [],0)   % [0 0 1280 720]   kPsychNeed32BPCFloat  PsychImaging
-Screen('FrameRate')
+% Screen('FrameRate')
 % Query the frame duration
 ifi = Screen('GetFlipInterval', window);
 % framerate = FrameRate(window);
@@ -488,4 +488,4 @@ sca;
 frameinterval = frametimepoint(2:end)-frametimepoint(1:end-1);
 plot(frameinterval);
 
-end 
+% end 

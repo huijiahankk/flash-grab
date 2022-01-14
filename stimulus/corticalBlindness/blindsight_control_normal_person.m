@@ -87,6 +87,19 @@ fixsize = 8;
 fixcolor = 200; % 0 255
 redcolor = [256 0 0];
 
+
+
+% Here we set the size of the arms of our fixation cross
+fixCrossDimPix = 10;
+% Now we set the coordinates (these are all relative to zero we will let
+% the drawing routine center the cross in the center of our monitor for us)
+xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
+yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
+allCoords = [xCoords; yCoords];
+% Set the line width for our fixation cross
+lineWidthPix = 4;
+
+
 %----------------------------------------------------------------------
 %                adjust screen rgb to map linear  ramp
 %----------------------------------------------------------------------
@@ -192,7 +205,7 @@ load ../../../DD_illusion/myGabor/function/CFS/CFSMatMovie1.mat
 % CFSFrequency= 8;
 CFSMatMovie=Shuffle(CFSMatMovie);
 CFSFrames = 100;
-CFSwidth = 80; %30;
+% CFSwidth = 80; %30;
 % make sure the gabor was all covered by CFS,CFS started y axis lower than
 % center of gabor start point
 % CFScoverGabor = gabor.DimPix/2;
@@ -463,10 +476,10 @@ for block = 1 : blockNumber
             back.FlagSpinDirecA = 0;
             back.FlagSpinDirecB = 0;
             
-            
-            
+            % draw cross fixation 
+            Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter yCenter]);
             % draw fixation
-            Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
+%             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
             %             Screen('DrawLine',window,blackColor,xCenter-fixationSize,yCenter,xCenter+fixationSize,yCenter,5);
             %             Screen('DrawLine',window,blackColor,xCenter,yCenter-fixationSize,xCenter,yCenter+fixationSize,5);
             
@@ -475,7 +488,8 @@ for block = 1 : blockNumber
             %----------------------------------------------------------------------
             
             Screen('SelectStereoDrawBuffer', wptr, eyeCFS(2));
-            Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
+             
+%             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
             maskSectorRect = [xCenter - sectorRadius_out_pixel-5 yCenter - sectorRadius_out_pixel-5 ...
                 xCenter  + sectorRadius_out_pixel+5  yCenter + sectorRadius_out_pixel+5];
             %             maskSectorRect = CenterRectOnPoint(maskSectorRect,xCenter,yCenter);
@@ -494,12 +508,14 @@ for block = 1 : blockNumber
             Screen('DrawTexture',wptr,CFSTex(w),[],redSectorRect);
             
             
-            Screen('FillArc',wptr,grey,maskSectorRect,180 - blindFieldLower,360 + blindFieldUpper); % blindFieldLower
-            Screen('FillArc',wptr,grey,InnerSectorRect,-blindFieldUpper, 180 - blindFieldLower + blindFieldLower);
+%             Screen('FillArc',wptr,grey,maskSectorRect,180 - blindFieldLower,360 + blindFieldUpper); % blindFieldLower
+%             Screen('FillArc',wptr,grey,InnerSectorRect,-blindFieldUpper, 180 - blindFieldLower + blindFieldLower);
             
             %             Screen('FillArc',wptr,grey,maskSectorRectAdjust,180-45, maskSectorArcAngle);
             %             Screen('FillArc',wptr,grey,maskInnerSectorRectAdjust,45, maskInnerSectorArcAngle);
+            % draw cross fixation 
             
+            Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter yCenter]);
             Screen('Flip',wptr);
             
             %----------------------------------------------------------------------
