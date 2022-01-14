@@ -27,6 +27,7 @@
 
 % clearvars;
 
+<<<<<<< Updated upstream
 if 0
     
     sbjname = 'huijiahan';
@@ -46,6 +47,27 @@ else
     % input('>>>trialNumber? (30):  ');
     
 end
+=======
+% if 0
+%     
+%     sbjname = 'huijiahan';
+%     run_no = '1';
+% %     debug = 'n';
+%     % have to be the mutiply of 3
+%     sbjIllusionSizeLeft = 0;  % 5
+%     sbjIllusionSizeRight = 0;
+
+%     
+% else
+%     run_no = input('>>>Please input the run number:   ','s');
+%     sbjname = input('>>>Please input the subject''s name:   ','s');
+% %     debug = input('>>>Debug? (y/n):  ','s');
+%     
+%     %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
+%     % input('>>>trialNumber? (30):  ');
+%     
+% end
+>>>>>>> Stashed changes
 
 debug = 'n';
 illusion = 'y';
