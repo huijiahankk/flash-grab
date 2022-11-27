@@ -20,12 +20,14 @@ function  fMRI_control(sbjname,run_no)
 
 
 if nargin < 1
-    sbjname = 'hjh';
+    sbjname = 'dingyingshi';
     run_no='1';
 else
     sbjname=sbjname;
     run_no=run_no;
 end
+
+optseqsubNum = '4';
 % clearvars;
 
 % if 0
@@ -72,6 +74,8 @@ fixationblack = blackcolor + 0.3;
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
 [wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
+HideCursor;
+
 [xCenter,yCenter] = WindowCenter(wptr);
 
 fixsize = 5;
@@ -106,18 +110,18 @@ respSwitch = 0;
 %----------------------------------------------------------------------
 
 
-% load ../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
-% % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
-% 
-% dacsize = 10;  %How many bits per pixel#
-% maxcol = 2.^dacsize-1;
-% ncolors = 256; % see details in makebkg.m
-% newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
-% newclut(1:ncolors,:) = newcmap./maxcol;
-% newclut(isnan(newclut)) = 0;
-% 
-% [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
-% Screen('LoadNormalizedGammaTable', wptr, newclut);
+load ../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
+% load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
+
+dacsize = 10;  %How many bits per pixel#
+maxcol = 2.^dacsize-1;
+ncolors = 256; % see details in makebkg.m
+newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
+newclut(1:ncolors,:) = newcmap./maxcol;
+newclut(isnan(newclut)) = 0;
+
+[Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
+Screen('LoadNormalizedGammaTable', wptr, newclut);
 
 %----------------------------------------------------------------------
 %        load the screen adjust parameters
@@ -144,7 +148,7 @@ lineWidthPix = 4;
 %     load subject illusion size data
 %----------------------------------------------------------------------
 
-cd '../data/7T/illusionSize_7T/';
+cd '../data/3T/illusionSize_3T/';
 illusionSizeFileName = strcat(sbjname,'*.mat');
 Files = dir(illusionSizeFileName);
 load (Files.name,'aveIlluSizeL','aveIlluSizeR');
@@ -231,7 +235,7 @@ flashRepresentFrame = 2.2; % 2.2 means 3 frame
 %----------------------------------------------------------------------
 optseqpath = '../optimal_seq/';
 optseqsub = 'sub';
-optseqSubpath = strcat(optseqpath,optseqsub,'1');
+optseqSubpath = strcat(optseqpath,optseqsub,optseqsubNum);
 
 cd (optseqSubpath);
 
@@ -335,20 +339,12 @@ end
 %       present a start screen and wait for a key-press
 %----------------------------------------------------------------------
 
-% formatSpec = 'This is the %dth of %d block. Click s To Begin';
-%
-% A1 = block;
-% A2 = blockNumber;
-% str = sprintf(formatSpec,A1,A2);
-% DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
-DrawFormattedText(wptr, '\n\nPress s To Begin', 'center', 'center', blackcolor);
-%         fprintf(1,'\tTrial number: %2.0f\n',trialNumber);
+% DrawFormattedText(wptr, '\n\nPress s To Begin', 'center', 'center', blackcolor);
 
+Screen('DrawLines', wptr, allCoords,lineWidthPix, fixationwhite, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
 Screen('Flip', wptr);
 
 
-%     KbStrokeWait;
-%     KbWait;
 
 checkflag = 1;
 
@@ -362,7 +358,8 @@ end
 %----------------------------------------------------------------------
 %                       Experimental loop
 %----------------------------------------------------------------------
-WaitSecs(4); % dummy scan
+dummyScanTime = 4;
+WaitSecs(dummyScanTime); % dummy scan
 scanOnset = GetSecs;
 response = - 1; % if the subject failed to press the key, record -1
 responseMat = zeros(1,trialNumber);
@@ -490,7 +487,7 @@ display(totalTime);
 % end
 
 
-savePath = '../data/7T/control/';
+savePath = '../data/3T/control/';
 
 
 time = clock;

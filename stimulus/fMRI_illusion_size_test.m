@@ -12,7 +12,7 @@
 clearvars;
 
 if 0
-    sbjname = 'huijiahan';
+    sbjname = 'zhangzixiao';
     debug = 'n';
     %     illusion = 'y';
     
@@ -44,7 +44,7 @@ whitecolor = WhiteIndex(screenNumber);
 % fixationwhite = 0.8 * whitecolor;
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1920 1080]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 960 540],[],[],0); %set window to ,[0 0 960 540]  [0 0 1920 1080]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -91,7 +91,7 @@ newclut(isnan(newclut)) = 0;
 
 [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
 Screen('LoadNormalizedGammaTable', wptr, newclut);
-
+% 
 
 %----------------------------------------------------------------------
 %                       Keyboard information
@@ -110,7 +110,10 @@ KbName('UnifyKeyNames');
 % for 7T scanner the resolution of the screen is 1024*768   the height and
 % width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
 % degree totally
-% for 3T Scanner the resolution of the screen is 0 0 1920 1080 
+% for 3T Scanner the resolution of the screen is 0 0 1920 1080； the distance from the subject to screen is 75cm
+% width of the screen is 57cm
+
+
 
 visualDegreeOrig = 10;
 sectorRadius_in_out_magniMat = 1;
@@ -190,20 +193,11 @@ lineWidthPix = 4;
 %       present a start screen and wait for a key-press
 %----------------------------------------------------------------------
 
-% formatSpec = 'This is the %dth of %d block. Click s To Begin';
-%
-% A1 = block;
-% A2 = blockNumber;
-% str = sprintf(formatSpec,A1,A2);
-% DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
-DrawFormattedText(wptr, '\n\nPress s To Begin', 'center', 'center', blackcolor);
-%         fprintf(1,'\tTrial number: %2.0f\n',trialNumber);
+% DrawFormattedText(wptr, '\n\nPress s To Begin', 'center', 'center', blackcolor);
 
+Screen('DrawLines', wptr, allCoords,lineWidthPix, whitecolor, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
 Screen('Flip', wptr);
 
-
-%     KbStrokeWait;
-%     KbWait;
 
 checkflag = 1;
 
@@ -250,7 +244,7 @@ for block = 1:blockNumber
     % on
     sectorRadius_in_out_magni = sectorRadius_in_out_magniMat(1);
     visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
-    visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
+    visualHeightIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
     
     
     sectorRadius_in_out_magniMat = fliplr(sectorRadius_in_out_magniMat);
@@ -261,7 +255,7 @@ for block = 1:blockNumber
     sectorNumber = 8;
     outpara = 20;%2 * xCenter*2/192;
     %         annnulus outer radius
-    sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - outpara)/2);% outpara = 20 + centerMovePix;   % outer radii of background annulus
+    sectorRadius_out_pixel = floor((visualHeightIn7T_pixel - outpara)/2);% outpara = 20 + centerMovePix;   % outer radii of background annulus
     inpara = 100;%10 * xCenter*2/192;
     sectorRadius_in_pixel = sectorRadius_out_pixel - inpara * sectorRadius_in_out_magni; % inpara = 100   % inner diameter of background annulus
     [sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
@@ -582,8 +576,8 @@ tiltLeftIndex = find( data.flashTiltDirection(:,:) == 2 );
 illusionSizeR = data.wedgeMoveDegreeMat(tiltRightIndex);
 illusionSizeL = data.wedgeMoveDegreeMat(tiltLeftIndex);
 
-aveIlluSizeR = mean(illusionSizeR);
-aveIlluSizeL = mean(illusionSizeL);
+aveIlluSizeR = mean(illusionSizeR)
+aveIlluSizeL = mean(illusionSizeL)
 
 %----------------------------------------------------------------------
 %                      save parameters files
@@ -594,7 +588,7 @@ aveIlluSizeL = mean(illusionSizeL);
 % end
 
 % if sectorRadius_in_out_magni == 1
-savePath = '../data/7T/illusionSize_7T/';
+savePath = '../data/3T/illusionSize_3T/';
 % else
 %     savePath = '../data/7T/illusionSize_memorized_illusion_adjust/magnification/';
 % end

@@ -9,7 +9,7 @@ function  fMRI_localizer(sbjname,run_no)
 
 
 if nargin < 1
-    sbjname = 'hjh';
+    sbjname = 'dingyingshi';
     run_no='1';
 else
     sbjname=sbjname;
@@ -55,7 +55,9 @@ fixationwhite = 0.8 * white;
 fixationblack = black + 0.3; 
 
 % Open an on screen window
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [], [], [], [],0)   % [0 0 1280 720]   kPsychNeed32BPCFloat  PsychImaging
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber,grey, [], [], [], [],0); 
+HideCursor;
+% [0 0 1280 720]   kPsychNeed32BPCFloat  PsychImaging
 % Screen('FrameRate')
 % Query the frame duration
 ifi = Screen('GetFlipInterval', window);
@@ -74,17 +76,17 @@ sectorRect = [0  yCenter - xCenter  2*xCenter yCenter + xCenter];
 %----------------------------------------------------------------------
 addpath ../function;
 
-% load ../function/calib-PC-03-Dec-2021_3t.mat;  % this is for 3T screen on the black mac pro
-%
-% dacsize = 10;  %How many bits per pixel#
-% maxcol = 2.^dacsize-1;
-% ncolors = 256; % see details in makebkg.m
-% newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
-% newclut(1:ncolors,:) = newcmap./maxcol;
-% newclut(isnan(newclut)) = 0;
-%
-% [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', window);
-% Screen('LoadNormalizedGammaTable', window, newclut);
+load ../function/calib-PC-03-Dec-2021_3t.mat;  % this is for 3T screen on the black mac pro
+
+dacsize = 10;  %How many bits per pixel#
+maxcol = 2.^dacsize-1;
+ncolors = 256; % see details in makebkg.m
+newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
+newclut(1:ncolors,:) = newcmap./maxcol;
+newclut(isnan(newclut)) = 0;
+
+[Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', window);
+Screen('LoadNormalizedGammaTable', window, newclut);
 
 %----------------------------------------------------------------------
 %               3T Screen parameter
@@ -142,9 +144,9 @@ textureCue = [1 2];
 
 if run_no == '1'
     % 2 types of localizer  1 left and 2 right  and 3 control nothing
-    localizerMat = repmat([1; 3; 2; 3],trialNumber/2,1);
+    localizerMat = repmat([1; 3; 2; 3],trialNumber/4,1);   % the first subject localizerMat size is (40,1)
 elseif run_no == '2'
-    localizerMat = repmat([2; 3; 1; 3],trialNumber/2,1);
+    localizerMat = repmat([2; 3; 1; 3],trialNumber/4,1);
 end
 % localizerMatRand = localizerMat(Shuffle(1:length(localizerMat)));
 
@@ -179,7 +181,7 @@ fixFlashDura = 0.5;  % time duration of fixation color change (total time of ram
 %     load subject illusion size data
 %----------------------------------------------------------------------
 
-cd '../data/7T/illusionSize_7T/';
+cd '../data/3T/illusionSize_3T/';
 illusionSizeFileName = strcat(sbjname,'*.mat');
 Files = dir(illusionSizeFileName);
 load (Files.name,'aveIlluSizeL','aveIlluSizeR');
@@ -238,12 +240,12 @@ maskInnerSectorArcAngle = 45;
 %       present a start screen and wait for a 's'     key-press
 %----------------------------------------------------------------------
 
-DrawFormattedText(window, '\n\n Press s To Begin', 'center', 'center', black);
+% DrawFormattedText(window, '\n\n Press s To Begin', 'center', 'center', black);
 DrawFormattedText(window, '\n\n\n\n How many times does the white color switch to black', 'center', 'center', black);
 
-
+Screen('DrawLines', window, allCoords,lineWidthPix, fixationwhite, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
 Screen('Flip', window);
-% % baselineOnset = GetSecs;
+
 
 checkflag = 1;
 
@@ -254,10 +256,11 @@ while checkflag
     end
 end
 
-WaitSecs(4); % dummy scan
+dummyScanTime = 4;
+WaitSecs(dummyScanTime); % dummy scan
 scanOnset = GetSecs;
 frametimepoint = scanOnset;
-trialOnset = zeros(trialNumber);
+trialOnset = zeros(trialNumber,1);
 
 for trial  = 1:trialNumber
     
@@ -429,7 +432,7 @@ prekeyIsDown = 0;
 
 while  respToBeMade
 %     formatSpec = 'How many times does the fixation change the color?\n\n\n The fixation color changed %d times. \n\n\n  1   increasing  \n  2  decreasing  \n 3 confirm';
-      formatSpec = 'The fixation color change 48 times.\n\n\n  1   right  \n  2  wrong ';
+      formatSpec = 'The fixation color change 40 times.\n\n\n  1   right  \n  2  wrong ';
 
     str = sprintf(formatSpec,colorChangeTimes);
     Screen('TextSize', window,40);
@@ -472,7 +475,7 @@ display(GetSecs - scanOnset);
 % end
 
 
-savePath = '../data/7T/localizer/';
+savePath = '../data/3T/localizer/';
 
 time = clock;
 

@@ -38,17 +38,17 @@ end
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
 
-addpath ../function;
+addpath ../../function;
 addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
-screenNumber = min(screens);
+screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -114,7 +114,7 @@ KbName('UnifyKeyNames');
 % visualHeightIn7T_cm = tan(deg2rad(10/2)) * 75 * 2;
 % visualHerghtIn7T_pixel = visualHeightIn7T_cm * 768/28;
 
-visualDegree = 10;
+visualDegree = 18;
 visualHeightIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75 * 2;
 visualHeightIn7T_pixel_perVisualDegree = visualHeightIn7T_cm_perVisualDegree/28 * 768;
 visualHeightIn7T_pixel = visualHeightIn7T_pixel_perVisualDegree * visualDegree;
@@ -206,7 +206,7 @@ barRect = Screen('Rect',barTexture);
 % VisualField = [2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2];
 % VisualField = [1 1 1 1];
 
-trialNumber = 2;
+trialNumber = 4;
 blockNumber = 2;
 % back.contrastratio = 1;
 % trialNumber = 3;
@@ -484,10 +484,9 @@ display(GetSecs - ScanOnset);
 %----------------------------------------------------------------------
 
 if dotOrWedgeFlag == 'd'
-    savePath = '../data/illusionSize/corticalBlindness/dot/';
+    savePath = '../../data/corticalBlindness/dot/';
 elseif dotOrWedgeFlag == 'b'
-        savePath = '../data/illusionSize/corticalBlindness/bar/blindField/';
-    
+    savePath = '../../data/corticalBlindness/bar/blindField/';
 end
 
 time = clock;
