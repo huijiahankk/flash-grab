@@ -48,7 +48,7 @@ blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -203,7 +203,7 @@ barRect = Screen('Rect',barTexture);
 % VisualField = [2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2];
 % VisualField = [1 1 1 1];
 
-trialNumber = 4;
+trialNumber = 2;
 blockNumber = 2;
 % back.contrastratio = 1;
 % trialNumber = 3;
@@ -295,30 +295,38 @@ for block = 1 : blockNumber
         flashPresentFlag = 0;
         prekeyIsDown = 0;
         data.flashTiltDirection(block,trial) = back.flashTiltDirectionMatShuff(trial);
+        currentframe = 0;
         
         % the first row is for upper field        
         if block == 1
             barLocation = 'u';
-            wedgeTiltNow = wedgeTiltStartUpper;
+            barTiltNow = wedgeTiltStartUpper;
         % the second row is for lower field
         elseif block == 2
             barLocation = 'l';
-            wedgeTiltNow = wedgeTiltStartLower;
+            barTiltNow = wedgeTiltStartLower;
         end
         
-        data.wedgeTiltEachBlock(block,trial) = wedgeTiltNow;
+        data.wedgeTiltEachBlock(block,trial) = barTiltNow;
         
         
         while respToBeMade
-            
+            currentframe = currentframe + 1;
             back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
             
+            % make sure the red bar didn't show up at the beginning of
+            % the rotation
+            if currentframe == 1
+                back.CurrentAngle = back.ReverseAngle - barTiltNow ;
+                back.CurrentAngle = - back.ReverseAngle - barTiltNow ;
+            end
+            
             % tilt right  background first rotate clockwise until to the reverse angle
-            if back.CurrentAngle >= back.ReverseAngle + adjustAngleL - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+            if back.CurrentAngle >= back.ReverseAngle + adjustAngleL - barTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
                 back.SpinDirec = - 1;
                 back.FlagSpinDirecA = back.SpinDirec;
                 % tilt left
-            elseif back.CurrentAngle <= - back.ReverseAngle + adjustAngleR - wedgeTiltNow  %  + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+            elseif back.CurrentAngle <= - back.ReverseAngle + adjustAngleR - barTiltNow  %  + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
                 back.SpinDirec = 1;
                 back.FlagSpinDirecB = back.SpinDirec;
             end
@@ -336,7 +344,7 @@ for block = 1 : blockNumber
                 %  the location of the red dot is present in the middle of annlus (between outer and inner radii)
                 
                 if dotOrWedgeFlag == 'd'
-                    dotCentercoord = [xCenter + dotRadius2Center * cosd(back.CurrentAngle)    yCenter + dotRadius2Center * (1 - tand(wedgeTiltNow/2)*cosd(90-wedgeTiltNow))];
+                    dotCentercoord = [xCenter + dotRadius2Center * cosd(back.CurrentAngle)    yCenter + dotRadius2Center * (1 - tand(barTiltNow/2)*cosd(90-barTiltNow))];
                     %  Screen('DrawDots', wptr, rotcoord, dotSizePix, dotColor,[],2);
                     dotRect = [dotCentercoord(1) - dotRadiusPix  dotCentercoord(2) - dotRadiusPix   dotCentercoord(1) + dotRadiusPix  dotCentercoord(2) + dotRadiusPix];
                     Screen('FillOval', wptr,dotColor,dotRect);
@@ -347,10 +355,10 @@ for block = 1 : blockNumber
                 elseif dotOrWedgeFlag == 'b'
                     if barLocation == 'l' | barLocation == 'lowerleft'
                         % vertical bar lower visual field
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(wedgeTiltNow), yCenter + dotRadius2Center * cosd(wedgeTiltNow));
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(barTiltNow), yCenter + dotRadius2Center * cosd(barTiltNow));
                     elseif  barLocation == 'u'
                         % vertical bar upper visual field
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(wedgeTiltNow), yCenter - dotRadius2Center * cosd(wedgeTiltNow));
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(barTiltNow), yCenter - dotRadius2Center * cosd(barTiltNow));
                         
                     end
                     Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,back.CurrentAngle);
@@ -360,7 +368,7 @@ for block = 1 : blockNumber
             elseif data.flashTiltDirection(block,trial) == 2  && back.FlagSpinDirecB ==  1    % flash tilt left
                 
                 if dotOrWedgeFlag == 'd'
-                    dotCentercoord = [xCenter - dotRadius2Center * cosd(back.CurrentAngle)    yCenter + dotRadius2Center * (1 - tand(wedgeTiltNow/2)*cosd(90-wedgeTiltNow))];
+                    dotCentercoord = [xCenter - dotRadius2Center * cosd(back.CurrentAngle)    yCenter + dotRadius2Center * (1 - tand(barTiltNow/2)*cosd(90-barTiltNow))];
                     % draw dots
                     %  Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     %  Screen('DrawDots', wptr, rotcoord, dotSizePix, dotColor,[],2);
@@ -375,10 +383,10 @@ for block = 1 : blockNumber
                 elseif dotOrWedgeFlag == 'b'
                     if barLocation == 'l' | barLocation == 'lowerleft'
                         % vertical bar lower visual field
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(wedgeTiltNow), yCenter + dotRadius2Center * cosd(wedgeTiltNow));
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(barTiltNow), yCenter + dotRadius2Center * cosd(barTiltNow));
                     elseif barLocation == 'u'
                         % vertical bar upper visual field
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(wedgeTiltNow), yCenter - dotRadius2Center * cosd(wedgeTiltNow));
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(barTiltNow), yCenter - dotRadius2Center * cosd(barTiltNow));
                         
                     end
                     Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,back.CurrentAngle);
@@ -414,28 +422,28 @@ for block = 1 : blockNumber
                     % the bar was on the left of the gabor
                 elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
                     if barLocation == 'l'| barLocation == 'lowerleft'
-                        wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
+                        barTiltNow = barTiltNow - wedgeTiltStep;
                     elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
+                        barTiltNow = barTiltNow + wedgeTiltStep;
                     end
                 elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
                     if barLocation == 'l'| barLocation == 'lowerleft'
-                        wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
+                        barTiltNow = barTiltNow + wedgeTiltStep;
                     elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
+                        barTiltNow = barTiltNow - wedgeTiltStep;
                     end
                 elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
                     if barLocation == 'l'| barLocation == 'lowerleft'
-                        wedgeTiltNow = wedgeTiltNow - 2 * wedgeTiltStep;
+                        barTiltNow = barTiltNow - 2 * wedgeTiltStep;
                     elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow + 2 * wedgeTiltStep;
+                        barTiltNow = barTiltNow + 2 * wedgeTiltStep;
                     end
                     
                 elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
                     if barLocation == 'l'| barLocation == 'lowerleft'
-                        wedgeTiltNow = wedgeTiltNow + 5 * wedgeTiltStep;
+                        barTiltNow = barTiltNow + 5 * wedgeTiltStep;
                     elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow - 5 * wedgeTiltStep;
+                        barTiltNow = barTiltNow - 5 * wedgeTiltStep;
                     end
                     
                 elseif keyCode(KbName('Space'))
@@ -460,7 +468,7 @@ for block = 1 : blockNumber
         end
         
         
-        data.wedgeTiltEachBlock(block,trial) = wedgeTiltNow;
+        data.wedgeTiltEachBlock(block,trial) = barTiltNow;
         WaitSecs (1);
         
     end

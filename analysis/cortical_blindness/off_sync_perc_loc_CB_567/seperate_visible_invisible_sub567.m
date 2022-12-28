@@ -13,16 +13,16 @@ addpath '../../../function';
 
 bar_only_mark = 1; % 1 means show bar_only  2 means no bar_only data  every data was normalized by bar_only
 % pValue = input('>>>Calculate p Value? (y/n):  ','s');
-sbjnames = { 'mali' } ; % 'magungquan'  'wutianjiang'  'mali'
+sbjnames = { 'wutianjiang' } ; % 6'maguangquan'     7'wutianjiang'    5'mali' 
 
-folderNum = 2;   % choose which visual to analysis
+folderNum = 1;   % choose which visual to analysis
 folders = {'upper_field','lower_field','normal_field'};
 path = '../../../data/corticalBlindness/bar';
 areaFolderName = fullfile(path, folders{folderNum});
 cd(areaFolderName);
 
 
-subfolders = {'vi2invi'  'invi2vi'};
+subfolders = {'vi2invi' 'invi2vi'};   %  'invi2vi'
 subfolderNums = length(subfolders);  % analy each condition include {'invi2vi','vi2invi'};
 
 for sbjnum = 1:length(sbjnames)
@@ -47,83 +47,96 @@ for sbjnum = 1:length(sbjnames)
         Files = dir(s3);
         load (Files.name);
         %----------------------------------------------------------------------
-        %                CCW & CW add  perceived location test
+        %          sbj 'mali'   CCW & CW add  perceived location test
         %----------------------------------------------------------------------
-        
-        if folderNum == 1   % 'upper_field'
-            multiplier = - 1 ;   %  for maguangquan left visual field damage   upper left visual field
-        elseif folderNum == 2  %  'lower_field'
-            multiplier = 1 ;   %  for maguangquan left visual field damage   lower left visual field
-        end
         
         if strcmp(sbjnames, 'mali')
             
-            bar_CCWDegree(subfolderNum,:) = 90 + multiplier * bar_only;
-            bar_CWDegree(subfolderNum,:) = 90 + multiplier * bar_only;
+            if strcmp(folders{folderNum} , 'upper_field')
+                multiplier =  1 ;
+            elseif strcmp(folders{folderNum} , 'lower_field')
+                multiplier = - 1 ;
+            end
             
-            if folders{folderNum} == 'upper_field'
-                
-                illusionCCWIndex = find(data.flashTiltDirection_off_sync_upper == 1);
-                illusionCWIndex = find(data.flashTiltDirection_off_sync_upper == 2);
-                off_sync_CCWDegree(subfolderNum,:) = 90 + multiplier * off_sync(illusionCCWIndex);
-                off_sync_CWDegree(subfolderNum,:) =  90 + multiplier * off_sync(illusionCWIndex);
+            bar_CCWDegree = 90 + multiplier * bar_only;
+            bar_CWDegree = 90 + multiplier * bar_only;
+            
+            %             illusionCCWIndex = find(data.flashTiltDirection_off_sync == 1);
+            %             illusionCWIndex = find(data.flashTiltDirection_off_sync == 2);
+            off_sync_Degree(subfolderNum,:) = 90 + multiplier * off_sync;
+            %             off_sync_CWDegree(subfolderNum,:) =  90 + multiplier * off_sync;
+            
+            
+            if strcmp(folders{folderNum} , 'upper_field')
                 
                 illusionCCWIndex = find(data.flashTiltDirection_grab_upper == 1);
                 illusionCWIndex = find(data.flashTiltDirection_grab_upper == 2);
                 flash_grab_CCWDegree(subfolderNum,:) =  90 + multiplier * flash_grab(illusionCCWIndex);
                 flash_grab_CWDegree(subfolderNum,:) =  90 + multiplier * flash_grab(illusionCWIndex);
                 
+                
                 if strcmp(condition, 'invi2vi')
-                    illusionCCWIndex = data.flashTiltDirection_grab_lower()
+                    
+                    illusionCCWIndex = find(data.flashTiltDirection_grab_upper == 1);
+                    illusionCWIndex = find(data.flashTiltDirection_grab_upper == 2);
                     perceived_location_CCWDegree(subfolderNum,:) = 90 + multiplier * perceived_location(illusionCCWIndex);
                     perceived_location_CWDegree(subfolderNum,:) = 90 + multiplier * perceived_location(illusionCWIndex);
                 end
                 
-                
-            elseif folders{folderNum} == 'lower_field'
-                
-                illusionCCWIndex = find(data.flashTiltDirection_off_sync_lower == 1);
-                illusionCWIndex = find(data.flashTiltDirection_off_sync_lower == 2);
-                off_sync_CCWDegree(subfolderNum,:) = 90 + multiplier * off_sync(illusionCCWIndex);
-                off_sync_CWDegree(subfolderNum,:) =  90 + multiplier * off_sync(illusionCWIndex);
+            elseif strcmp(folders{folderNum} , 'lower_field')
                 
                 illusionCCWIndex = find(data.flashTiltDirection_grab_lower == 1);
                 illusionCWIndex = find(data.flashTiltDirection_grab_lower == 2);
                 flash_grab_CCWDegree(subfolderNum,:) =  90 + multiplier * flash_grab(illusionCCWIndex);
                 flash_grab_CWDegree(subfolderNum,:) =  90 + multiplier * flash_grab(illusionCWIndex);
                 
+                
                 if strcmp(condition, 'invi2vi')
+                    
+                    illusionCCWIndex = find(data.flashTiltDirection_grab_lower == 1);
+                    illusionCWIndex = find(data.flashTiltDirection_grab_lower == 2);
                     perceived_location_CCWDegree(subfolderNum,:) = 90 + multiplier * perceived_location(illusionCCWIndex);
                     perceived_location_CWDegree(subfolderNum,:) = 90 + multiplier * perceived_location(illusionCWIndex);
                 end
                 
-                
             end
             
+            %----------------------------------------------------------------------
+            %    sbj not  'mali'   CCW & CW add  perceived location test
+            %----------------------------------------------------------------------
+        else   %  if not 'mali'
             
-        else
+            if strcmp(folders{folderNum} , 'upper_field')
+                multiplier = - 1 ;
+            elseif strcmp(folders{folderNum} , 'lower_field')
+                multiplier =  1 ;
+            end
             
             illusionCCWIndex = find(data.flashTiltDirection == 1); % CCW
             illusionCWIndex = find(data.flashTiltDirection == 2);  % CW
+            
+            
+            bar_CCWDegree(subfolderNum,:) = 90 + multiplier * bar_only(illusionCCWIndex);
+            bar_CWDegree(subfolderNum,:) = 90 + multiplier * bar_only(illusionCWIndex);
+            off_sync_CCWDegree(subfolderNum,:) = 90 + multiplier * off_sync(illusionCCWIndex);
+            off_sync_CWDegree(subfolderNum,:) =  90 + multiplier * off_sync(illusionCWIndex);
+            flash_grab_CCWDegree(subfolderNum,:) =  90 + multiplier * flash_grab(illusionCCWIndex);
+            flash_grab_CWDegree(subfolderNum,:) =  90 + multiplier * flash_grab(illusionCWIndex);
+            
+            if strcmp(condition, 'invi2vi')
+                perceived_location_CCWDegree(subfolderNum,:) = 90 + multiplier * perceived_location(illusionCCWIndex);
+                perceived_location_CWDegree(subfolderNum,:) = 90 + multiplier * perceived_location(illusionCWIndex);
+            end
+            
         end
-        
-        bar_CCWDegree(subfolderNum,:) = 90 + multiplier * bar_only(illusionCCWIndex);
-        bar_CWDegree(subfolderNum,:) = 90 + multiplier * bar_only(illusionCWIndex);
-        off_sync_CCWDegree(subfolderNum,:) = 90 + multiplier * off_sync(illusionCCWIndex);
-        off_sync_CWDegree(subfolderNum,:) =  90 + multiplier * off_sync(illusionCWIndex);
-        flash_grab_CCWDegree(subfolderNum,:) =  90 + multiplier * flash_grab(illusionCCWIndex);
-        flash_grab_CWDegree(subfolderNum,:) =  90 + multiplier * flash_grab(illusionCWIndex);
-        
-        if strcmp(condition, 'invi2vi')
-            perceived_location_CCWDegree(subfolderNum,:) = 90 + multiplier * perceived_location(illusionCCWIndex);
-            perceived_location_CWDegree(subfolderNum,:) = 90 + multiplier * perceived_location(illusionCWIndex);
-        end
-        
     end
     
-    
     bar_onlyDegreeMean = mean(reshape([bar_CWDegree bar_CCWDegree],1,8));
-    off_syncDegreeMean = mean(reshape([off_sync_CCWDegree off_sync_CWDegree],1,8));
+    if strcmp(sbjnames, 'mali')
+        off_syncDegreeMean = mean(reshape(off_sync_Degree,1,8));
+    else
+        off_syncDegreeMean = mean(reshape([off_sync_CCWDegree off_sync_CWDegree],1,8));
+    end
     flash_grab_CCWDegreeMean= mean(reshape(flash_grab_CCWDegree,1,4));
     flash_grab_CWDegreeMean = mean(reshape(flash_grab_CWDegree,1,4));
     
@@ -251,13 +264,13 @@ if bar_only_mark == 1
     hold on;
     ylabel('Shift degree from horizontal meridian','FontName','Arial','FontSize',25);
     % legend({'blind field border' 'reverse counter-clockwise','reverse clockwise'},'EdgeColor','w');
-    if folderNum == 1
-        title('Motion reversal towards and outwards the scotoma---upper visual field ','FontName','Arial','FontSize',30);
-        %          set(gca,'ylim',[0 140],'FontName','Arial','FontSize',25);
-    elseif folderNum == 2
-        title('Motion reversal towards and outwards the scotoma---lower visual field ','FontName','Arial','FontSize',30);
-        %          set(gca,'ylim',[-90 0],'FontName','Arial','FontSize',25);% 'Position', [5, 0, 0],
-    end
+%     if folderNum == 1
+%         title('Motion reversal towards and outwards the scotoma---upper visual field ','FontName','Arial','FontSize',30);
+%         %          set(gca,'ylim',[0 140],'FontName','Arial','FontSize',25);
+%     elseif folderNum == 2
+%         title('Motion reversal towards and outwards the scotoma---lower visual field ','FontName','Arial','FontSize',30);
+%         %          set(gca,'ylim',[-90 0],'FontName','Arial','FontSize',25);% 'Position', [5, 0, 0],
+%     end
     
     
     %----------------------------------------------------------------------
@@ -265,8 +278,12 @@ if bar_only_mark == 1
     %----------------------------------------------------------------------
     % plot bar_only value
     eachtrialdegree_bar_only = [reshape(bar_CCWDegree,1,4) reshape(bar_CWDegree,1,4)];
-    % plot off_sync data
-    eachtrialdegree_off_sync = [reshape(off_sync_CCWDegree,1,4) reshape(off_sync_CWDegree,1,4)];
+    if strcmp(sbjnames, 'mali')
+        eachtrialdegree_off_sync = off_sync_Degree;
+    else
+        % plot off_sync data
+        eachtrialdegree_off_sync = [reshape(off_sync_CCWDegree,1,4) reshape(off_sync_CWDegree,1,4)];
+    end
     % plot grab_CCW data
     eachtrialdegree_grab_CCW = reshape(flash_grab_CCWDegree,1,4);
     % plot perc_CCW data

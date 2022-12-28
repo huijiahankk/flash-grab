@@ -1,10 +1,12 @@
 
-% for cortical blindness patient
+% for normal participant artificial scotoma 
 % generate the flash grab illusion with 2 sector.  one boundary was blurred
-% and the other with sharp bounday so this stimulus could generate flash grab illusion
+% and the other with sharp boundary so this stimulus could generate flash grab illusion
 % without integrated red bar flash.
 % Test this blurred boundary pattern as control with bar only condition.
 % If this moving boundary the same as off_sync condition
+
+% barTiltNow means the degree from bar to vertical meridian 
 
 %  5 condition :(all from vi2invi  and then invi2vi)
 % bar_only
@@ -18,12 +20,12 @@
 clear all;close all;
 
 if 1
-    sbjname = 'k';
+    sbjname = 'hjh';
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
     redbarflash_flag = 1; % barflash_flag = 0  no red flash bar    barflash_flag = 1  with red flashed bar
-    barLocation = 'l';  % u  upper visual field   l   lower visual field n  normal
-    condition = 'invi2vi';   % 'vi2invi'  'invi2vi'   'normal'
+    barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
+    condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
 else
     
     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -50,8 +52,10 @@ screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
-bottomcolor = (whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+greycolor = (whitecolor + blackcolor) / 2; % 128
+blindfieldColor = 110;
+
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [displaywidth, ~] = Screen('DisplaySize', screenNumber);
 % [screenXpixels, screenYpixels] = Screen('WindowSize', wptr);
@@ -85,6 +89,14 @@ sectorRadius_in_visual_degree = 5.5; % sunnannan 5.5   mali 7.9
 sectorRadius_out_pixel = round(tand(sectorRadius_out_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
 sectorRadius_in_pixel = round(tand(sectorRadius_in_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
 centerRingRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
+
+%----------------------------------------------------------------------
+%             Blind field parameter
+%----------------------------------------------------------------------
+
+blindfieldDegree = 40;  % degree from horizontal meridian
+blindfieldRadius = centerRingRadius2Center * sind(blindfieldDegree);  %pixel
+blindfield_shift = centerRingRadius2Center + 65;
 
 %----------------------------------------------------------------------
 %%%          parameters of blurred boundary
@@ -122,7 +134,7 @@ barRect = Screen('Rect',barTexture);
 %%%                     parameters of rotate background
 %----------------------------------------------------------------------
 
-trialNumber = 2;
+trialNumber = 8;
 
 if strcmp(condition, 'normal')
     subtrialNumber = 1;
@@ -130,8 +142,8 @@ else
     subtrialNumber = 5;
 end
 
-barTiltStartUpper = -20;
-barTiltStartLower = - 77.5;
+barTiltStartUpper = 90 - blindfieldDegree;% - 90 + blindfieldDegree - 10;   % -10 from invi2vi
+barTiltStartLower = 90 + blindfieldDegree;
 barTiltStartNormal = 90;
 
 currentframe = 0;
@@ -140,7 +152,7 @@ back.CurrentAngle = 0;
 back.SpinDirec = 0; % 1 means clockwise     -1 means counter-clockwise
 back.FlagSpinDirecA = 0;
 back.FlagSpinDirecB = 0;
-barTiltStep = 1; 
+barTiltStep = 1;
 % back.alpha = 1; % background transparence
 
 back.SpinSpeed = 3;%  3  2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
@@ -161,6 +173,7 @@ ScanOnset = GetSecs;
 for trial = 1:trialNumber
     
     BlockOnset = GetSecs;
+    back.CurrentAngle = 0;
     
     %----------------------------------------------------------------------
     %       present a start screen and wait for a key-press
@@ -180,15 +193,28 @@ for trial = 1:trialNumber
     
     
     if barLocation == 'u'
-        barTiltNow = barTiltStartUpper;
-        multiplier = - 1;   % in vi2invi condition  off_sync degree  over than bar_only degree
+%         barTiltNow = barTiltStartUpper;   % barTiltNow  the bar tilt degree from upright
+        if strcmp(condition, 'vi2invi')
+            multiplier =  - 1;   % in vi2invi condition  off_sync degree  over than bar_only degree
+            barTiltNow = barTiltStartUpper;
+        elseif strcmp(condition, 'invi2vi')
+            multiplier = 1;
+            barTiltNow = barTiltStartUpper + 10;
+        end
     elseif barLocation == 'l'
-        barTiltNow = barTiltStartLower;
-        multiplier = 1;
+%         barTiltNow = barTiltStartLower;
+        if strcmp(condition, 'vi2invi')
+            multiplier =  1;   % in vi2invi condition  off_sync degree  over than bar_only degree
+            barTiltNow = barTiltStartLower;
+        elseif strcmp(condition, 'invi2vi')
+            multiplier = - 1;
+            barTiltNow = barTiltStartLower - 10;
+        end
     elseif barLocation == 'n'
         barTiltNow = barTiltStartNormal;
     end
     
+
     
     for subtrial = 1:subtrialNumber
         
@@ -198,11 +224,11 @@ for trial = 1:trialNumber
         respToBeMade = true;
         flashPresentFlag = 0;
         prekeyIsDown = 0;
-        data.flashTiltDirection = back.flashTiltDirectionMatShuff(trial);
+        data.flashTiltDirection(trial) = back.flashTiltDirectionMatShuff(trial);
         back.CurrentAngle = 0;
         currentframe = 0;
         flashtimes = 0;
-        barTiltStep = 1; 
+        barTiltStep = 1;
         
         if barLocation ~= 'n'
             switch subtrial
@@ -241,7 +267,7 @@ for trial = 1:trialNumber
                     redbarflash_flag = 1;
                     if strcmp(condition, 'vi2invi')
                         str_subtrial = '\n 4  Adjust the bar from visible to invisible and \n\n remember the last location you have seen \n\n Press Any Key To Begin';
-                        barTiltNow = bar_only(trial) + multiplier * 0;
+                        barTiltNow = bar_only(trial) - multiplier * 0;
                     elseif strcmp(condition,'invi2vi')
                         str_subtrial = '\n 4  Adjust the bar from invisible to visible and \n\n  remember the location  \n\n Press Any Key To Begin';
                         barTiltNow = bar_only(trial);
@@ -273,13 +299,6 @@ for trial = 1:trialNumber
         
         if subtrial ~= 5  % subtrial 1 - 4
             
-            if data.flashTiltDirection == 1
-                back.reverse_anlge_start = 0;
-                back.reverse_anlge_end = - 180;
-            elseif data.flashTiltDirection == 2
-                back.reverse_anlge_start = 180;
-                back.reverse_anlge_end = 0;
-            end
             
             while respToBeMade
                 
@@ -291,55 +310,82 @@ for trial = 1:trialNumber
                 % make sure the red bar didn't show up at the beginning of
                 % the rotation
                 if currentframe == 1
-                    back.CurrentAngle = back.reverse_anlge_end - barTiltNow ;
-                    back.CurrentAngle = back.reverse_anlge_start - barTiltNow ;
+                    back.CurrentAngle = barTiltNow - 1;  % back.reverse_anlge_end
+                    %                     back.CurrentAngle = back.reverse_anlge_start - barTiltNow ;
                 end
                 
-                % when larger than certain degree reverse  CCW
-                if back.CurrentAngle >= back.reverse_anlge_start - barTiltNow % back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
-                    back.SpinDirec = - 1;
-                    back.FlagSpinDirecA = back.SpinDirec;
-                    %  when lower than certain degree reverse  CW
-                elseif back.CurrentAngle <= back.reverse_anlge_end - barTiltNow  % - back.ReverseAngle  - wedgeTiltNow  %  + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
-                    back.SpinDirec = 1;
-                    back.FlagSpinDirecB = back.SpinDirec;
+                if data.flashTiltDirection(trial) == 1    % CCW
+                    % when larger than certain degree reverse  CCW
+                    if back.CurrentAngle >= 0 + barTiltNow %   back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+                        back.SpinDirec = - 1;
+                        back.FlagSpinDirecA = back.SpinDirec;
+                        %  when lower than certain degree reverse  CW
+                    elseif back.CurrentAngle <= - 180 + barTiltNow %  - back.ReverseAngle  - wedgeTiltNow  %  + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+                        back.SpinDirec = 1;
+                        back.FlagSpinDirecB = back.SpinDirec;
+                    end
+                elseif data.flashTiltDirection(trial) == 2   % CW
+                    % when larger than certain degree reverse  CCW
+                    if back.CurrentAngle >= 180 + barTiltNow %   back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+                        back.SpinDirec = - 1;
+                        back.FlagSpinDirecA = back.SpinDirec;
+                        %  when lower than certain degree reverse  CW
+                    elseif back.CurrentAngle <= barTiltNow  %  - back.ReverseAngle  - wedgeTiltNow  %  + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+                        back.SpinDirec = 1;
+                        back.FlagSpinDirecB = back.SpinDirec;
+                    end
                 end
                 
-                if subtrial ~= 1 && subtrial ~= 3 % rotating background didn't presented in bar_only condition
+                
+                if subtrial ~= 1 && subtrial ~= 3 % rotating background didn't presented in bar_only condition    DrawTexture 0 deg. = upright
                     Screen('DrawTexture',wptr,ringBlurredBoundaryTexture,ringBlurredBoundaryRect,ringBlurredBoundaryDestinationRect,back.CurrentAngle,[],back.alpha);
                 elseif subtrial == 3
                     Screen('DrawTexture',wptr,ringBlurredBoundaryTexture,ringBlurredBoundaryRect,ringBlurredBoundaryDestinationRect,back.CurrentAngle + 90,[],back.alpha);
                 end
                 
-                barRectTiltDegree = barTiltNow + 180;
-                barDrawTiltDegree = back.CurrentAngle + 180;
-                
                 
                 
                 if redbarflash_flag == 1
                     % present flash tilt right  CCW
-                    if data.flashTiltDirection == 1  && back.FlagSpinDirecA ==  - 1
+                    if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1
                         
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter + centerRingRadius2Center * cosd(barRectTiltDegree));
-                        Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
-                        
-                        flashtimes = flashtimes + 1;
-                        barTiltNowMat(trial,subtrial,flashtimes) = barTiltNow;
-                        back_currentAngleMat(trial,subtrial,flashtimes) = back.CurrentAngle;
-                        
-                    elseif data.flashTiltDirection == 2  && back.FlagSpinDirecB == 1
-                        
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter + centerRingRadius2Center * cosd(barRectTiltDegree));
-                        Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
+                        Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);  % DrawTexture 0 deg. = upright
                         
                         flashtimes = flashtimes + 1;
-                        barTiltNowMat(trial,subtrial,flashtimes) = barTiltNow;
-                        back_currentAngleMat(trial,subtrial,flashtimes) = back.CurrentAngle;
+                        barTiltNowMat(subtrial,flashtimes,trial) = barTiltNow;
+                        back_currentAngleMat(subtrial,flashtimes,trial) = back.CurrentAngle;
+                        
+                    elseif data.flashTiltDirection(trial) == 2  && back.FlagSpinDirecB == 1
+                        
+                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
+                        Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);
+                        
+                        flashtimes = flashtimes + 1;
+                        barTiltNowMat(subtrial,flashtimes,trial) = barTiltNow;
+                        back_currentAngleMat(subtrial,flashtimes,trial) = back.CurrentAngle;
                         
                         flashPresentFlag = 1;
                     else
                         flashPresentFlag = 0;
                     end
+                else 
+                   if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1
+                        
+                        flashtimes = flashtimes + 1;
+                        barTiltNowMat(subtrial,flashtimes,trial) = barTiltNow;
+                        back_currentAngleMat(subtrial,flashtimes,trial) = back.CurrentAngle;
+                        
+                    elseif data.flashTiltDirection(trial) == 2  && back.FlagSpinDirecB == 1
+                        
+                        flashtimes = flashtimes + 1;
+                        barTiltNowMat(subtrial,flashtimes,trial) = barTiltNow;
+                        back_currentAngleMat(subtrial,flashtimes,trial) = back.CurrentAngle;
+                        
+                        flashPresentFlag = 1;
+                    else
+                        flashPresentFlag = 0;
+                    end 
                 end
                 
                 back.FlagSpinDirecA = 0;
@@ -348,7 +394,8 @@ for trial = 1:trialNumber
                 fixcolor = 0;
                 
                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-                
+                Screen('FillOval',wptr,blindfieldColor,[xCenter + blindfield_shift - blindfieldRadius, yCenter - blindfieldRadius,...
+                    xCenter + blindfield_shift + blindfieldRadius, yCenter + blindfieldRadius]);
                 Screen('Flip',wptr);
                 
                 %----------------------------------------------------------------------
@@ -363,13 +410,13 @@ for trial = 1:trialNumber
                         return
                         % the bar was on the left of the gabor
                     elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
-                        barTiltNow = barTiltNow + barTiltStep;
-                    elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
                         barTiltNow = barTiltNow - barTiltStep;
+                    elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
+                        barTiltNow = barTiltNow + barTiltStep;
                     elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
-                        barTiltNow = barTiltNow + 2 * barTiltStep;
-                    elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
                         barTiltNow = barTiltNow - 2 * barTiltStep;
+                    elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
+                        barTiltNow = barTiltNow + 2 * barTiltStep;
                     elseif keyCode(KbName('Space'))
                         respToBeMade = false;
                         %                     prekeyIsDown = 1;
@@ -400,18 +447,18 @@ for trial = 1:trialNumber
             
             while respToBeMade
                 
-                barRectTiltDegree =  barTiltNow;
-                barDrawTiltDegree = - barTiltNow - 180;
+                %                 barRectPositionDegree =  barTiltNow;
+                %                 barDrawTiltDegree = - barTiltNow - 180;
                 
                 if barLocation == 'l' | barLocation == 'n'
                     % vertical bar lower visual field
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter + centerRingRadius2Center * cosd(barRectTiltDegree));
+                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
                 elseif barLocation == 'u'
                     % vertical bar upper visual field
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter - centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
+                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
                 end
                 
-                Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
+                Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);
                 
                 
                 % draw fixation
@@ -421,6 +468,7 @@ for trial = 1:trialNumber
                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                 %             Screen('DrawLine',wptr,fixcolor,xCenter-fixsize,yCenter,xCenter+fixsize,yCenter,5);
                 %             Screen('DrawLine',wptr,fixcolor,xCenter,yCenter-fixsize,xCenter,yCenter+fixsize,5);
+                
                 Screen('Flip',wptr);
                 
                 
@@ -436,31 +484,13 @@ for trial = 1:trialNumber
                     return
                     % the bar was on the left of the gabor
                 elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        barTiltNow = barTiltNow - barTiltStep;
-                    elseif barLocation == 'u'
-                        barTiltNow = barTiltNow + barTiltStep;
-                    end
+                    barTiltNow = barTiltNow - barTiltStep;
                 elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        barTiltNow = barTiltNow + barTiltStep;
-                    elseif barLocation == 'u'
-                        barTiltNow = barTiltNow - barTiltStep;
-                    end
+                    barTiltNow = barTiltNow + barTiltStep;
                 elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        barTiltNow = barTiltNow - 2 * barTiltStep;
-                    elseif barLocation == 'u'
-                        barTiltNow = barTiltNow + 2 * barTiltStep;
-                    end
-                    
+                    barTiltNow = barTiltNow - 2 * barTiltStep;
                 elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        barTiltNow = barTiltNow + 2 * barTiltStep;
-                    elseif barLocation == 'u'
-                        barTiltNow = barTiltNow - 2 * barTiltStep;
-                    end
-                    
+                    barTiltNow = barTiltNow + 2 * barTiltStep;
                 elseif keyCode(KbName('Space'))
                     respToBeMade = false;
                     %                     prekeyIsDown = 1;
@@ -479,13 +509,13 @@ for trial = 1:trialNumber
         if barLocation ~= 'n'
             if  subtrial == 1      % flash bar only
                 bar_only(trial) = barTiltNow;
-            elseif subtrial == 2   % off-sync
+            elseif subtrial == 2   % blurred boundary
+                blurred_boundary(trial) = barTiltNow;
+            elseif subtrial == 3     % off fync
                 off_sync(trial) = barTiltNow;
-            elseif subtrial == 3     % flash grab
-                blurred_bounday(trial) = barTiltNow;
-            elseif subtrial == 4  % perceived location or none
+            elseif subtrial == 4  % flash grab
                 flash_grab(trial) = barTiltNow;
-            elseif subtrial == 5  % perceived location or none
+            elseif subtrial == 5  % perceived location
                 perceived_location(trial) = barTiltNow;
             end
             
@@ -507,32 +537,16 @@ display(GetSecs - ScanOnset);
 %----------------------------------------------------------------------
 %                      save parameters files
 %----------------------------------------------------------------------
-% dir = sprintf(['../data/' '%s/'],sbjname);
-% if ~isdir(dir)
-%     mkdir(dir)
-% end
-
-if  barLocation == 'u'
-    if condition == 'vi2invi'
-        savePath = '../../data/corticalBlindness/ringBlurredBoundary/upper_field/vi2invi/';
-    elseif condition == 'invi2vi'
-        savePath = '../../data/corticalBlindness/ringBlurredBoundary/upper_field/invi2vi/';
-    end
-elseif  barLocation == 'l'
-    if condition == 'vi2invi'
-        savePath = '../../data/corticalBlindness/ringBlurredBoundary/lower_field/vi2invi/';
-    elseif condition == 'invi2vi'
-        savePath = '../../data/corticalBlindness/ringBlurredBoundary/lower_field/invi2vi/';
-    end
-elseif  barLocation == 'n'
-    savePath = '../../data/corticalBlindness/ringBlurredBoundary/normal_field/';
+dir = sprintf(['../../../data/corticalBlindness/artificial_scotoma/' '%s/'],sbjname);
+if ~isdir(dir)
+    mkdir(dir)
 end
 
-
+savePath = dir;
 
 time = clock;
 
-filename = sprintf('%s_%02g_%02g_%02g_%02g_%02g',sbjname,time(1),time(2),time(3),time(4),time(5));
+filename = sprintf('%s_%s_%s_%02g_%02g_%02g_%02g_%02g',sbjname,condition,barLocation,time(1),time(2),time(3),time(4),time(5));
 filename2 = [savePath,filename];
 % save(filename2,'data','back');
 save(filename2);
@@ -541,7 +555,5 @@ save(filename2);
 %                    average illusion size
 %----------------------------------------------------------------------
 
-grab_effect_degree_CCW_from_vertical
-grab_effect_degree_CW_from_vertical
 
 sca;
