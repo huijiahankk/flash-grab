@@ -51,7 +51,7 @@ blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = (whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [displaywidth, ~] = Screen('DisplaySize', screenNumber);
 % [screenXpixels, screenYpixels] = Screen('WindowSize', wptr);
@@ -68,7 +68,7 @@ framerate = FrameRate(wptr);
 %----------------------------------------------------------------------
 %                 Setup LiveTrack
 %----------------------------------------------------------------------
-viewDist = 600;
+
 % Initialise LiveTrack
 crsLiveTrackInit;
 % Start streaming calibrated results
@@ -76,7 +76,8 @@ crsLiveTrackSetResultsTypeCalibrated;
 % Start buffering data to the library
 crsLiveTrackStartTracking;
 % Collect Eye Tracking Data
-[pupilL, glintL, pupilR, glintR, targets] = crsLiveTrackGetFixationDataRaw(viewDist, targetsDeg, wptr);
+[pupilL, glintL, pupilR, glintR, targets] = crsLiveTrackGetFixationDataRaw(viewDist, targetsDeg, 
+wptr);
 % eye calibration data is uploaded to LiveTrack using the API function crsLiveTrackCalibrateDevice
 [trackLeftEye, trackRightEye] = crsLiveTrackGetTracking;
 if trackLeftEye
@@ -86,7 +87,7 @@ if trackRightEye
 crsLiveTrackCalibrateDevice('right', pupilR, glintR, targets, viewDist);
 end
 
-crsLiveTrackDemoShowGazePosition(wptr);
+crsLiveTrackDemoShowGazePosition(WindowID);
 % Get the sample rate
 [ width, height, sampleRate, offsetX, offsetY, ErrorCode ] = crsLiveTrackGetCaptureConfig; %#ok<ASGLU>;
 % Calculate how many data samples the fixation duration (fixDur) contains
