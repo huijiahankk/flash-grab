@@ -68,38 +68,33 @@ framerate = FrameRate(wptr);
 %----------------------------------------------------------------------
 %                 Setup LiveTrack
 %----------------------------------------------------------------------
-viewDist = 600;
+
+% Set the duration of the sample buffer. The dot shown on the screen is
+% placed at the average position of the samples in the buffer. Set buffer
+% duration to zero to show the dot at the most recent sample (no averaging)
+bufferDuration = 30; % duration in mS
+
 % Initialise LiveTrack
 crsLiveTrackInit;
+
 % Start streaming calibrated results
 crsLiveTrackSetResultsTypeCalibrated;
+
 % Start buffering data to the library
 crsLiveTrackStartTracking;
-% Collect Eye Tracking Data
-[pupilL, glintL, pupilR, glintR, targets] = crsLiveTrackGetFixationDataRaw(viewDist, targetsDeg, wptr);
-% eye calibration data is uploaded to LiveTrack using the API function crsLiveTrackCalibrateDevice
-[trackLeftEye, trackRightEye] = crsLiveTrackGetTracking;
-if trackLeftEye
-crsLiveTrackCalibrateDevice('left', pupilL, glintL, targets, viewDist);
-end
-if trackRightEye
-crsLiveTrackCalibrateDevice('right', pupilR, glintR, targets, viewDist);
-end
 
-crsLiveTrackDemoShowGazePosition(wptr);
 % Get the sample rate
-[ width, height, sampleRate, offsetX, offsetY, ErrorCode ] = crsLiveTrackGetCaptureConfig; %#ok<ASGLU>;
-% Calculate how many data samples the fixation duration (fixDur) contains
-% Make sure the buffer has a length of at least 1
-% if bufferLength<1
-%     bufferLength = 1;
+[ width, height, sampleRate, offsetX, offsetY, ErrorCode ] = crsLiveTrackGetCaptureConfig; %#ok<ASGLU>
 
-% eye data
-% scabufferDuration= 1 ; %(0.3+0.01*trial2(trial)+0.1+0.01*trial4(trial)+0.1+trial5+0.5)*1000;
-% bufferDuration = 1;
-% bufferLength = round((bufferDuration/1000)*sampleRate);
-Data= crsLiveTrackGetLatestEyePosition; %(bufferLength)
-Data.glintPositions;
+% Calculate how many data samples the fixation duration (fixDur) contains
+bufferLength = round((bufferDuration/1000)*sampleRate);
+
+% Make sure the buffer has a length of at least 1
+if bufferLength<1
+    bufferLength = 1;
+end
+
+
 
 
 %----------------------------------------------------------------------
