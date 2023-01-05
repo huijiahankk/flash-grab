@@ -25,7 +25,7 @@ if 1
     barLocation = 'l';  % u  upper visual field   l   lower visual field n  normal
     condition = 'invi2vi';   % 'vi2invi'  'invi2vi'   'normal'
 else
-
+    
     sbjname = input('>>>Please input the subject''s name:   ','s');
     debug = 'n';
     %     debug = input('>>>Debug? (y/n):  ','s');
@@ -33,7 +33,7 @@ else
     flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
     barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
     condition = input('>>>visible2invisible or invisible2visible? (vi2invi  invi2vi normal):  ','s');
-
+    
 end
 
 
@@ -42,7 +42,7 @@ end
 %----------------------------------------------------------------------
 
 addpath ../../../function;
-addpath ../../FGE_subcortex_new/flashgrabExp_7T_layer;
+addpath ../../../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
@@ -68,59 +68,85 @@ framerate = FrameRate(wptr);
 %----------------------------------------------------------------------
 %                 Setup LiveTrack
 %----------------------------------------------------------------------
-<<<<<<< HEAD
-
+viewDist = 300;
 % Set the duration of the sample buffer. The dot shown on the screen is
 % placed at the average position of the samples in the buffer. Set buffer
 % duration to zero to show the dot at the most recent sample (no averaging)
 bufferDuration = 30; % duration in mS
 
-=======
-viewDist = 600;
->>>>>>> parent of 438f2e4 (Cambridge eye tracker)
+% Mimic window view scale. Sets the size of the mimic window relative to
+% the stimilus
+cnrViewScale = 0.5; % show a half-sized window of stimulus on control monitor
+% Select whether or not to draw gaze point in stimulus window (gaze point
+% is always shown in the mimic window)
+drawGazeInStimWin = true;
+
+% Define the raduis of the fixation point (in screen pixels) - used for
+% drift calibration
+fixRadIn = 4; % inner circle
+fixRadOut = 20;  % outer circle
+
+
 % Initialise LiveTrack
 crsLiveTrackInit;
+
 % Start streaming calibrated results
 crsLiveTrackSetResultsTypeCalibrated;
+
 % Start buffering data to the library
 crsLiveTrackStartTracking;
-% Collect Eye Tracking Data
-[pupilL, glintL, pupilR, glintR, targets] = crsLiveTrackGetFixationDataRaw(viewDist, targetsDeg, wptr);
-% eye calibration data is uploaded to LiveTrack using the API function crsLiveTrackCalibrateDevice
-[trackLeftEye, trackRightEye] = crsLiveTrackGetTracking;
-if trackLeftEye
-crsLiveTrackCalibrateDevice('left', pupilL, glintL, targets, viewDist);
-end
-if trackRightEye
-crsLiveTrackCalibrateDevice('right', pupilR, glintR, targets, viewDist);
-end
 
-crsLiveTrackDemoShowGazePosition(wptr);
 % Get the sample rate
-<<<<<<< HEAD
-[ width, height, sampleRate, offsetX, offsetY, ErrorCode ] = crsLiveTrackGetCaptureConfig; %#ok<ASGLU>
+[ width, height, sampleRate, offsetX, offsetY, ErrorCode ] = crsLiveTrackGetCaptureConfig; %  #ok<ASGLU>
 
-=======
-[ width, height, sampleRate, offsetX, offsetY, ErrorCode ] = crsLiveTrackGetCaptureConfig; %#ok<ASGLU>;
->>>>>>> parent of 438f2e4 (Cambridge eye tracker)
 % Calculate how many data samples the fixation duration (fixDur) contains
+bufferLength = round((bufferDuration/1000)*sampleRate);
+
 % Make sure the buffer has a length of at least 1
-<<<<<<< HEAD
 if bufferLength<1
     bufferLength = 1;
 end
 
-=======
-% if bufferLength<1
-%     bufferLength = 1;
->>>>>>> parent of 438f2e4 (Cambridge eye tracker)
+% Calculate stimulus screen specification
+% Use default settings for Psychtoolbox
+PsychDefaultSetup(2);
 
-% eye data
-% scabufferDuration= 1 ; %(0.3+0.01*trial2(trial)+0.1+0.01*trial4(trial)+0.1+trial5+0.5)*1000;
-% bufferDuration = 1;
-% bufferLength = round((bufferDuration/1000)*sampleRate);
-Data= crsLiveTrackGetLatestEyePosition; %(bufferLength)
-Data.glintPositions;
+% get the resolution of the stimulus monitor
+ResStim=Screen('Resolution', wptr);
+
+% get screen width (in mm)
+screenW = Screen('DisplaySize', wptr);
+
+% calculate pixel size (in mm) assuming square pixels
+pixSize = screenW/ResStim.width;
+
+% Get the resolution of the experimenter's monitor (where the mimic window
+% will be shown)
+
+ResExp = Screen('Resolution', wptr);
+
+
+% Set default values for parameters used in the screen refresh loop
+getOffset = false;
+OL=[0 0];
+OR=[0 0];
+tgtLocsL=[0 0];
+tgtLocsR=[0 0];
+curimg = 1;
+
+% Begin the screen refresh loop (runs once per monitor refresh)
+% while true
+%
+%     % Get the most recent samples in the buffer
+%     Data = crsLiveTrackGetLatestEyePosition(bufferLength);
+%
+%     % Calculate the gaze location in screeen pixel coordinates and apply
+%     % offset, for left and right eye
+%     tgtLocsL(1) = round((OL(1)+mean(Data.mmPositions(:,1)))/pixSize+ResStim.width/2);
+%     tgtLocsL(2) = round((OL(2)+mean(Data.mmPositions(:,2)))/pixSize+ResStim.height/2);
+%     tgtLocsR(1) = round((OR(1)+mean(Data.mmPositionsRight(:,1)))/pixSize+ResStim.width/2);
+%     tgtLocsR(2) = round((OR(2)+mean(Data.mmPositionsRight(:,2)))/pixSize+ResStim.height/2);
+
 
 
 %----------------------------------------------------------------------
@@ -218,13 +244,13 @@ ScanOnset = GetSecs;
 
 
 for trial = 1:trialNumber
-
+    
     BlockOnset = GetSecs;
-
+    
     %----------------------------------------------------------------------
     %       present a start screen and wait for a key-press
     %----------------------------------------------------------------------
-
+    
     formatSpec = 'This is the %dth of %d trial. Press Any Key To Begin';
     A1 = trial;
     A2 = trialNumber;
@@ -232,12 +258,12 @@ for trial = 1:trialNumber
     DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
     %         DrawFormattedText(wptr, '\n\nPress Any Key To Begin', 'center', 'center', blackcolor);
     %         fprintf(1,'\tTrial number: %2.0f\n',trialNumber);
-
+    
     Screen('Flip', wptr);
-
+    
     KbStrokeWait;
-
-
+    
+    
     if barLocation == 'u'
         barTiltNow = barTiltStartUpper;
         multiplier = - 1;   % in vi2invi condition  off_sync degree  over than bar_only degree
@@ -247,10 +273,10 @@ for trial = 1:trialNumber
     elseif barLocation == 'n'
         barTiltNow = barTiltStartNormal;
     end
-
-
+    
+    
     for subtrial = 1:subtrialNumber
-
+        
         %-----------------------------------------------------------------
         %              task instruction  adjust the bar
         %-----------------------------------------------------------------
@@ -262,7 +288,7 @@ for trial = 1:trialNumber
         currentframe = 0;
         flashtimes = 0;
         barTiltStep = 1;
-
+        
         if barLocation ~= 'n'
             switch subtrial
                 case 1    % flash bar only
@@ -283,7 +309,7 @@ for trial = 1:trialNumber
                         barTiltNow = bar_only(trial);
                         str_subtrial = '\n 2  Adjust the sharp bondary from invisible to visible   \n\n Press Any Key To Begin';
                     end
-
+                    
                 case 3   % off-sync
                     back.alpha = 1;
                     redbarflash_flag = 1;
@@ -294,7 +320,7 @@ for trial = 1:trialNumber
                         str_subtrial = '\n 3  Adjust the bar from invisible to visible and  \n\n Press Any Key To Begin';
                         barTiltNow = bar_only(trial);
                     end
-
+                    
                 case 4   % flash grab
                     back.alpha = 1;
                     redbarflash_flag = 1;
@@ -305,9 +331,9 @@ for trial = 1:trialNumber
                         str_subtrial = '\n 4  Adjust the bar from invisible to visible and \n\n  remember the location  \n\n Press Any Key To Begin';
                         barTiltNow = bar_only(trial);
                     end
-
+                    
                 case 5  % perceived location
-
+                    
                     if strcmp(condition, 'vi2invi')
                         str_subtrial = '\n 5  Adjust the bar to the perceived location where you last saw  \n\n Press Any Key To Begin' ;
                         barTiltNow = barTiltNow;
@@ -315,23 +341,23 @@ for trial = 1:trialNumber
                         str_subtrial = '\n 5  Adjust the bar to the perceived location   \n\n Press Any Key To Begin';
                     end
             end
-
+            
         elseif  barLocation == 'n'   % normal visual field
             barTiltNow = barTiltStartNormal;
             str_subtrial = '\n Adjust the bar until horizon   \n\n Press Any Key To Begin';
         end
-
+        
         DrawFormattedText(wptr, str_subtrial, 'center', 'center', blackcolor);
         Screen('Flip', wptr);
         KbStrokeWait;
-
-
+        
+        
         %----------------------------------------------------------------------
         %               background rotate   subtrial 1 - 4
         %----------------------------------------------------------------------
-
+        
         if subtrial ~= 5  % subtrial 1 - 4
-
+            
             if data.flashTiltDirection == 1
                 back.reverse_anlge_start = 0;
                 back.reverse_anlge_end = - 180;
@@ -339,21 +365,21 @@ for trial = 1:trialNumber
                 back.reverse_anlge_start = 180;
                 back.reverse_anlge_end = 0;
             end
-
+            
             while respToBeMade
-
+                
                 currentframe = currentframe + 1;
-
+                
                 %  back.SpinDirec    1 means clockwise     -1 means counter-clockwise
                 back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
-
+                
                 % make sure the red bar didn't show up at the beginning of
                 % the rotation
                 if currentframe == 1
                     back.CurrentAngle = back.reverse_anlge_end - barTiltNow ;
                     back.CurrentAngle = back.reverse_anlge_start - barTiltNow ;
                 end
-
+                
                 % when larger than certain degree reverse  CCW
                 if back.CurrentAngle >= back.reverse_anlge_start - barTiltNow % back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
                     back.SpinDirec = - 1;
@@ -363,57 +389,81 @@ for trial = 1:trialNumber
                     back.SpinDirec = 1;
                     back.FlagSpinDirecB = back.SpinDirec;
                 end
-
+                
                 if subtrial ~= 1 && subtrial ~= 3 % rotating background didn't presented in bar_only condition
                     Screen('DrawTexture',wptr,ringBlurredBoundaryTexture,ringBlurredBoundaryRect,ringBlurredBoundaryDestinationRect,back.CurrentAngle,[],back.alpha);
                 elseif subtrial == 3
                     Screen('DrawTexture',wptr,ringBlurredBoundaryTexture,ringBlurredBoundaryRect,ringBlurredBoundaryDestinationRect,back.CurrentAngle + 90,[],back.alpha);
                 end
-
+                
                 barRectTiltDegree = barTiltNow + 180;
                 barDrawTiltDegree = back.CurrentAngle + 180;
-
-
-
+                
+                
+                
                 if redbarflash_flag == 1
                     % present flash tilt right  CCW
                     if data.flashTiltDirection == 1  && back.FlagSpinDirecA ==  - 1
-
+                        
                         barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter + centerRingRadius2Center * cosd(barRectTiltDegree));
                         Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
-
+                        
                         flashtimes = flashtimes + 1;
                         barTiltNowMat(trial,subtrial,flashtimes) = barTiltNow;
                         back_currentAngleMat(trial,subtrial,flashtimes) = back.CurrentAngle;
-
+                        
                     elseif data.flashTiltDirection == 2  && back.FlagSpinDirecB == 1
-
+                        
                         barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter + centerRingRadius2Center * cosd(barRectTiltDegree));
                         Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
-
+                        
                         flashtimes = flashtimes + 1;
                         barTiltNowMat(trial,subtrial,flashtimes) = barTiltNow;
                         back_currentAngleMat(trial,subtrial,flashtimes) = back.CurrentAngle;
-
+                        
                         flashPresentFlag = 1;
                     else
                         flashPresentFlag = 0;
                     end
                 end
-
+                
                 back.FlagSpinDirecA = 0;
                 back.FlagSpinDirecB = 0;
-
+                
                 fixcolor = 0;
-
+                
                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-%                 Screen('FrameOval',wptr,fixcolor,)
+                
+                
+                %----------------------------------------------------------------------
+                %                 draw eye fixation dot
+                %----------------------------------------------------------------------
+                % Get the most recent samples in the buffer
+                Data = crsLiveTrackGetLatestEyePosition(bufferLength);
+                
+                % Calculate the gaze location in screeen pixel coordinates and apply
+                % offset, for left and right eye
+                tgtLocsL(1) = round((OL(1)+mean(Data.mmPositions(:,1)))/pixSize+ResStim.width/2);
+                tgtLocsL(2) = round((OL(2)+mean(Data.mmPositions(:,2)))/pixSize+ResStim.height/2);
+                tgtLocsR(1) = round((OR(1)+mean(Data.mmPositionsRight(:,1)))/pixSize+ResStim.width/2);
+                tgtLocsR(2) = round((OR(2)+mean(Data.mmPositionsRight(:,2)))/pixSize+ResStim.height/2);
+                
+                % Draw a dot for each eye on the stimilus monitor (if enabled by
+                %                         if Data.tracked
+                Screen('FillOval', wptr,[130 130 130], round([tgtLocsL(1)-fixRadOut  tgtLocsL(2)-fixRadOut tgtLocsL(1)+fixRadOut tgtLocsL(2)+fixRadOut]));  % [255 0 0]
+                %                           end
+                %                         if Data.trackedRight
+                %                             Screen('FillOval', wptr, [0 255 0], round([tgtLocsR(1)-fixRadOut...
+                %                                 tgtLocsR(2)-fixRadOut tgtLocsR(1)+fixRadOut tgtLocsR(2)+fixRadOut]));
+                %                         end
+                
+                %                 Screen('FrameOval',wptr,fixcolor,)
                 Screen('Flip',wptr);
-
+                
                 %----------------------------------------------------------------------
                 %                      Response
                 %----------------------------------------------------------------------
-
+                
                 [keyIsDown,secs,keyCode] = KbCheck(-1);
                 if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
                     if keyCode(KbName('ESCAPE'))
@@ -436,32 +486,32 @@ for trial = 1:trialNumber
                     end
                 end
                 prekeyIsDown = keyIsDown;
-
+                
                 % define the present frame of the flash
                 if flashPresentFlag
                     WaitSecs((1/framerate) * flashRepresentFrame);
                 end
-
+                
                 % for debug when flash present the simulus halt
                 if debug== 'y' && flashPresentFlag
                     KbWait;
                 end
-
+                
             end
-
+            
             %----------------------------------------------------------------------
             %         adjustable  smoothly moving red  bar
             %----------------------------------------------------------------------
-
+            
         elseif subtrial == 5
-
+            
             barTiltStep = 0.1;
-
+            
             while respToBeMade
-
+                
                 barRectTiltDegree =  barTiltNow;
                 barDrawTiltDegree = - barTiltNow - 180;
-
+                
                 if barLocation == 'l' | barLocation == 'n'
                     % vertical bar lower visual field
                     barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter + centerRingRadius2Center * cosd(barRectTiltDegree));
@@ -469,27 +519,29 @@ for trial = 1:trialNumber
                     % vertical bar upper visual field
                     barDestinationRect = CenterRectOnPoint(barRect,xCenter - centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
                 end
-
+                
                 Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
-
-
+                
+                
                 % draw fixation
-
+                
                 fixcolor = 0;
-
+                
                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                 %             Screen('DrawLine',wptr,fixcolor,xCenter-fixsize,yCenter,xCenter+fixsize,yCenter,5);
                 %             Screen('DrawLine',wptr,fixcolor,xCenter,yCenter-fixsize,xCenter,yCenter+fixsize,5);
                 Screen('Flip',wptr);
-
-
+                
+                
                 %----------------------------------------------------------------------
                 %                      Response
                 %----------------------------------------------------------------------
-
+                
                 [keyIsDown,secs,keyCode] = KbCheck(-1);
                 %                 if keyIsDown && ~prekeyIsDown   % prevent the same press was treated twice
                 if keyCode(KbName('ESCAPE'))
+                    Screen('CloseAll');
+                    break;
                     ShowCursor;
                     sca;
                     return
@@ -512,14 +564,14 @@ for trial = 1:trialNumber
                     elseif barLocation == 'u'
                         barTiltNow = barTiltNow + 2 * barTiltStep;
                     end
-
+                    
                 elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
                     if barLocation == 'l'| barLocation == 'n'
                         barTiltNow = barTiltNow + 2 * barTiltStep;
                     elseif barLocation == 'u'
                         barTiltNow = barTiltNow - 2 * barTiltStep;
                     end
-
+                    
                 elseif keyCode(KbName('Space'))
                     respToBeMade = false;
                     %                     prekeyIsDown = 1;
@@ -529,12 +581,12 @@ for trial = 1:trialNumber
                 %                 prekeyIsDown = keyIsDown;
             end
         end
-
+        
         %-----------------------------------------------------------------
         %           Response  record
         %-----------------------------------------------------------------
-
-
+        
+        
         if barLocation ~= 'n'
             if  subtrial == 1      % flash bar only
                 bar_only(trial) = barTiltNow;
@@ -547,7 +599,7 @@ for trial = 1:trialNumber
             elseif subtrial == 5  % perceived location or none
                 perceived_location(trial) = barTiltNow;
             end
-
+            
         else
             if data.flashTiltDirection == 1
                 grab_effect_degree_CCW_from_vertical(trial) = barTiltNow;
@@ -555,13 +607,34 @@ for trial = 1:trialNumber
                 grab_effect_degree_CW_from_vertical(trial) = barTiltNow;
             end
         end
-
+        
         WaitSecs (0.5);
     end
-
+    
 end
 
+% % Exit the script if Esc key is pressed
+% if keyCode(KbName('ESCAPE'))
+%     Screen('CloseAll');
+%     disp('Esc pressed. Stopping demo');
+%     break;
+% end
+
+
 display(GetSecs - ScanOnset);
+
+%----------------------------------------------------------------------
+%                  close eye tracker
+%----------------------------------------------------------------------
+
+% Stop buffering data to the library
+crsLiveTrackStopTracking;
+
+% Clear the buffer
+crsLiveTrackClearDataBuffer;
+
+% Close LiveTrack
+crsLiveTrackClose;
 
 %----------------------------------------------------------------------
 %                      save parameters files
@@ -604,3 +677,12 @@ grab_effect_degree_CCW_from_vertical
 grab_effect_degree_CW_from_vertical
 
 sca;
+
+figure;
+plot(Data.timeStamps./1000,Data.mmPositions,'r'); hold on;
+plot(Data.timeStamps./1000,Data.mmPositions,'g'); hold on;
+xlabel('time (mS)');
+ylabel('Pupil Diameter (mm)');
+
+
+
