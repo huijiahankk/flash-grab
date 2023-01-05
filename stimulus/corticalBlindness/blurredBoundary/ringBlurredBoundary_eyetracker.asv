@@ -51,7 +51,7 @@ blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = (whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [displaywidth, ~] = Screen('DisplaySize', screenNumber);
 % [screenXpixels, screenYpixels] = Screen('WindowSize', wptr);
@@ -68,16 +68,7 @@ framerate = FrameRate(wptr);
 %----------------------------------------------------------------------
 %                 Setup LiveTrack
 %----------------------------------------------------------------------
-<<<<<<< HEAD
 
-% Set the duration of the sample buffer. The dot shown on the screen is
-% placed at the average position of the samples in the buffer. Set buffer
-% duration to zero to show the dot at the most recent sample (no averaging)
-bufferDuration = 30; % duration in mS
-
-=======
-viewDist = 600;
->>>>>>> parent of 438f2e4 (Cambridge eye tracker)
 % Initialise LiveTrack
 crsLiveTrackInit;
 % Start streaming calibrated results
@@ -85,7 +76,8 @@ crsLiveTrackSetResultsTypeCalibrated;
 % Start buffering data to the library
 crsLiveTrackStartTracking;
 % Collect Eye Tracking Data
-[pupilL, glintL, pupilR, glintR, targets] = crsLiveTrackGetFixationDataRaw(viewDist, targetsDeg, wptr);
+[pupilL, glintL, pupilR, glintR, targets] = crsLiveTrackGetFixationDataRaw(viewDist, targetsDeg, 
+wptr);
 % eye calibration data is uploaded to LiveTrack using the API function crsLiveTrackCalibrateDevice
 [trackLeftEye, trackRightEye] = crsLiveTrackGetTracking;
 if trackLeftEye
@@ -95,25 +87,13 @@ if trackRightEye
 crsLiveTrackCalibrateDevice('right', pupilR, glintR, targets, viewDist);
 end
 
-crsLiveTrackDemoShowGazePosition(wptr);
+crsLiveTrackDemoShowGazePosition(WindowID);
 % Get the sample rate
-<<<<<<< HEAD
-[ width, height, sampleRate, offsetX, offsetY, ErrorCode ] = crsLiveTrackGetCaptureConfig; %#ok<ASGLU>
-
-=======
 [ width, height, sampleRate, offsetX, offsetY, ErrorCode ] = crsLiveTrackGetCaptureConfig; %#ok<ASGLU>;
->>>>>>> parent of 438f2e4 (Cambridge eye tracker)
 % Calculate how many data samples the fixation duration (fixDur) contains
 % Make sure the buffer has a length of at least 1
-<<<<<<< HEAD
-if bufferLength<1
-    bufferLength = 1;
-end
-
-=======
 % if bufferLength<1
 %     bufferLength = 1;
->>>>>>> parent of 438f2e4 (Cambridge eye tracker)
 
 % eye data
 % scabufferDuration= 1 ; %(0.3+0.01*trial2(trial)+0.1+0.01*trial4(trial)+0.1+trial5+0.5)*1000;
