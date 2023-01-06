@@ -12,9 +12,10 @@ if 1
     sbjname = 'k';
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
-    barLocation = 'n';  % u  upper visual field   l   lower visual field n  normal
-    condition = 'normal';   % 'vi2invi'  'invi2vi'   'normal'
+    barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
+    condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 1;
+    eyelinkfilename_eye = 'hjh' ;
 else
     
     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -24,6 +25,8 @@ else
     flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
     barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
     condition = input('>>>visible2invisible or invisible2visible? (vi2invi  invi2vi normal):  ','s');
+    isEyelink = 1;
+    eyelinkfilename_eye = 'hjh' ;
 end
 
 
@@ -147,7 +150,7 @@ if isEyelink
     screenid=1;
     dummymode=0;
 %     filename_eye = 'eyelinkdata' ;
-    filename_eye = 'hjh' ;
+    eyelinkfilename_eye = 'hjh' ;
 %     % script trial run without link eyelink 
 %     [status] = Eyelink('Initialize',displayCallbackFunction);
     
@@ -172,7 +175,7 @@ if isEyelink
     Eyelink('command','file event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
     Eyelink('Command','file_event_filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
     
-    edfFile=[filename_eye '.edf'];
+    edfFile=[eyelinkfilename_eye '.edf'];
     open=Eyelink('Openfile',edfFile);
     if open ~=0
         fprintf('Can not open the edfile');
@@ -441,42 +444,6 @@ for trial = 1:trialNumber
                 Screen('Flip',wptr);
                 
                 
-                
-                %----------------------------------------------------------------------
-                %                      Eyelink  recording
-                %----------------------------------------------------------------------
-                if isEyelink
-                    if frameK==1
-                        if stim_type(Ntrial) == 1
-                            Eyelink('Message','LHit start');
-                        end
-                        if stim_type(Ntrial) == 2
-                            Eyelink('Message','LNMiss start');
-                        end
-                        if stim_type(Ntrial) == 3
-                            Eyelink('Message','LRec start');
-                        end
-                        if stim_type(Ntrial) == 4
-                            Eyelink('Message','RHit start');
-                        end
-                        if stim_type(Ntrial) == 5
-                            Eyelink('Message','RNMiss start');
-                        end
-                        if stim_type(Ntrial) == 6
-                            Eyelink('Message','RRec start');
-                        end
-                    end
-                    
-                    if frameK == PresentFlyFrames+1
-                        Eyelink('Message',['ball ' num2str(Ntrial) 'stopped at' num2str(GetSecs(), '%10.5f')]);
-                    end
-                    
-                end
-                
-                
-                
-                
-                
                 %----------------------------------------------------------------------
                 %                      Response record
                 %----------------------------------------------------------------------
@@ -608,6 +575,34 @@ for trial = 1:trialNumber
                 end
                 %                 end
                 %                 prekeyIsDown = keyIsDown;
+                
+                
+                %----------------------------------------------------------------------
+                %                      Eyelink  recording
+                %----------------------------------------------------------------------
+                if isEyelink
+                    if currentFrame==1
+                        if subtrial == 1
+                            Eyelink('Message','Bar Only');
+                        end
+                        if subtrial == 2
+                            Eyelink('Message','Off Sync');
+                        end
+                        if subtrial == 3
+                            Eyelink('Message','Flash Grab');
+                        end
+                        if subtrial == 4
+                            Eyelink('Message','Perceived Location');
+                        end
+                    end
+                    
+%                     if frameK == PresentFlyFrames+1
+%                         Eyelink('Message',['ball ' num2str(Ntrial) 'stopped at' num2str(GetSecs(), '%10.5f')]);
+%                     end
+                    
+                end
+                   
+                
             end
         end
         
@@ -696,40 +691,40 @@ save(filename2);
 
 
 
-%----------------------------------------------------------------------
-%                    average illusion size
-%----------------------------------------------------------------------
-
-illusionCCWIndex = find(data.flashTiltDirection == 1);
-illusionCWIndex = find(data.flashTiltDirection == 2);
-
-% if strcmp(barlocation,'u')
-%     quardant
-bar_CCWDegree = mean(bar_only(illusionCCWIndex));
-bar_CWDegree = mean(bar_only(illusionCWIndex));
-off_sync_CCWDegree = mean(off_sync(illusionCCWIndex));
-off_sync_CWDegree = mean(off_sync(illusionCWIndex));
-flash_grab_CCWDegree = mean(flash_grab(illusionCCWIndex));
-flash_grab_CWDegree = mean(flash_grab(illusionCWIndex));
-
-if strcmp(condition, 'invi2vi')
-    perceived_location_CCWDegree = mean(perceived_location(illusionCCWIndex));
-    perceived_location_CWDegree = mean(perceived_location(illusionCWIndex));
-end
-
-if strcmp(condition, 'vi2invi')
-    y = [bar_CCWDegree off_sync_CCWDegree flash_grab_CCWDegree bar_CWDegree off_sync_CWDegree flash_grab_CWDegree];
-    h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1);
-    set(gca, 'XTick', 1:6, 'XTickLabels', {'bar-CCW' 'off-sync-CCW' 'grab-CCW'  'bar-CW' 'off-sync-CW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
-elseif strcmp(condition, 'invi2vi')
-    y = [bar_CCWDegree off_sync_CCWDegree flash_grab_CCWDegree perceived_location_CCWDegree bar_CWDegree off_sync_CWDegree flash_grab_CWDegree perceived_location_CWDegree];
-    h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1);
-    set(gca, 'XTick', 1:8, 'XTickLabels', {'bar-CCW' 'off-sync-CCW' 'grab-CCW' 'perc-CCW' 'bar-CW' 'off-sync-CW' 'grab-CW' 'perc-CW'},'fontsize',20,'FontWeight','bold');
-end
-
-
-set(gcf,'color','w');
-set(gca,'box','off');
-% title('Illusion size','FontSize',25);
+% %----------------------------------------------------------------------
+% %                    average illusion size
+% %----------------------------------------------------------------------
+% 
+% illusionCCWIndex = find(data.flashTiltDirection == 1);
+% illusionCWIndex = find(data.flashTiltDirection == 2);
+% 
+% % if strcmp(barlocation,'u')
+% %     quardant
+% bar_CCWDegree = mean(bar_only(illusionCCWIndex));
+% bar_CWDegree = mean(bar_only(illusionCWIndex));
+% off_sync_CCWDegree = mean(off_sync(illusionCCWIndex));
+% off_sync_CWDegree = mean(off_sync(illusionCWIndex));
+% flash_grab_CCWDegree = mean(flash_grab(illusionCCWIndex));
+% flash_grab_CWDegree = mean(flash_grab(illusionCWIndex));
+% 
+% if strcmp(condition, 'invi2vi')
+%     perceived_location_CCWDegree = mean(perceived_location(illusionCCWIndex));
+%     perceived_location_CWDegree = mean(perceived_location(illusionCWIndex));
+% end
+% 
+% if strcmp(condition, 'vi2invi')
+%     y = [bar_CCWDegree off_sync_CCWDegree flash_grab_CCWDegree bar_CWDegree off_sync_CWDegree flash_grab_CWDegree];
+%     h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1);
+%     set(gca, 'XTick', 1:6, 'XTickLabels', {'bar-CCW' 'off-sync-CCW' 'grab-CCW'  'bar-CW' 'off-sync-CW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
+% elseif strcmp(condition, 'invi2vi')
+%     y = [bar_CCWDegree off_sync_CCWDegree flash_grab_CCWDegree perceived_location_CCWDegree bar_CWDegree off_sync_CWDegree flash_grab_CWDegree perceived_location_CWDegree];
+%     h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1);
+%     set(gca, 'XTick', 1:8, 'XTickLabels', {'bar-CCW' 'off-sync-CCW' 'grab-CCW' 'perc-CCW' 'bar-CW' 'off-sync-CW' 'grab-CW' 'perc-CW'},'fontsize',20,'FontWeight','bold');
+% end
+% 
+% 
+% set(gcf,'color','w');
+% set(gca,'box','off');
+% % title('Illusion size','FontSize',25);
 
 sca;
