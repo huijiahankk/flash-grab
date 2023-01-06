@@ -441,42 +441,6 @@ for trial = 1:trialNumber
                 Screen('Flip',wptr);
                 
                 
-                
-                %----------------------------------------------------------------------
-                %                      Eyelink  recording
-                %----------------------------------------------------------------------
-                if isEyelink
-                    if frameK==1
-                        if stim_type(Ntrial) == 1
-                            Eyelink('Message','LHit start');
-                        end
-                        if stim_type(Ntrial) == 2
-                            Eyelink('Message','LNMiss start');
-                        end
-                        if stim_type(Ntrial) == 3
-                            Eyelink('Message','LRec start');
-                        end
-                        if stim_type(Ntrial) == 4
-                            Eyelink('Message','RHit start');
-                        end
-                        if stim_type(Ntrial) == 5
-                            Eyelink('Message','RNMiss start');
-                        end
-                        if stim_type(Ntrial) == 6
-                            Eyelink('Message','RRec start');
-                        end
-                    end
-                    
-                    if frameK == PresentFlyFrames+1
-                        Eyelink('Message',['ball ' num2str(Ntrial) 'stopped at' num2str(GetSecs(), '%10.5f')]);
-                    end
-                    
-                end
-                
-                
-                
-                
-                
                 %----------------------------------------------------------------------
                 %                      Response record
                 %----------------------------------------------------------------------
@@ -608,6 +572,34 @@ for trial = 1:trialNumber
                 end
                 %                 end
                 %                 prekeyIsDown = keyIsDown;
+                
+                
+                %----------------------------------------------------------------------
+                %                      Eyelink  recording
+                %----------------------------------------------------------------------
+                if isEyelink
+                    if currentFrame==1
+                        if subtrial == 1
+                            Eyelink('Message','Bar Only');
+                        end
+                        if subtrial == 2
+                            Eyelink('Message','Off Sync');
+                        end
+                        if subtrial == 3
+                            Eyelink('Message','Flash Grab');
+                        end
+                        if subtrial == 4
+                            Eyelink('Message','Perceived Location');
+                        end
+                    end
+                    
+%                     if frameK == PresentFlyFrames+1
+%                         Eyelink('Message',['ball ' num2str(Ntrial) 'stopped at' num2str(GetSecs(), '%10.5f')]);
+%                     end
+                    
+                end
+                   
+                
             end
         end
         
