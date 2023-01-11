@@ -634,6 +634,9 @@ display(GetSecs - ScanOnset);
 if isEyelink
     Eyelink('stopRecording');
     Eyelink('command','set_idle_mode');
+    iSuccess = Eyelink('ReceiveFile', [], edfDir, 1);
+            disp(conditional(iSuccess > 0, ['Eyelink File Received, file size is ' num2str(iSuccess)], ...
+                'Something went wrong with receiving the Eyelink File'));
     WaitSecs(0.5);
     Eyelink('CloseFile')
 
