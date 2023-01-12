@@ -92,7 +92,7 @@ KbName('UnifyKeyNames');
 eyeScreenDistence = 78;  % cm  68sunnannan
 screenHeight = 26.8; % cm
 sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
-sectorRadius_in_visual_degree = 5.5; % sunnannan 5.5   mali 7.9
+sectorRadius_in_visual_degree = 15; % sunnannan 5.5   mali 7.9
 sectorRadius_out_pixel = round(tand(sectorRadius_out_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
 sectorRadius_in_pixel = round(tand(sectorRadius_in_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
 

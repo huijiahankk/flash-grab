@@ -275,7 +275,7 @@ end
 % SET UP TRACKER CONFIGURATION
 % Setting the proper recording resolution, proper calibration type,
 % as well as the data file content;
-Eyelink('command', 'add_file_preamble_text ''Recorded by EyelinkToolbox demo-experiment''');
+Eyelink('command', 'add_file_preamble_text ''Recorded by EyelinkToolbox demo-experiment''');  %Must be used immediately after open_data_file, to add a note on file history.
 
 [winWidth, winHeight] = Screen('WindowSize', screenNumber);
 
@@ -285,7 +285,7 @@ Eyelink('command','screen_pixel_coords = %ld %ld %ld %ld', 0, 0, winWidth-1, win
 Eyelink('message', 'DISPLAY_COORDS %ld %ld %ld %ld', 0, 0, winWidth-1, winHeight-1);
 
 % set calibration type.
-Eyelink('command', 'calibration_type = HV5');
+Eyelink('command', 'calibration_type = HV5');  
 Eyelink('command', 'generate_default_targets = YES');
 % STEP 5.1 modify calibration and validation target locations
 Eyelink('command','calibration_samples = 6');
