@@ -369,6 +369,7 @@ for trial = 1:trialNumber
                     else
                         flashPresentFlag = 0;
                     end
+                    
                 else 
                    if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1
                         
