@@ -11,11 +11,12 @@ clear all;close all;
 if 1
     sbjname = 'k';
     debug = 'n';
-    flashRepresentFrame = 2.2;  % 2.2 means 3 frame
+    flashRepresentFrame = 4.2;  % 2.2 means 3 frame
     barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
-    isEyelink = 1;
+    isEyelink = 0;
     eyelinkfilename_eye = 'hjh' ;
+    blindspot = 'y';
 else
     
     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -27,6 +28,7 @@ else
     condition = input('>>>visible2invisible or invisible2visible? (vi2invi  invi2vi normal):  ','s');
     isEyelink = 1;
     eyelinkfilename_eye = 'hjh' ;
+    blindspot = input('>>>blindspot experiment for normal participants? (y for yes n for no):  ','s');
 end
 
 
@@ -52,28 +54,14 @@ fixsize = 12;
 HideCursor;
 
 centerMovePix = 0;
-% fixcolor = [0:1:255  255:-1:0]; % 200
 framerate = FrameRate(wptr);
 
-%----------------------------------------------------------------------
-%                adjust screen rgb to map linear  ramp
-%----------------------------------------------------------------------
-
-
-% load ../../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;   %????????????????????????????????????????????????
-% % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
-%
-% dacsize = 10;  %How many bits per pixel#
-% maxcol = 2.^dacsize-1;
-% ncolors = 256; % see details in makebkg.m
-% newcmap = rgb2cmapramp([.5 .5 .5],[.5 .5 .5],1,ncolors,gamInv);  %Make the gamma table we want#
-% newclut(1:ncolors,:) = newcmap./maxcol;
-% newclut(isnan(newclut)) = 0;
-%
-% [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
-% Screen('LoadNormalizedGammaTable', wptr, newclut);
-
-
+% draw the fixcross
+fixCrossDimPix = 15;
+xCoords = [-fixCrossDimPix fixCrossDimPix 0 0];
+yCoords = [0 0 -fixCrossDimPix fixCrossDimPix];
+allCoords = [xCoords; yCoords];
+LineWithPix = 6;
 
 %----------------------------------------------------------------------
 %                       Keyboard information
@@ -89,13 +77,23 @@ KbName('UnifyKeyNames');
 %               Screen parameter
 %----------------------------------------------------------------------
 
-eyeScreenDistence = 78;  % cm  68sunnannan
-screenHeight = 26.8; % cm
-sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
-sectorRadius_in_visual_degree = 15; % sunnannan 5.5   mali 7.9
+eyeScreenDistence = 66;  % 78cm  68sunnannan
+screenHeight = 33.5; % 26.8 cm
+if blindspot == 'n'
+    sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
+    sectorRadius_in_visual_degree = 5.5; % sunnannan 5.5   mali7.9
+elseif blindspot == 'y'
+    sectorRadius_out_visual_degree = 15.25; % sunnannan 9.17  mali 11.5
+    sectorRadius_in_visual_degree = 13.5; % sunnannan 5.5   mali7.9
+end
+
 sectorRadius_out_pixel = round(tand(sectorRadius_out_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
 sectorRadius_in_pixel = round(tand(sectorRadius_in_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
+centerRingRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 
+% eye gaze distance from center
+gaze_away_visual_degree = 0.5;
+gaze_away_pixel = round(tand(gaze_away_visual_degree) * eyeScreenDistence *  rect(4)/screenHeight);
 
 %----------------------------------------------------------------------
 %                      draw background sector
@@ -103,9 +101,6 @@ sectorRadius_in_pixel = round(tand(sectorRadius_in_visual_degree) * eyeScreenDis
 
 sectorNumber = 8;
 
-% sectorRadius_in_pixel = floor((visualHeightIn7T_pixel - 400)/2);    % inner diameter of background annulus
-% sectorRadius_out_pixel = floor((visualHeightIn7T_pixel - 20)/2);%  %         annnulus outer radius
-dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 [sector] = drawBackgroundSector(sectorNumber,sectorRadius_in_pixel,sectorRadius_out_pixel,blackcolor,whitecolor,xCenter,yCenter,centerMovePix);
 
 sectorTex = Screen('MakeTexture', wptr, sector);
@@ -118,63 +113,39 @@ Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 %%%          parameters of red bar
 %----------------------------------------------------------------------
 
-
 barWidth = 20;
 barLength = (sectorRadius_out_pixel - sectorRadius_in_pixel);
 barRect = [-barLength/2  -barWidth/2  barLength/2  barWidth/2];
 
 
 % Define a vertical red rectangle
-barMat(:,:,1) = repmat(255, barLength, barWidth);
-barMat(:,:,2) = repmat(0, barLength, barWidth);
-% barMat(:,:,1) = repmat(255, barLength, barWidth);
-% barMat(:,:,2) = repmat(0, barLength,  barWidth);
+barMat(:,:,1) = repmat(255,  barLength,barWidth);
+barMat(:,:,2) = zeros(barLength,  barWidth);
 barMat(:,:,3) = barMat(:,:,2);
 
-% % Define a horizontal red rectangle
-% barMat(:,:,1) = repmat(255, barLength, barWidth);
-% barMat(:,:,2) = repmat(0,  barLength, barWidth);
-% barMat(:,:,3) = barMat(:,:,2);
 
 % % % Make the rectangle into a texure
 barTexture = Screen('MakeTexture', wptr, barMat);
 barRect = Screen('Rect',barTexture);
 
-
-
 %----------------------------------------------------------------------
 %%%            Eyelink setting up
 %----------------------------------------------------------------------
 if isEyelink
-      
-    screenid=1;
-    dummymode=0;
-%     filename_eye = 'eyelinkdata' ;
-    eyelinkfilename_eye = 'hjh' ;
-%     % script trial run without link eyelink 
-%     [status] = Eyelink('Initialize',displayCallbackFunction);
+    dummymode = 0;
+    enableCallbacks = 1;
+    %     % script trial run without link eyelink
+    %     [status] = Eyelink('Initialize',displayCallbackFunction);
     
     %Initialize
     el=EyelinkInitDefaults(wptr);
-      if ~EyelinkInit(dummymode,1)   % 1 show  eye image 
+    if ~EyelinkInit(dummymode,enableCallbacks)   % enableCallbacks = 1 show  eye image
         fprintf('Eyelink Init aborted.\n');
         cleanup;
         return;
     end
     
-
-    
-    % [v vs]=Eyelink('GetTrakerVersion');
-    % fprintf('Runninig experiment on a "%s" tracker.\n',vs)
-    
-    Eyelink('command','link sample data = LEFT,GAZE ,GAZERES,HREF,AREA,PUPIL');
-    Eyelink('command','link event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
-    Eyelink('command','link event filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
-    
-    Eyelink('command','file sample data = LEFT,GAZE ,GAZERES,HREF,AREA,PUPIL');
-    Eyelink('command','file event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
-    Eyelink('Command','file_event_filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
-    
+    % open file to record data to
     edfFile=[eyelinkfilename_eye '.edf'];
     open=Eyelink('Openfile',edfFile);
     if open ~=0
@@ -183,65 +154,104 @@ if isEyelink
         return;
     end
     
-    %Calibrate
-    % EyelinkUpdateDefaults(el); what dose this mean?
-    EyelinkDoTrackerSetup(el);
-    success=EyelinkDoDriftCorrection(el);
-    if success~=1
-        cleanup;
+    % make sure we're still connected.
+    if Eyelink('IsConnected')~=1 && ~dummymode
+        %     cleanup;
+        Eyelink('Shutdown');
+        Screen('CloseAll');
         return;
     end
     
-    %start recording
-    % Eyelink('Command', 'set_idle_mode');what dose this mean?
-    Eyelink('startrecording',1,1,1,1);
-    eyeused = Eyelink('EyeAvailable');
-    % if eyeused==el.BINOCULAR
-    %     eyeused==el.LEFT EYE;
-    % end
-    WaitSecs(0.1);
+    Eyelink('command', 'add_file_preamble_text ''Recorded by FGI experiment''');
+    % SET UP TRACKER CONFIGURATION
+    % Setting the proper recording resolution, proper calibration type,
+    % as well as the data file content;
+    Eyelink('command','screen_pixel_coords = %ld %ld %ld %ld', 0, 0, ScreenRect(3)-1, ScreenRect(4)-1);
+    Eyelink('message', 'DISPLAY_COORDS %ld %ld %ld %ld', 0, 0, ScreenRect(3)-1, ScreenRect(4)-1);
+    % set calibration type.
+    Eyelink('command', 'calibration_type = HV5'); %  setting the usual 5-point calibration
     
-    while true
-        disp('checkrecording');
-        error=Eyelink('CheckRecording');
-        if (error==0)
-            disp('success');
-            break;
-        end
+    % set EDF file contents using the file_sample_data and
+    % file-event_filter commands
+    % set link data thtough link_sample_data and link_event_filter
+    Eyelink('command', 'file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT');
+    Eyelink('command', 'link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT');
+    
+    % check the software version
+    % add "HTARGET" to record possible target data for EyeLink Remote
+    Eyelink('command', 'file_sample_data  = LEFT,RIGHT,GAZE,HREF,GAZERES,AREA,HTARGET,STATUS,INPUT');
+    Eyelink('command', 'link_sample_data  = LEFT,RIGHT,GAZE,HREF,GAZERES,AREA,HTARGET,STATUS,INPUT');
+    
+    
+    %     Eyelink('command','link sample data = LEFT,GAZE ,GAZERES,HREF,AREA,PUPIL');
+    %     Eyelink('command','link event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
+    %     Eyelink('command','link event filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
+    %
+    %     Eyelink('command','file sample data = LEFT,GAZE ,GAZERES,HREF,AREA,PUPIL');
+    %     Eyelink('command','file event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
+    %     Eyelink('Command','file_event_filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
+    
+    
+    % make sure we're still connected.
+    if Eyelink('IsConnected')~=1 && input.dummymode == 0
+        exit_flag = 'ESC';
+        return;
     end
+    
+    % possible changes from EyelinkPictureCustomCalibration
+    
+    % set sample rate in camera setup screen
+    Eyelink('command', 'sample_rate = %d', 1000);
+    
+    % Will call the calibration routine
+    EyelinkDoTrackerSetup(el);
+    
+    
+    %Calibrate
+    % EyelinkUpdateDefaults(el); what dose this mean?
+    EyelinkDoTrackerSetup(el);
+    
+    % Must be offline to draw to EyeLink screen
+    Eyelink('Command', 'set_idle_mode');
+    % clear tracker display
+    Eyelink('Command', 'clear_screen 0');
+    Eyelink('StartRecording');
+    
+    eyeUsed = Eyelink('EyeAvailable'); % get eye that's tracked
+    % returns 0 (LEFT_EYE), 1 (RIGHT_EYE) or 2 (BINOCULAR) depending on what data is
+    if eyeUsed == 2
+        eyeUsed = 1; % use the right_eye data
+    end
+    % always wait a moment for recording to have definitely started
+    WaitSecs(0.1);
+    % mark when the experiment has actually started
+    Eyelink('message', 'SYNCTIME');
+    
 end
-
 
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
 %----------------------------------------------------------------------
 
-trialNumber = 4;
+blockNumber = 4;
 
 if strcmp(condition, 'normal')
-    subtrialNumber = 1;
+    trialNumber = 1;
 else
-    subtrialNumber = 4;
+    trialNumber = 4;
 end
 
-
-
-randWedgeTiltNoiseMat = rand(trialNumber,1)*2;
 back.CurrentAngle = 0;
-
-
-% back.SpinSpeed = 4; % degree/frame     138  degree/sec    max 270
 back.SpinDirec = 1; % 1 means clockwise     -1 means counter-clockwise
 back.FlagSpinDirecA = 0;  % flash tilt right
 back.FlagSpinDirecB = 0;  % flash tilt left
-% wedgeTiltStart = 0;
-wedgeTiltStep = 1; %2.8125   1.40625;
 back.alpha = 1; % background transparence
 
-wedgeTiltStartUpperRight = 0;
-wedgeTiltStartLowerRight =  - 90;
-wedgeTiltStartNormal = 90;
-% wedgeTiltIncre = 0;
+barTiltStep = 1; %2.8125   1.40625;
+barTiltStartUpper = 80;
+barTiltStartLower = 120;
+barTiltStartNormal = 0;
+
 back.SpinSpeed = 3;%  3  2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
 back.velocity = back.SpinSpeed * framerate;
 back.ReverseAngle = 90; % duration frame of checkerboard
@@ -258,7 +268,7 @@ back.flashTiltDirectionMatShuff = Shuffle(back.flashTiltDirectionMat)';
 ScanOnset = GetSecs;
 
 
-for trial = 1:trialNumber
+for block = 1:blockNumber
     
     BlockOnset = GetSecs;
     
@@ -266,9 +276,9 @@ for trial = 1:trialNumber
     %       present a start screen and wait for a key-press
     %----------------------------------------------------------------------
     
-    formatSpec = 'This is the %dth of %d trial. Press Any Key To Begin';
-    A1 = trial;
-    A2 = trialNumber;
+    formatSpec = 'This is the %dth of %d block. Press Any Key To Begin';
+    A1 = block;
+    A2 = blockNumber;
     str = sprintf(formatSpec,A1,A2);
     DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
     %         DrawFormattedText(wptr, '\n\nPress Any Key To Begin', 'center', 'center', blackcolor);
@@ -280,18 +290,18 @@ for trial = 1:trialNumber
     
     
     if barLocation == 'u'
-        wedgeTiltNow = wedgeTiltStartUpperRight;
+        barTiltNow = barTiltStartUpper;
         multiplier = - 1;   % in vi2invi condition  off_sync degree  over than bar_only degree
     elseif barLocation == 'l'
-        wedgeTiltNow = wedgeTiltStartLowerRight;
+        barTiltNow = barTiltStartLower;
         multiplier = 1;
     elseif barLocation == 'n'
-        wedgeTiltNow = wedgeTiltStartNormal;
+        barTiltNow = barTiltStartNormal;
     end
     
     
     
-    for subtrial = 1:subtrialNumber
+    for trial = 1:trialNumber
         
         %----------------------------------------------------------------------
         %                      background rotate
@@ -302,127 +312,193 @@ for trial = 1:trialNumber
         prekeyIsDown = 0;
         data.flashTiltDirection(trial) = back.flashTiltDirectionMatShuff(trial);
         back.alpha = 1;
-        currentFrame = 0;
+        currentframe = 0;
+        flashtimes = 0;
         
         if barLocation ~= 'n'
-            if subtrial == 1    % flash bar only
+            if trial == 1    % flash bar only
                 back.alpha = 0;
                 if strcmp(condition, 'vi2invi')
-                    str_subtrial = '\n Adjust the bar from visible to invisible   \n\n Press Any Key To Begin';
+                    str_trial = '\n Adjust the bar from visible to invisible   \n\n Fixation on the cross to start the trial';
                 elseif strcmp(condition,'invi2vi')
-                    str_subtrial = '\n Adjust the bar from invisible to visible   \n\n Press Any Key To Begin';
+                    str_trial = '\n Adjust the bar from invisible to visible   \n\n Fixation on the cross to start the trial';
                 end
-            elseif subtrial == 2   % off-sync
+            elseif trial == 2   % off-sync
                 if strcmp(condition, 'vi2invi')
-                    wedgeTiltNow = bar_only(trial) + multiplier * 20;
-                    str_subtrial = '\n Adjust the bar from visible to invisible   \n\n Press Any Key To Begin';
+                    barTiltNow = bar_only(block) + multiplier * 20;
+                    str_trial = '\n Adjust the bar from visible to invisible   \n\n Fixation on the cross to start the trial';
                 elseif strcmp(condition,'invi2vi')
-                    wedgeTiltNow = bar_only(trial);
-                    str_subtrial = '\n Adjust the bar from invisible to visible   \n\n Press Any Key To Begin';
+                    barTiltNow = bar_only(block);
+                    str_trial = '\n Adjust the bar from invisible to visible   \n\n Fixation on the cross to start the trial';
                 end
                 
-            elseif subtrial == 3   % flash grab
+            elseif trial == 3   % flash grab
                 
                 if strcmp(condition, 'vi2invi')
-                    str_subtrial = '\n Adjust the bar from visible to invisible and remember the last location you have seen \n\n Press Any Key To Begin';
-                    wedgeTiltNow = bar_only(trial) + multiplier * 20;
+                    str_trial = '\n Adjust the bar from visible to invisible and remember the last location you have seen \n\n Fixation on the cross to start the trial';
+                    barTiltNow = bar_only(block) + multiplier * 20;
                 elseif strcmp(condition,'invi2vi')
-                    str_subtrial = '\n Adjust the bar from invisible to visible and remember the location  \n\n Press Any Key To Begin';
-                    wedgeTiltNow = bar_only(trial);
+                    str_trial = '\n Adjust the bar from invisible to visible and remember the location  \n\n Fixation on the cross to start the trial';
+                    barTiltNow = bar_only(block);
                 end
                 
-            elseif subtrial == 4  % perceived location
-                str_subtrial = '\n Adjust the bar to the perceived location   \n\n Press Any Key To Begin'
-                wedgeTiltNow = wedgeTiltNow;
+            elseif trial == 4  % perceived location
+                str_trial = '\n Adjust the bar to the perceived location   \n\n Fixation on the cross to start the trial'
+                barTiltNow = barTiltNow;
                 %                 back.alpha = 0;
             end
         elseif barLocation == 'n'
-            wedgeTiltNow = wedgeTiltStartNormal;
-            str_subtrial = '\n Adjust the bar until horizon   \n\n Press Any Key To Begin'
+            barTiltNow = wedgeTiltStartNormal;
+            str_trial = '\n Adjust the bar until horizon   \n\n Fixation on the cross to start the trial'
         end
         
         
         %----------------------------------------------------------------------
         %     task instruction  adjust the bar
         %----------------------------------------------------------------------
-        
-        DrawFormattedText(wptr, str_subtrial, 'center', 'center', blackcolor);
+        Screen('DrawText', wptr, str_trial, xCenter - 400, yCenter - 100, blackcolor);
+        Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+        %         DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor);
         Screen('Flip', wptr);
-        KbStrokeWait;
+        %         KbStrokeWait;
+        WaitSecs (2);
         
-        if subtrial ~= 4
+        %----------------------------------------------------------------------
+        %  Eyelink file transfer to Display PC and check if fixation correct
+        %  'Fast' method (sample only)
+        %----------------------------------------------------------------------
+        if isEyelink
+            while 1
+                err = Eyelink('CheckRecording');
+                if (err ~= 0)
+                    fprint('EyeLink Recording stopped! \n')
+                    % Transfer a copy of the EDF file to Display PC
+                    Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode
+                    Eyelink('CloseFile'); % Close EDF file on Host PC
+                    Eyelink('Commond','clear_screen 0'); % Clear trial image on Host PC at the end of the experiment
+                    WaitSecs(0.1) %Allow some time for screen drawing
+                    % Transfer a copy of the EDF to Display PC
+                    transferFile; % See transferFile function below
+                    cleanup ; % Abort experiment(see cleanup function below)
+                    return
+                end
+                
+                % Check if a new sample is available online via the link. This is the most recent sample, which is faster than buffered data
+                % This is equivalent to eyeLink_newest_float_samp() in C API.
+                % See Eyelink programmers Guidmanual > function lists > Message
+                % and Command Sending/Recording
+                % Fast method (sample only)
+                if Eyelink('NewFloatSampleAvailable') > 0
+                    % Get sample data in a Matlab structure
+                    evt = Eyelink('NewestFloatSample');
+                    
+                    % save sample properties as variables. See Eyelink
+                    % Programmers Guide manual > Data Structures > FSAMPLE
+                    x = evt.gx(eyeUsed + 1); % [left eye gaze x, right eye gaze x] + 1 as we're accessing a Matlab array
+                    y = evt.gy(eyeUsed + 1); % [Left eye gaze y,right eye gaze y]
+                    
+                    
+                    if (x >= xCenter - gaze_away_pixel && x <= xCenter + gaze_away_pixel) && ...
+                            (y >= yCenter - gaze_away_pixel && y <= yCenter + gaze_away_pixel)
+                        break;
+                    end
+                    
+                    
+                    
+                    
+                    % The following sample properties are also available online
+                    % but are not used in this script;
+                    % evt.time; % Sample EDF time
+                    % evt.type; % Event type (SAMPLE = 200)
+                    % evt.pa; % [left eye poupil size, right eye pupil size]
+                    % evt.rx; % Gaze x 'pixel per degree' value
+                    % evt.ry; % Gaze y 'pixel per degree' value
+                    
+                    %        %----------------------------------------------------------------------
+                    %        %            Buffered data (samples, events)
+                    %        %----------------------------------------------------------------------
+                    %          % Get next data item (sample or event) from link buffer.
+                    %          evtype = Eyelink('GetNextDataType')
+                    %
+                    %          % Read item type returned by getnextdatatype. Wait for end of
+                    %          % saccade (ENDSACC) event
+                    %          if evtype == el.ENDSACC % if end of saccade (ENDSACC) event is returned
+                    %              evt = Eyelink('GetFloatData',evtype); % access the ENDSACC event structure
+                    %
+                    
+                    
+                    Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+                    Screen('Flip',wptr);
+                end
+            end
+        end
+        
+        
+        if trial ~= 4
             
             while respToBeMade
                 
-                %             if currentFrame > 512
-                %                 currentFrame = currentFrame - 512;
-                %             end
-                currentFrame = currentFrame + 1;
-                
-                
+                currentframe = currentframe + 1;
                 back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
                 
+                % make sure the red bar didn't show up at the beginning of
+                % the rotation
+                if currentframe == 1
+                    back.CurrentAngle = barTiltNow - 1;  % back.reverse_anlge_end
+                    %                     back.CurrentAngle = back.reverse_anlge_start - barTiltNow ;
+                end
                 
-                % tilt right  background first rotate clockwise until to the reverse angle
-                if back.CurrentAngle >= back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
-                    back.SpinDirec = - 1;
-                    back.FlagSpinDirecA = back.SpinDirec;
-                    % tilt left
-                elseif back.CurrentAngle <= - back.ReverseAngle  - wedgeTiltNow  %  + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
-                    back.SpinDirec = 1;
-                    back.FlagSpinDirecB = back.SpinDirec;
+                if data.flashTiltDirection(trial) == 1    % CCW
+                    % when larger than certain degree reverse  CCW
+                    if back.CurrentAngle >= 0 + barTiltNow %   back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+                        back.SpinDirec = - 1;
+                        back.FlagSpinDirecA = back.SpinDirec;
+                        %  when lower than certain degree reverse  CW
+                    elseif back.CurrentAngle <= - 180 + barTiltNow %  - back.ReverseAngle  - wedgeTiltNow  %  + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+                        back.SpinDirec = 1;
+                        back.FlagSpinDirecB = back.SpinDirec;
+                    end
+                elseif data.flashTiltDirection(trial) == 2   % CW
+                    % when larger than certain degree reverse  CCW
+                    if back.CurrentAngle >= 180 + barTiltNow %   back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+                        back.SpinDirec = - 1;
+                        back.FlagSpinDirecA = back.SpinDirec;
+                        %  when lower than certain degree reverse  CW
+                    elseif back.CurrentAngle <= barTiltNow  %  - back.ReverseAngle  - wedgeTiltNow  %  + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
+                        back.SpinDirec = 1;
+                        back.FlagSpinDirecB = back.SpinDirec;
+                    end
                 end
                 
                 %    draw background each frame
                 Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.alpha); %  + backGroundRota
                 
-                if subtrial == 2
-                    barRectTiltDegree = wedgeTiltNow + 22.5;
-                    barDrawTiltDegree = back.CurrentAngle - 22.5 + 90;
+                if trial == 2
+                    barRectTiltDegree = barTiltNow + 22.5;
+                    barDrawTiltDegree = back.CurrentAngle - 22.5;
                 else
                     
-                    barRectTiltDegree = wedgeTiltNow;
-                    barDrawTiltDegree = back.CurrentAngle + 90;
+                    barRectTiltDegree = barTiltNow;
+                    barDrawTiltDegree = back.CurrentAngle;
                 end
-                %             barRectTiltDegree = wedgeTiltNow - 360/sectorNumber;    % - 360/sectorNumber
-                %             barDrawTiltDegree = back.CurrentAngle + 360/sectorNumber;  % + 360/sectorNumber
-                
-                
                 % present flash tilt right  CCW
-                if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1   % flash tilt right  CCW
-                    %                 wedgeTiltNow
+                if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1
                     
+                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
+                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);  % DrawTexture 0 deg. = upright
                     
-                    if barLocation == 'l' | barLocation == 'n'
-                        % vertical bar lower visual field
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(barRectTiltDegree), yCenter + dotRadius2Center * cosd(barRectTiltDegree));
-                        
-                    elseif  barLocation == 'u'
-                        % vertical bar upper visual field
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(barRectTiltDegree), yCenter - dotRadius2Center * cosd(barRectTiltDegree));
-                        
-                    end
+                    flashtimes = flashtimes + 1;
+                    barTiltNowMat(trial,flashtimes,block) = barTiltNow;
+                    back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
                     
-                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
+                elseif data.flashTiltDirection(trial) == 2  && back.FlagSpinDirecB == 1
                     
-                    %                 end
-                    flashPresentFlag = 1;
-                    % present flash tilt left  CW
-                elseif data.flashTiltDirection(trial) == 2  && back.FlagSpinDirecB ==  1    % CW
+                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
+                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);
                     
-                    
-                    
-                    if barLocation == 'l' | barLocation == 'n'
-                        % vertical bar lower visual field
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(barRectTiltDegree), yCenter + dotRadius2Center * cosd(barRectTiltDegree));
-                    elseif barLocation == 'u'
-                        % vertical bar upper visual field
-                        barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(barRectTiltDegree), yCenter - dotRadius2Center * cosd(barRectTiltDegree));
-                    end
-                    
-                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
-                    
-                    %                 end
+                    flashtimes = flashtimes + 1;
+                    barTiltNowMat(trial,flashtimes,block) = barTiltNow;
+                    back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
                     
                     flashPresentFlag = 1;
                 else
@@ -437,10 +513,8 @@ for trial = 1:trialNumber
                 % draw fixation
                 
                 fixcolor = 0;
-                
-                Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-                %             Screen('DrawLine',wptr,fixcolor,xCenter-fixsize,yCenter,xCenter+fixsize,yCenter,5);
-                %             Screen('DrawLine',wptr,fixcolor,xCenter,yCenter-fixsize,xCenter,yCenter+fixsize,5);
+                Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+                %                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                 Screen('Flip',wptr);
                 
                 
@@ -456,31 +530,13 @@ for trial = 1:trialNumber
                         return
                         % the bar was on the left of the gabor
                     elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
-                        if barLocation == 'l'| barLocation == 'n'
-                            wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
-                        elseif barLocation == 'u'
-                            wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
-                        end
+                        barTiltNow = barTiltNow - barTiltStep;
                     elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
-                        if barLocation == 'l'| barLocation == 'n'
-                            wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
-                        elseif barLocation == 'u'
-                            wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
-                        end
+                        barTiltNow = barTiltNow + barTiltStep;
                     elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
-                        if barLocation == 'l'| barLocation == 'n'
-                            wedgeTiltNow = wedgeTiltNow - 2 * wedgeTiltStep;
-                        elseif barLocation == 'u'
-                            wedgeTiltNow = wedgeTiltNow + 2 * wedgeTiltStep;
-                        end
-                        
+                        barTiltNow = barTiltNow - 2 * barTiltStep;
                     elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
-                        if barLocation == 'l'| barLocation == 'n'
-                            wedgeTiltNow = wedgeTiltNow + 2 * wedgeTiltStep;
-                        elseif barLocation == 'u'
-                            wedgeTiltNow = wedgeTiltNow - 2 * wedgeTiltStep;
-                        end
-                        
+                        barTiltNow = barTiltNow + 2 * barTiltStep;
                     elseif keyCode(KbName('Space'))
                         respToBeMade = false;
                         %                     prekeyIsDown = 1;
@@ -503,20 +559,15 @@ for trial = 1:trialNumber
             end
             
             
-        elseif subtrial == 4
+        elseif trial == 4
             wedgeTiltStep = 0.1;
             while respToBeMade
                 
-                barRectTiltDegree =  wedgeTiltNow;
-                barDrawTiltDegree = - wedgeTiltNow - 180;
+                barRectTiltDegree =  barTiltNow;
+                barDrawTiltDegree = - barTiltNow - 180;
                 
-                if barLocation == 'l' | barLocation == 'n'
-                    % vertical bar lower visual field
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(barRectTiltDegree), yCenter + dotRadius2Center * cosd(barRectTiltDegree));
-                elseif barLocation == 'u'
-                    % vertical bar upper visual field
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(barRectTiltDegree), yCenter - dotRadius2Center * cosd(barRectTiltDegree));
-                end
+                
+                barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter + centerRingRadius2Center * cosd(barRectTiltDegree));
                 
                 Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
                 
@@ -524,10 +575,9 @@ for trial = 1:trialNumber
                 % draw fixation
                 
                 fixcolor = 0;
+                Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+                %                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                 
-                Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-                %             Screen('DrawLine',wptr,fixcolor,xCenter-fixsize,yCenter,xCenter+fixsize,yCenter,5);
-                %             Screen('DrawLine',wptr,fixcolor,xCenter,yCenter-fixsize,xCenter,yCenter+fixsize,5);
                 Screen('Flip',wptr);
                 
                 
@@ -543,31 +593,13 @@ for trial = 1:trialNumber
                     return
                     % the bar was on the left of the gabor
                 elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
-                    elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
-                    end
+                    barTiltNow = barTiltNow - barTiltStep;
                 elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        wedgeTiltNow = wedgeTiltNow + wedgeTiltStep;
-                    elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow - wedgeTiltStep;
-                    end
+                    barTiltNow = barTiltNow + wedgeTiltStep;
                 elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        wedgeTiltNow = wedgeTiltNow - 2 * wedgeTiltStep;
-                    elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow + 2 * wedgeTiltStep;
-                    end
-                    
+                    barTiltNow = barTiltNow - 2 * wedgeTiltStep;
                 elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
-                    if barLocation == 'l'| barLocation == 'n'
-                        wedgeTiltNow = wedgeTiltNow + 2 * wedgeTiltStep;
-                    elseif barLocation == 'u'
-                        wedgeTiltNow = wedgeTiltNow - 2 * wedgeTiltStep;
-                    end
-                    
+                    barTiltNow = barTiltNow + 2 * wedgeTiltStep;
                 elseif keyCode(KbName('Space'))
                     respToBeMade = false;
                     %                     prekeyIsDown = 1;
@@ -581,44 +613,44 @@ for trial = 1:trialNumber
                 %                      Eyelink  recording
                 %----------------------------------------------------------------------
                 if isEyelink
-                    if currentFrame==1
-                        if subtrial == 1
+                    if currentframe==1
+                        if trial == 1
                             Eyelink('Message','Bar Only');
                         end
-                        if subtrial == 2
+                        if trial == 2
                             Eyelink('Message','Off Sync');
                         end
-                        if subtrial == 3
+                        if trial == 3
                             Eyelink('Message','Flash Grab');
                         end
-                        if subtrial == 4
+                        if trial == 4
                             Eyelink('Message','Perceived Location');
                         end
                     end
                     
-%                     if frameK == PresentFlyFrames+1
-%                         Eyelink('Message',['ball ' num2str(Ntrial) 'stopped at' num2str(GetSecs(), '%10.5f')]);
-%                     end
+                    %                     if frameK == PresentFlyFrames+1
+                    %                         Eyelink('Message',['ball ' num2str(Ntrial) 'stopped at' num2str(GetSecs(), '%10.5f')]);
+                    %                     end
                     
                 end
-                   
+                
                 
             end
         end
         
         if barLocation ~= 'n'
-            if  subtrial == 1      % flash bar only
-                bar_only(trial) = wedgeTiltNow;
-            elseif subtrial == 2   % off-sync
-                off_sync(trial) = wedgeTiltNow;
-            elseif subtrial == 3     % flash grab
-                flash_grab(trial) = wedgeTiltNow;
-            elseif subtrial == 4  % perceived location or none
-                perceived_location(trial) = wedgeTiltNow;
+            if  trial == 1      % flash bar only
+                bar_only(block) = barTiltNow;
+            elseif trial == 2   % off-sync
+                off_sync(block) = barTiltNow;
+            elseif trial == 3     % flash grab
+                flash_grab(block) = barTiltNow;
+            elseif trial == 4  % perceived location or none
+                perceived_location(block) = barTiltNow;
             end
             
         else
-            grab_effect_degree(trial) = wedgeTiltNow;
+            grab_effect_degree(block) = barTiltNow;
         end
         
         WaitSecs (0.5);
@@ -635,11 +667,11 @@ if isEyelink
     Eyelink('stopRecording');
     Eyelink('command','set_idle_mode');
     iSuccess = Eyelink('ReceiveFile', [], edfDir, 1);
-            disp(conditional(iSuccess > 0, ['Eyelink File Received, file size is ' num2str(iSuccess)], ...
-                'Something went wrong with receiving the Eyelink File'));
+    disp(conditional(iSuccess > 0, ['Eyelink File Received, file size is ' num2str(iSuccess)], ...
+        'Something went wrong with receiving the Eyelink File'));
     WaitSecs(0.5);
     Eyelink('CloseFile')
-
+    
     % try
     %     fprint('Receiving data file "%s"\n',edfFile);
     %     status = Eyelink('ReceivingFile');
@@ -652,55 +684,36 @@ if isEyelink
     % catch
     %     fprintf('Problem Receiving data file "%s"\n',edfFile);
     % end
-
+    
     Eyelink('ShutDown');
 end
 
 %----------------------------------------------------------------------
 %                      save parameters files
 %----------------------------------------------------------------------
-% dir = sprintf(['../data/' '%s/'],sbjname);
-% if ~isdir(dir)
-%     mkdir(dir)
-% end
 
-
-if  barLocation == 'u'
-    if condition == 'vi2invi'
-        savePath = '../../data/corticalBlindness/bar/upper_field/vi2invi/';
-    elseif condition == 'invi2vi'
-        savePath = '../../data/corticalBlindness/bar/upper_field/invi2vi/';
-    end
-elseif  barLocation == 'l'
-    if condition == 'vi2invi'
-        savePath = '../../data/corticalBlindness/bar/lower_field/vi2invi/';
-    elseif condition == 'invi2vi'
-        savePath = '../../data/corticalBlindness/bar/lower_field/invi2vi/';
-    end
-elseif  barLocation == 'n'
-    savePath = '../../data/corticalBlindness/bar/normal_field/';
+dir = sprintf(['../../../data/corticalBlindness/Eyelink_guiding/' '%s/'],sbjname);
+if ~isdir(dir)
+    mkdir(dir)
 end
 
+savePath = dir;
 
 time = clock;
 
-filename = sprintf('%s_%02g_%02g_%02g_%02g_%02g',sbjname,time(1),time(2),time(3),time(4),time(5));
+filename = sprintf('%s_%s_%s_%02g_%02g_%02g_%02g_%02g',sbjname,condition,barLocation,time(1),time(2),time(3),time(4),time(5));
 filename2 = [savePath,filename];
 % save(filename2,'data','back');
 save(filename2);
 
 
-
-
-
-
 % %----------------------------------------------------------------------
 % %                    average illusion size
 % %----------------------------------------------------------------------
-% 
+%
 % illusionCCWIndex = find(data.flashTiltDirection == 1);
 % illusionCWIndex = find(data.flashTiltDirection == 2);
-% 
+%
 % % if strcmp(barlocation,'u')
 % %     quardant
 % bar_CCWDegree = mean(bar_only(illusionCCWIndex));
@@ -709,12 +722,12 @@ save(filename2);
 % off_sync_CWDegree = mean(off_sync(illusionCWIndex));
 % flash_grab_CCWDegree = mean(flash_grab(illusionCCWIndex));
 % flash_grab_CWDegree = mean(flash_grab(illusionCWIndex));
-% 
+%
 % if strcmp(condition, 'invi2vi')
 %     perceived_location_CCWDegree = mean(perceived_location(illusionCCWIndex));
 %     perceived_location_CWDegree = mean(perceived_location(illusionCWIndex));
 % end
-% 
+%
 % if strcmp(condition, 'vi2invi')
 %     y = [bar_CCWDegree off_sync_CCWDegree flash_grab_CCWDegree bar_CWDegree off_sync_CWDegree flash_grab_CWDegree];
 %     h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1);
@@ -724,8 +737,8 @@ save(filename2);
 %     h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1);
 %     set(gca, 'XTick', 1:8, 'XTickLabels', {'bar-CCW' 'off-sync-CCW' 'grab-CCW' 'perc-CCW' 'bar-CW' 'off-sync-CW' 'grab-CW' 'perc-CW'},'fontsize',20,'FontWeight','bold');
 % end
-% 
-% 
+%
+%
 % set(gcf,'color','w');
 % set(gca,'box','off');
 % % title('Illusion size','FontSize',25);

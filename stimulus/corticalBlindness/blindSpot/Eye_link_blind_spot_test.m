@@ -1,7 +1,9 @@
-% generate a flash-grab checkerboard event-related for testing whether SC
-% response to the illusion or physical position
-% flash tilt right:   data.flashTiltDirection(block,trial) == 1  && back.FlagSpinDirecA ==  - 1
-% flash perceived tilt left :   data.flashTiltDirection(block,trial) == 2  && back.FlagSpinDirecB ==  1
+% test the right eye blind spot using an adjustable red bar
+% '1' for bar length reduce '2' for enlarge
+% 'right arrow' for moving rightward and 'left arrow' for moving leftward
+% At the beginning of each trial the fixation should within
+% "gaze_away_visual_degree"  then the trial could begin
+% 20230117 Jiahan Hui
 
 
 clear all;close all;
@@ -275,7 +277,13 @@ for trial = 1 : trialNumber
     %%%                     parameters of  red bar
     %----------------------------------------------------------------------
     barWidth = 20;
-    barLength = barLengthStart_pixel;
+    
+    if trial == 1
+        barLength = barLengthStart_pixel;
+    else
+        barLength = data.barLengthPixel(trial - 1);
+        barPosition_from_center = data.barPositionFromCenterPixel(trial - 1);
+    end
     
     while respToBeMade
         
@@ -387,8 +395,11 @@ if isEyelink
         if status > 0
             fprintf('ReceiveFile status %d\n', status);
         end
+        
+        eyelinkDataSavePath = '../../../data/corticalBlindness/blindspot/eyelink/';
+        
         if 2==exist(edfFile, 'file')
-            fprintf('Data file ''%s'' can be found in ''%s''\n', edfFile, pwd );
+            fprintf('Data file ''%s'' can be found in ''%s''\n', edfFile, eyelinkDataSavePath);
         end
     catch
         fprintf('Problem receiving data file ''%s''\n', edfFile );
@@ -418,8 +429,11 @@ filename2 = [savePath,filename];
 save(filename2);
 
 %----------------------------------------------------------------------
-%                    average illusion size
+%        average blind spot width and distance
 %----------------------------------------------------------------------
-
+barLengthPixelAve = mean(data.barLengthPixel);
+barPositionFromCenterPixelAve = mean(data.barPositionFromCenterPixel);
+barLengthVisualDegreeAve = mean(data.barLengthVisualDegree);
+barPositionFromCenterVisualDegreeAve = mean(data.barPositionFromCenterVisualDegree);
 
 sca;

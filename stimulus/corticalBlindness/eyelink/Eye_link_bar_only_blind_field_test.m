@@ -11,7 +11,7 @@ if 1
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
     isEyelink = 0;
-    eyelinkfilename_eye = sbjname;
+    eyelinkfilename_eye = 'bar_only_hjh';
     
 else
     
@@ -71,10 +71,11 @@ KbName('UnifyKeyNames');
 
 eyeScreenDistence = 66;  % 78cm  68sunnannan
 screenHeight = 33.5; % 26.8 cm
-sectorRadius_out_visual_degree = 16; % sunnannan 9.17  mali 11.5
-sectorRadius_in_visual_degree = 14; % sunnannan 5.5   mali7.9
+sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
+sectorRadius_in_visual_degree = 5.5; % sunnannan 5.5   mali7.9
 sectorRadius_out_pixel = round(tand(sectorRadius_out_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
 sectorRadius_in_pixel = round(tand(sectorRadius_in_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
+centerRingRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 
 % eye gaze distance from center
 gaze_away_visual_degree = 0.5;
@@ -87,9 +88,6 @@ gaze_away_pixel = round(tand(gaze_away_visual_degree) * eyeScreenDistence *  rec
 
 sectorNumber = 8;
 
-% sectorRadius_in_pixel = floor((visualHeightIn7T_pixel - 400)/2);    % inner diameter of background annulus
-% sectorRadius_out_pixel = floor((visualHeightIn7T_pixel - 20)/2);%  %         annnulus outer radius
-dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 [sector] = drawBackgroundSector(sectorNumber,sectorRadius_in_pixel,sectorRadius_out_pixel,blackcolor,whitecolor,xCenter,yCenter,centerMovePix);
 
 sectorTex = Screen('MakeTexture', wptr, sector);
@@ -98,20 +96,22 @@ sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter,yCenter-centerMoveP
 Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 %----------------------------------------------------------------------
-%%%                     parameters of red dot  and red bar
+%%%                     parameters of red bar
 %----------------------------------------------------------------------
 barWidth = 20;
 barLength = (sectorRadius_out_pixel - sectorRadius_in_pixel);
+barRect = [-barLength/2  -barWidth/2  barLength/2  barWidth/2];
+
 
 % Define a vertical red rectangle
-barMat(:,:,1) = repmat(255, barWidth, barLength);
-barMat(:,:,2) = repmat(0,  barWidth, barLength);
+barMat(:,:,1) = repmat(255,  barLength,barWidth);
+barMat(:,:,2) = zeros(barLength,  barWidth);
 barMat(:,:,3) = barMat(:,:,2);
+
 
 % % % Make the rectangle into a texure
 barTexture = Screen('MakeTexture', wptr, barMat);
 barRect = Screen('Rect',barTexture);
-
 %----------------------------------------------------------------------
 %%%            Eyelink setting up
 %----------------------------------------------------------------------
@@ -219,23 +219,18 @@ end
 
 trialNumber = 2;
 blockNumber = 2;
-% back.contrastratio = 1;
-% trialNumber = 3;
-back.CurrentAngle = 0;
-% back.AngleRange = 180;
 
-% back.SpinSpeed = 4; % degree/frame     138  degree/sec    max 270
+back.CurrentAngle = 0;
 back.SpinDirec = 1; % 1 means clockwise     -1 means counter-clockwise
 back.FlagSpinDirecA = 0;  % flash tilt right
 back.FlagSpinDirecB = 0;  % flash tilt left
 
 barTiltStep = 1; %2.8125   1.40625;
 back.alpha = 0; % background transparence
-barTiltStartLower = 0;
-barTiltStartUpper =  0;
+barTiltStartUpper = 0;
+barTiltStartLower = 120;
 
-% wedgeTiltIncre = 0;
-back.SpinSpeed = 6;% 2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
+back.SpinSpeed = 3;% 2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
 back.velocity = back.SpinSpeed * framerate;
 back.ReverseAngle = 90; % duration frame of checkerboard
 % each experiment generate the same sequence for flash direction,
@@ -258,17 +253,22 @@ for block = 1 : blockNumber
     %       present a start screen and wait for a key-press
     %----------------------------------------------------------------------
     
-    formatSpec = 'This is the %dth of %d block. Press Any Key To Begin';
+    %     str = 'Fixation on the cross then the next trial will began';
+    %     %     DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
+    %     Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
+    %     Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+    %     Screen('Flip', wptr);
+    %     WaitSecs (2);
+    
+    formatSpec = 'This is the %dth of %d block. Fixation on the cross to start the trial';
     A1 = block;
     A2 = blockNumber;
     str = sprintf(formatSpec,A1,A2);
-    DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
-    %         DrawFormattedText(wptr, '\n\nPress Any Key To Begin', 'center', 'center', blackcolor);
-    %         fprintf(1,'\tTrial number: %2.0f\n',trialNumber);
-    
+    %     DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
+    Screen('DrawText', wptr, str, xCenter - 400, yCenter - 100, blackcolor);
+    Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
     Screen('Flip', wptr);
-    
-    KbStrokeWait;
+    WaitSecs (2);
     
     
     for trial = 1:trialNumber
@@ -281,6 +281,7 @@ for block = 1 : blockNumber
         prekeyIsDown = 0;
         data.flashTiltDirection(block,trial) = back.flashTiltDirectionMatShuff(trial);
         currentframe = 0;
+        flashtimes = 0;
         
         % the first row is for upper field
         if block == 1
@@ -291,7 +292,7 @@ for block = 1 : blockNumber
             barLocation = 'l';
             barTiltNow = barTiltStartLower;
         end
-                
+        
         %----------------------------------------------------------------------
         %  Eyelink file transfer to Display PC and check if fixation correct
         %  'Fast' method (sample only)
@@ -362,9 +363,9 @@ for block = 1 : blockNumber
             end
         end
         
-       
+        
         while respToBeMade
-
+            
             currentframe = currentframe + 1;
             back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
             
@@ -374,7 +375,7 @@ for block = 1 : blockNumber
                 back.CurrentAngle = barTiltNow - 1;  % back.reverse_anlge_end
                 %                     back.CurrentAngle = back.reverse_anlge_start - barTiltNow ;
             end
-        
+            
             if data.flashTiltDirection(trial) == 1    % CCW
                 % when larger than certain degree reverse  CCW
                 if back.CurrentAngle >= 0 + barTiltNow %   back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
@@ -397,47 +398,31 @@ for block = 1 : blockNumber
                 end
             end
             
-            %    draw background each frame
-            Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.alpha); %  + backGroundRota
-            
-            
-            % present flash tilt right
-            if data.flashTiltDirection(block,trial) == 1  && back.FlagSpinDirecA ==  - 1   % flash tilt right
+            if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1
                 
-                % background on the vertical meridian the left part is always
-                % white and the right part is always black
-                %  the location of the red dot is present in the middle of annlus (between outer and inner radii)
+                barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
+                Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);  % DrawTexture 0 deg. = upright
                 
-                if barLocation == 'l' | barLocation == 'lowerleft'
-                    % vertical bar lower visual field
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(barTiltNow), yCenter + dotRadius2Center * cosd(barTiltNow));
-                elseif  barLocation == 'u'
-                    % vertical bar upper visual field
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(barTiltNow), yCenter - dotRadius2Center * cosd(barTiltNow));
-                    
-                end
-                Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,back.CurrentAngle);
+                flashtimes = flashtimes + 1;
+                barTiltNowMat(trial,flashtimes,block) = barTiltNow;
+                back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
                 
-                flashPresentFlag = 1;
-                % present flash tilt left
-            elseif data.flashTiltDirection(block,trial) == 2  && back.FlagSpinDirecB ==  1    % flash tilt left
+            elseif data.flashTiltDirection(trial) == 2  && back.FlagSpinDirecB == 1
                 
+                barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
+                Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);
                 
-                if barLocation == 'l' | barLocation == 'lowerleft'
-                    % vertical bar lower visual field
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + dotRadius2Center * sind(barTiltNow), yCenter + dotRadius2Center * cosd(barTiltNow));
-                elseif barLocation == 'u'
-                    % vertical bar upper visual field
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter - dotRadius2Center * sind(barTiltNow), yCenter - dotRadius2Center * cosd(barTiltNow));
-                    
-                end
-                Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,back.CurrentAngle);
-                
+                flashtimes = flashtimes + 1;
+                barTiltNowMat(trial,flashtimes,block) = barTiltNow;
+                back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
                 
                 flashPresentFlag = 1;
             else
                 flashPresentFlag = 0;
             end
+            
+            
+            
             
             back.FlagSpinDirecA = 0;
             back.FlagSpinDirecB = 0;
@@ -550,8 +535,11 @@ if isEyelink
         if status > 0
             fprintf('ReceiveFile status %d\n', status);
         end
+        
+        eyelinkDataSavePath = '../../../data/corticalBlindness/Eyelink_guiding/';
+        
         if 2==exist(edfFile, 'file')
-            fprintf('Data file ''%s'' can be found in ''%s''\n', edfFile, pwd );
+            fprintf('Data file ''%s'' can be found in ''%s''\n', edfFile, eyelinkDataSavePath );
         end
     catch
         fprintf('Problem receiving data file ''%s''\n', edfFile );
