@@ -11,10 +11,10 @@ clear all;close all;
 if 1
     sbjname = 'k';
     debug = 'n';
-    flashRepresentFrame = 4.2;  % 2.2 means 3 frame
+    flashRepresentFrame = 5.2;  % 2.2 means 3 frame
     barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
-    isEyelink = 0;
+    isEyelink = 1;
     eyelinkfilename_eye = 'hjh' ;
     blindspot = 'y';
 else
@@ -36,8 +36,8 @@ end
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
 
-addpath ../../function;
-addpath ../../FGE_subcortex_new/flashgrabExp_7T_layer;
+addpath ../../../function;
+addpath ../../../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
@@ -319,36 +319,36 @@ for block = 1:blockNumber
             if trial == 1    % flash bar only
                 back.alpha = 0;
                 if strcmp(condition, 'vi2invi')
-                    str_trial = '\n Adjust the bar from visible to invisible   \n\n Fixation on the cross to start the trial';
+                    str_trial = ['Adjust the bar from visible to invisible.\n '   '\n\n Fixation on the cross to start the trial. \n'];
                 elseif strcmp(condition,'invi2vi')
-                    str_trial = '\n Adjust the bar from invisible to visible   \n\n Fixation on the cross to start the trial';
+                    str_trial = ['Adjust the bar from invisible to visible.\n '    '\n\n Fixation on the cross to start the trial. \n'];
                 end
             elseif trial == 2   % off-sync
                 if strcmp(condition, 'vi2invi')
-                    barTiltNow = bar_only(block) + multiplier * 20;
-                    str_trial = '\n Adjust the bar from visible to invisible   \n\n Fixation on the cross to start the trial';
+                    barTiltNow = bar_only(block);
+                    str_trial = ['\n Adjust the bar from visible to invisible'    '\n\n Fixation on the cross to start the trial'];
                 elseif strcmp(condition,'invi2vi')
                     barTiltNow = bar_only(block);
-                    str_trial = '\n Adjust the bar from invisible to visible   \n\n Fixation on the cross to start the trial';
+                    str_trial = ['\n Adjust the bar from invisible to visible'     '\n\n Fixation on the cross to start the trial'];
                 end
                 
             elseif trial == 3   % flash grab
                 
                 if strcmp(condition, 'vi2invi')
-                    str_trial = '\n Adjust the bar from visible to invisible and remember the last location you have seen \n\n Fixation on the cross to start the trial';
+                    str_trial = ['\n Adjust the bar from visible to invisible and \n\n remember the last location you have seen'  '\n\n Fixation on the cross to start the trial'];
                     barTiltNow = bar_only(block) + multiplier * 20;
                 elseif strcmp(condition,'invi2vi')
-                    str_trial = '\n Adjust the bar from invisible to visible and remember the location  \n\n Fixation on the cross to start the trial';
+                    str_trial = ['\n Adjust the bar from invisible to visible and remember the location'   '\n\n Fixation on the cross to start the trial'];
                     barTiltNow = bar_only(block);
                 end
                 
             elseif trial == 4  % perceived location
-                str_trial = '\n Adjust the bar to the perceived location   \n\n Fixation on the cross to start the trial'
-                barTiltNow = barTiltNow;
+                str_trial = ['\n Adjust the bar to the perceived location'    '\n\n Fixation on the cross to start the trial'];
+                barTiltNow = bar_only(block);
                 %                 back.alpha = 0;
             end
         elseif barLocation == 'n'
-            barTiltNow = wedgeTiltStartNormal;
+            barTiltNow = barTiltStartNormal;
             str_trial = '\n Adjust the bar until horizon   \n\n Fixation on the cross to start the trial'
         end
         
@@ -356,9 +356,10 @@ for block = 1:blockNumber
         %----------------------------------------------------------------------
         %     task instruction  adjust the bar
         %----------------------------------------------------------------------
-        Screen('DrawText', wptr, str_trial, xCenter - 400, yCenter - 100, blackcolor);
+%         Screen('DrawText', wptr, str_trial, xCenter - 400, yCenter - 100, blackcolor);
         Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
-        %         DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor);
+%         DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor);
+        DrawFormattedText(wptr, str_trial, xCenter - 200, yCenter - 200, blackcolor);
         Screen('Flip', wptr);
         %         KbStrokeWait;
         WaitSecs (2);
@@ -402,9 +403,6 @@ for block = 1:blockNumber
                             (y >= yCenter - gaze_away_pixel && y <= yCenter + gaze_away_pixel)
                         break;
                     end
-                    
-                    
-                    
                     
                     % The following sample properties are also available online
                     % but are not used in this script;
@@ -474,27 +472,27 @@ for block = 1:blockNumber
                 Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,back.CurrentAngle,[],back.alpha); %  + backGroundRota
                 
                 if trial == 2
-                    barRectTiltDegree = barTiltNow + 22.5;
-                    barDrawTiltDegree = back.CurrentAngle - 22.5;
+                    barRectTiltDegree = barTiltNow - 22.5;
+                    barDrawTiltDegree = barTiltNow - 22.5;  % back.CurrentAngle - 22.5
                 else
-                    
                     barRectTiltDegree = barTiltNow;
-                    barDrawTiltDegree = back.CurrentAngle;
+                    barDrawTiltDegree = barTiltNow; % back.CurrentAngle
                 end
                 % present flash tilt right  CCW
                 if data.flashTiltDirection(trial) == 1  && back.FlagSpinDirecA ==  - 1
                     
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
-                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);  % DrawTexture 0 deg. = upright
+                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
+                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);  % DrawTexture 0 deg. = upright
                     
                     flashtimes = flashtimes + 1;
                     barTiltNowMat(trial,flashtimes,block) = barTiltNow;
                     back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
+                    flashPresentFlag = 1;
                     
                 elseif data.flashTiltDirection(trial) == 2  && back.FlagSpinDirecB == 1
                     
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barTiltNow), yCenter - centerRingRadius2Center * cosd(barTiltNow));
-                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barTiltNow);
+                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
+                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
                     
                     flashtimes = flashtimes + 1;
                     barTiltNowMat(trial,flashtimes,block) = barTiltNow;
@@ -560,15 +558,15 @@ for block = 1:blockNumber
             
             
         elseif trial == 4
-            wedgeTiltStep = 0.1;
+            
+            barMovStep = 0.1;
+            
             while respToBeMade
                 
                 barRectTiltDegree =  barTiltNow;
-                barDrawTiltDegree = - barTiltNow - 180;
+                barDrawTiltDegree = barTiltNow;
                 
-                
-                barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter + centerRingRadius2Center * cosd(barRectTiltDegree));
-                
+                barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
                 Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
                 
                 
@@ -593,13 +591,13 @@ for block = 1:blockNumber
                     return
                     % the bar was on the left of the gabor
                 elseif keyCode(KbName('1')) || keyCode(KbName('1!'))
-                    barTiltNow = barTiltNow - barTiltStep;
+                    barTiltNow = barTiltNow - barMovStep;
                 elseif keyCode(KbName('2')) || keyCode(KbName('2@'))
-                    barTiltNow = barTiltNow + wedgeTiltStep;
+                    barTiltNow = barTiltNow + barMovStep;
                 elseif keyCode(KbName('4')) || keyCode(KbName('4$'))
-                    barTiltNow = barTiltNow - 2 * wedgeTiltStep;
+                    barTiltNow = barTiltNow - 2 * barMovStep;
                 elseif keyCode(KbName('5')) || keyCode(KbName('5%'))
-                    barTiltNow = barTiltNow + 2 * wedgeTiltStep;
+                    barTiltNow = barTiltNow + 2 * barMovStep;
                 elseif keyCode(KbName('Space'))
                     respToBeMade = false;
                     %                     prekeyIsDown = 1;
@@ -666,24 +664,26 @@ display(GetSecs - ScanOnset);
 if isEyelink
     Eyelink('stopRecording');
     Eyelink('command','set_idle_mode');
-    iSuccess = Eyelink('ReceiveFile', [], edfDir, 1);
-    disp(conditional(iSuccess > 0, ['Eyelink File Received, file size is ' num2str(iSuccess)], ...
-        'Something went wrong with receiving the Eyelink File'));
+%     iSuccess = Eyelink('ReceiveFile', [], edfdir, 1);
+%     disp(conditional(iSuccess > 0, ['Eyelink File Received, file size is ' num2str(iSuccess)], ...
+%         'Something went wrong with receiving the Eyelink File'));
     WaitSecs(0.5);
     Eyelink('CloseFile')
     
-    % try
-    %     fprint('Receiving data file "%s"\n',edfFile);
-    %     status = Eyelink('ReceivingFile');
-    %     if status > 0
-    %         fprintf('ReciveFile status %d\n',status);
-    %     end
-    %     if 2==exist(edfFile,'file')1
-    %         fprintf('Data file "%s" can be found in "%s"\n',edfFile,pwd)
-    %     end
-    % catch
-    %     fprintf('Problem Receiving data file "%s"\n',edfFile);
-    % end
+    try
+        fprint('Receiving data file "%s"\n',edfFile);
+        status = Eyelink('ReceivingFile');
+        if status > 0
+            fprintf('ReciveFile status %d\n',status);
+        end
+        eyelinkDataSavePath = '../../../data/corticalBlindness/Eyelink_guiding/';
+        
+        if 2==exist(edfFile,'file')
+            fprintf('Data file "%s" can be found in "%s"\n',edfFile,eyelinkDataSavePath)
+        end
+    catch
+        fprintf('Problem Receiving data file "%s"\n',edfFile);
+    end
     
     Eyelink('ShutDown');
 end
