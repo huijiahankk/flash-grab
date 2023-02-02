@@ -34,7 +34,7 @@ if 1
     isEyelink = 0;
     eyelinkfilename_eye = 'hjh' ;
     blindspot = 'y';
-    blurredBoundaryExp = 'n';
+    blurredBoundaryExp = 'y';
 else
     
     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -794,12 +794,26 @@ end
 %                      save parameters files
 %----------------------------------------------------------------------
 
-dir = sprintf(['../../../data/corticalBlindness/Eyelink_guiding/' '%s/'],sbjname);
-if ~isdir(dir)
-    mkdir(dir)
+subdir = sprintf(['../../../data/corticalBlindness/Eyelink_guiding/' '%s/'],sbjname);
+if ~isdir(subdir)
+    mkdir(subdir)
 end
 
-savePath = dir;
+if strcmp(blurredBoundaryExp,'y')
+    expdir = strcat(subdir,'blurredBoundary');
+elseif strcmp(blurredBoundaryExp,'n')
+    expdir = strcat(subdir,'sectorEight');
+end
+
+if strcmp(blindspot,'y')
+    expdir = strcat(subdir,'blindspot');
+end
+
+if ~isdir(expdir)
+    mkdir(expdir)
+end
+
+savePath = expdir;
 
 time = clock;
 

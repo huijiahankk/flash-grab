@@ -33,7 +33,7 @@ if 1
     condition = 'invi2vi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 0;
     eyelinkfilename_eye = 'hjh' ;
-    blindspot = 'n';
+    blindspot = 'y';
     blurredBoundaryExp = 'y';
 else
     
@@ -132,7 +132,8 @@ if blurredBoundaryExp == 'y'
     backgroundTexture = Screen('MakeTexture', wptr, ringBlurredBoundaryMat);
     backgroundRect = Screen('Rect',backgroundTexture);
     backgroundDestinationRect = CenterRectOnPoint(backgroundRect,xCenter,yCenter);
-    
+    Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+     
     %----------------------------------------------------------------------
     %                      draw background 8 sector
     %----------------------------------------------------------------------
@@ -360,11 +361,8 @@ for block = 1:blockNumber
         %                      background rotate
         %----------------------------------------------------------------------
         respToBeMade = true;
-        %     while respToBeMade
         flashPresentFlag = 0;
         prekeyIsDown = 0;
-        
-        back.alpha = 1;
         currentframe = 0;
         flashtimes = 0;
         
@@ -526,23 +524,6 @@ for block = 1:blockNumber
                 currentframe = currentframe + 1;
                 back.CurrentAngle = back.CurrentAngle + back.SpinDirec * back.SpinSpeed;
                 
-                % for off sync condition the background rotate 22.5 degree
-                % more
-                
-%                 if strcmp(blurredBoundaryExp,'y')
-%                     if trial == 3
-%                         off_sync_adjust = 90;
-%                     else
-%                         off_sync_adjust = 0;
-%                     end
-%                 elseif strcmp(blurredBoundaryExp,'n')
-%                     if trial == 2
-%                         off_sync_adjust = 22.5;
-%                     else
-%                         off_sync_adjust = 0;
-%                     end
-%                 end
-                
                 
                 % make sure the red bar didn't show up at the beginning of
                 % the rotation
@@ -577,11 +558,18 @@ for block = 1:blockNumber
                 %    draw background each frame
                 if strcmp(blurredBoundaryExp,'y')
                     if trial == 3
-                    back.presentAngle = back.currentAngle + 90;
-                    else 
-                        back.presentAngle = back.currentAngle;
+                        back.presentAngle = back.CurrentAngle + 90;
+                    else
+                        back.presentAngle = back.CurrentAngle;
+                    end
                 elseif strcmp(blurredBoundaryExp,'n')
-                    
+                    if trial == 2
+                        back.presentAngle = back.CurrentAngle + 22.5;
+                    else
+                        back.presentAngle = back.CurrentAngle;
+                    end
+                end
+                
                 Screen('DrawTexture',wptr,backgroundTexture,backgroundRect,backgroundDestinationRect,back.presentAngle,[],back.alpha);
                 
                 barRectTiltDegree = barTiltNow;
@@ -806,12 +794,17 @@ end
 %                      save parameters files
 %----------------------------------------------------------------------
 
-dir = sprintf(['../../../data/corticalBlindness/Eyelink_guiding/' '%s/'],sbjname);
-if ~isdir(dir)
-    mkdir(dir)
+subdir = sprintf(['../../../data/corticalBlindness/Eyelink_guiding/' '%s/'],sbjname);
+if ~isdir(subdir)
+    mkdir(subdir)
 end
 
-savePath = dir;
+if strcmp(blurredBoundaryExp,'y')
+  expdir =   strcat(subdir,'blurredBoundary')
+ if ~isdir(expdir)
+    mkdir(subdir)
+end   
+savePath = strcat(subdir,'/blurredBoundary');
 
 time = clock;
 
