@@ -20,7 +20,7 @@ clear all;close all;
 if 1
     sbjname = 'k';
     debug = 'n';
-    flashRepresentFrame = 2.2;  % 2.2 means 3 frame
+    flashRepresentFrame = 2.2;  % 2.2 means 3 frame    for blindspot normal subject is 4.2 frame
     redbarflash_flag = 1; % barflash_flag = 0  no red flash bar    barflash_flag = 1  with red flashed bar
     barLocation = 'l';  % u  upper visual field   l   lower visual field n  normal
     condition = 'invi2vi';   % 'vi2invi'  'invi2vi'   'normal'

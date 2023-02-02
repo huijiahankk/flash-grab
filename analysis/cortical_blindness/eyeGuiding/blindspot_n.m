@@ -6,7 +6,7 @@ clear all;
 addpath '../../../function';
 
 % pValue = input('>>>Calculate p Value? (y/n):  ','s');
-sbjnames = { 'hjh5frame' } ; % 6'maguangquan'     7'wutianjiang'    5'mali'
+sbjnames = { 'k_vi2invi_u' } ; % 6'maguangquan'     7'wutianjiang'    5'mali'
 
 path = '../../../data/corticalBlindness/Eyelink_guiding/k/';
 % areaFolderName = fullfile(path, folders{folderNum});

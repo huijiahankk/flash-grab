@@ -311,6 +311,21 @@ for trial = 1 : trialNumber
         Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
         Screen('Flip',wptr);
         
+        if isEyelink
+            if Eyelink('NewFloatSampleAvailable') > 0
+                % Get sample data in a Matlab structure
+                evt = Eyelink('NewestFloatSample');
+                
+                % save sample properties as variables. See Eyelink
+                % Programmers Guide manual > Data Structures > FSAMPLE
+                x = evt.gx(eyeUsed + 1); % [left eye gaze x, right eye gaze x] + 1 as we're accessing a Matlab array
+                y = evt.gy(eyeUsed + 1); % [Left eye gaze y,right eye gaze y]
+                if (x >= xCenter - gaze_away_pixel && x <= xCenter + gaze_away_pixel) && ...
+                        (y >= yCenter - gaze_away_pixel && y <= yCenter + gaze_away_pixel)
+                    break;
+                end
+            end
+        end
         %----------------------------------------------------------------------
         %                      Response record
         %----------------------------------------------------------------------
