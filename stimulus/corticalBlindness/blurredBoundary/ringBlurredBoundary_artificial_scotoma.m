@@ -55,7 +55,7 @@ whitecolor = WhiteIndex(screenNumber);
 greycolor = (whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
 
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [displaywidth, ~] = Screen('DisplaySize', screenNumber);
 % [screenXpixels, screenYpixels] = Screen('WindowSize', wptr);
@@ -93,10 +93,17 @@ centerRingRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 %----------------------------------------------------------------------
 %             Blind field parameter
 %----------------------------------------------------------------------
+blindfield_deviate_center_visual_degree = 7;  % degree from horizontal meridian
+blindfield_deviate_center_pixel = round(tand(blindfield_deviate_center_visual_degree) * eyeScreenDistence *  rect(4)/screenHeight);
+blindfieldRadius_visual_degree = 4;
+blindfieldRadius_pixel = round(tand(blindfieldRadius_visual_degree) * eyeScreenDistence *  rect(4)/screenHeight);
 
-blindfieldDegree = 40;  % degree from horizontal meridian
-blindfieldRadius = centerRingRadius2Center * sind(blindfieldDegree);  %pixel
-blindfield_shift = centerRingRadius2Center + 65;
+
+blindfieldDegree = radi2ang(asin(blindfieldRadius_pixel/centerRingRadius2Center));
+
+% blindfieldDegree = 40;  % degree from horizontal meridian
+% blindfieldRadius = centerRingRadius2Center * sind(blindfieldDegree);  %pixel
+% blindfield_shift = centerRingRadius2Center + 65;
 
 %----------------------------------------------------------------------
 %%%          parameters of blurred boundary
@@ -141,6 +148,7 @@ if strcmp(condition, 'normal')
 else
     trialNumber = 5;
 end
+
 
 barTiltStartUpper = 90 - blindfieldDegree;% - 90 + blindfieldDegree - 10;   % -10 from invi2vi
 barTiltStartLower = 90 + blindfieldDegree;
@@ -395,8 +403,8 @@ for block = 1:blockNumber
                 fixcolor = 0;
                 
                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-                Screen('FillOval',wptr,blindfieldColor,[xCenter + blindfield_shift - blindfieldRadius, yCenter - blindfieldRadius,...
-                    xCenter + blindfield_shift + blindfieldRadius, yCenter + blindfieldRadius]);
+                Screen('FillOval',wptr,blindfieldColor,[xCenter + blindfield_deviate_center_pixel - blindfieldRadius_pixel, yCenter - blindfieldRadius,...
+                    xCenter + blindfield_deviate_center_pixel + blindfieldRadius_pixel, yCenter + blindfieldRadius_pixel]);
                 Screen('Flip',wptr);
                 
                 %----------------------------------------------------------------------

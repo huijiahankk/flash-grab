@@ -6,15 +6,18 @@ clear all;
 addpath '../../../function';
 
 % pValue = input('>>>Calculate p Value? (y/n):  ','s');
-sbjnames = { 'k_vi2invi_u' } ; % 6'maguangquan'     7'wutianjiang'    5'mali'
+sbjnames = {'k'};
+expconNames = { '_invi2vi_u' '_vi2invi_u'} ; %  'k_invi2vi_l','k_vi2invi_l' 'k_invi2vi_u' 'k_vi2invi_u'
 
-path = '../../../data/corticalBlindness/Eyelink_guiding/k/';
+path = sprintf(['../../../data/corticalBlindness/Eyelink_guiding/blindspot/'  '%s/'],sbjnames{1});
+
 % areaFolderName = fullfile(path, folders{folderNum});
 cd(path);
 
 
-for sbjnum = 1:length(sbjnames)
-    s1 = string(sbjnames(sbjnum));
+for expcondition = 1:length(expconNames)
+    %     s1 = string(expconNames(expcondition));
+    s1 = num2str(cell2mat(strcat(sbjnames,expconNames(expcondition))));
     s2 = '*.mat';
     s3 = strcat(s1,s2);
     
@@ -23,37 +26,36 @@ for sbjnum = 1:length(sbjnames)
     load (Files.name);
     
     
-    if strcmp(condition, 'vi2invi')
-        illusionCCWIndex = find(data.flashTiltDirection == 1);
-        illusionCWIndex = find(data.flashTiltDirection == 2);
-    end
+%     if strcmp(condition, 'vi2invi')
+%         illusionCCWIndex = find(back.flashTiltDirectionMat == 1);
+%         illusionCWIndex = find(back.flashTiltDirectionMat == 2);
+%     end
     
     
     
-    illusionCCWIndex = find(data.flashTiltDirection == 1); % CCW
-    illusionCWIndex = find(data.flashTiltDirection == 2);  % CW
+    illusionCCWIndex = find(back.flashTiltDirectionMat == 1); % CCW
+    illusionCWIndex = find(back.flashTiltDirectionMat == 2);  % CW
     
-    
-    off_sync_CCWDegree = 90 - off_sync(illusionCCWIndex);
-    off_sync_CWDegree = 90 - off_sync(illusionCWIndex);
-    flash_grab_CCWDegree = 90 - flash_grab(illusionCCWIndex);
-    flash_grab_CWDegree = 90 - flash_grab(illusionCWIndex);
-    perceived_location_CCWDegree = 90 -  perceived_location(illusionCCWIndex);
-    perceived_location_CWDegree  = 90 -  perceived_location(illusionCWIndex);
+    bar_only_degree(expcondition,:) = 90 - bar_only;
+    off_sync_CCWDegree(expcondition,:) = 90 - off_sync(illusionCCWIndex);
+    off_sync_CWDegree(expcondition,:)  = 90 - off_sync(illusionCWIndex);
+    flash_grab_CCWDegree(expcondition,:)  = 90 - flash_grab(illusionCCWIndex);
+    flash_grab_CWDegree(expcondition,:)  = 90 - flash_grab(illusionCWIndex);
+    perceived_location_CCWDegree(expcondition,:)  = 90 -  perceived_location(illusionCCWIndex);
+    perceived_location_CWDegree(expcondition,:)   = 90 -  perceived_location(illusionCWIndex);
     
 end
 
 
-bar_onlyDegreeMean = 90 - mean(bar_only);
-off_synCCWDegreeMean = mean(off_sync_CCWDegree);
-off_synCWDegreeMean = mean(off_sync_CWDegree);
+bar_onlyDegreeMean = mean(mean(bar_only_degree));
+off_synCCWDegreeMean = mean(mean(off_sync_CCWDegree));
+off_synCWDegreeMean = mean(mean(off_sync_CWDegree));
 
-flash_grab_CCWDegreeMean= mean(flash_grab_CCWDegree);
-flash_grab_CWDegreeMean = mean(flash_grab_CWDegree);
+flash_grab_CCWDegreeMean= mean(mean(flash_grab_CCWDegree));
+flash_grab_CWDegreeMean = mean(mean(flash_grab_CWDegree));
 
-perceived_location_CCWDegreeMean = mean(perceived_location_CCWDegree);
-perceived_location_CWDegreeMean = mean(perceived_location_CWDegree);
-
+perceived_location_CCWDegreeMean = mean(mean(perceived_location_CCWDegree));
+perceived_location_CWDegreeMean = mean(mean(perceived_location_CWDegree));
 
 
 y = [bar_onlyDegreeMean off_synCCWDegreeMean off_synCWDegreeMean flash_grab_CCWDegreeMean perceived_location_CCWDegreeMean flash_grab_CWDegreeMean perceived_location_CWDegreeMean];
@@ -78,19 +80,26 @@ ylabel('Shift degree from horizontal meridian','FontName','Arial','FontSize',25)
 %  plot  each trial
 %----------------------------------------------------------------------
 % plot bar_only value
-eachtrialdegree_bar_only = 90 - bar_only;
+eachtrialdegree_bar_only = reshape(bar_only_degree,1,numel(bar_only_degree));
 
 
 for condition = 1: length(eachtrialdegree_bar_only)
     plot(1,eachtrialdegree_bar_only(condition),'r--o');
 end
 
-for condition = 1: length(off_sync_CCWDegree)
-    plot(2,off_sync_CCWDegree(condition),'r--o');
-    plot(3,off_sync_CWDegree(condition),'b--o');
-    plot(4,flash_grab_CCWDegree(condition),'r--o');
-    plot(5,perceived_location_CCWDegree(condition),'r--o');
-    plot(6,flash_grab_CWDegree(condition),'b--o');
-    plot(7,perceived_location_CWDegree(condition),'b--o');    
+eachtrialdegree_off_sync_CCW = reshape(off_sync_CCWDegree,1,numel(off_sync_CCWDegree));
+eachtrialdegree_off_sync_CW = reshape(off_sync_CWDegree,1,numel(off_sync_CWDegree));
+eachtrialdegree_flash_grab_CCW = reshape(flash_grab_CCWDegree,1,numel(flash_grab_CCWDegree));
+eachtrialdegree_perceived_location_CCW= reshape(perceived_location_CCWDegree,1,numel(perceived_location_CCWDegree));
+eachtrialdegree_flash_grab_CW = reshape(flash_grab_CWDegree,1,numel(flash_grab_CWDegree));
+eachtrialdegree_perceived_location_CW= reshape(perceived_location_CWDegree,1,numel(perceived_location_CWDegree));
+
+for condition = 1: numel(off_sync_CCWDegree)
+    plot(2,eachtrialdegree_off_sync_CCW(condition),'r--o');
+    plot(3,eachtrialdegree_off_sync_CW(condition),'b--o');
+    plot(4,eachtrialdegree_flash_grab_CCW(condition),'r--o');
+    plot(5,eachtrialdegree_perceived_location_CCW(condition),'r--o');
+    plot(6,eachtrialdegree_flash_grab_CW(condition),'b--o');
+    plot(7,eachtrialdegree_perceived_location_CW(condition),'b--o');    
 end
 
