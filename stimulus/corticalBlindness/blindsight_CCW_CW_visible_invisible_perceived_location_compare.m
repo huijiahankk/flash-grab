@@ -382,8 +382,7 @@ for trial = 1:trialNumber
             
             % define the present frame of the flash
             if flashPresentFlag
-                WaitSecs((1/framerate) * flashRepresentFrame);
-                
+                WaitSecs((1/framerate) * flashRepresentFrame);  
             end
             
             % for debug when flash present the simulus halt

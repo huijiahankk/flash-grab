@@ -83,6 +83,8 @@ barLengthStart_pixel = round(tand(barLengthStart_degree) * eyeScreenDistence *  
 barLengthChangeStep = 1; % pixel
 barPosition_from_center = centerRingRadius2Center;
 barPostionChangeStep = 1; % pixel
+barFlashFreq = 10; % Hz
+flashRepresentFrame = 8; % frame
 
 %----------------------------------------------------------------------
 %%%            Eyelink setting up
@@ -286,7 +288,7 @@ for trial = 1 : trialNumber
     end
     
     while respToBeMade
-        
+        flashPresentFlag = 0;
         currentframe = currentframe + 1;
         barMat = [];
         % Define a vertical red rectangle
@@ -300,8 +302,12 @@ for trial = 1 : trialNumber
         
         % vertical bar lower visual field
         barDestinationRect = CenterRectOnPoint(barRect,xCenter + barPosition_from_center, yCenter);
-        
-        Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,90);
+
+         
+        if mod(currentframe,(60/barFlashFreq)) == 0 
+            flashPresentFlag = 1;
+            Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,90);
+        end
         %         Screen('FillRect', wptr, redcolor, barDestinationRect);
         
         flashPresentFlag = 1;
@@ -353,6 +359,10 @@ for trial = 1 : trialNumber
         end
         %         end
         %         prekeyIsDown = keyIsDown;
+        
+                    if flashPresentFlag
+                WaitSecs((1/framerate) * flashRepresentFrame);  
+            end
         
         %----------------------------------------------------------------------
         %                      Eyelink  stamp

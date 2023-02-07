@@ -25,21 +25,21 @@
 
 clear all;close all;
 
-if 0
+if 1
     sbjname = 'k';
     debug = 'n';
-%     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
+    %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
     barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
-    condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
+    condition = 'invi2vi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 0;
-    whichExp = 'blurredBoundary';  % blindspot blurredBoundary  sectorEight 
+    whichExp = 'sectorEight';  % blindspot blurredBoundary  sectorEight
     artificialScotomaExp = 'y';
 else
-%     sbjname = input('>>>Please input the subject''s name:   ','s');
-%     barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
-%     condition = input('>>>visible2invisible or invisible2visible? (vi2invi  invi2vi normal):  ','s');
-%     isEyelink = 0;
-%     whichExp = input('>>>which experiment? (blindspot/blurredBoundary/sectorEight?):  ','s');
+    %     sbjname = input('>>>Please input the subject''s name:   ','s');
+    %     barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
+    %     condition = input('>>>visible2invisible or invisible2visible? (vi2invi  invi2vi normal):  ','s');
+    %     isEyelink = 0;
+    %     whichExp = input('>>>which experiment? (blindspot/blurredBoundary/sectorEight?):  ','s');
     
     prompt = {'subject''s name','barLocation(u for upper\l for lower\n for normal)',...
         'condition(vi2invi  invi2vi normal)', 'isEyelink(without eyelink 0 or use eyelink 1)',...
@@ -71,7 +71,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 fixsize = 12;
@@ -201,8 +201,14 @@ if isEyelink
     end
     
     % open file to record data to
-    edfFile=[eyelinkfilename_eye '.edf'];
-    open=Eyelink('Openfile',edfFile);
+    datadir = '../../../data/corticalBlindness/Eyelink_guiding/';
+    datadir = sprintf([datadir '%s/'],whichExp);
+    
+    fileName = fullfile(datadir, 'eyelinkDataFile.edf');
+%     edfFile=[eyelinkfilename_eye '.edf'];
+    
+    open=Eyelink('Openfile',fileName);
+    
     if open ~=0
         fprintf('Can not open the edfile');
         Eyelink('Shutdown');
@@ -415,7 +421,7 @@ for block = 1:blockNumber
                     elseif strcmp(condition,'invi2vi')
                         str_trial = ['Adjust the bar from invisible to visible.\n '    '\n\n Fix on the cross to start the trial. \n'];
                     end
-                case 2    
+                case 2
                     back.alpha = 1;
                     if  strcmp(whichExp,'blurredBoundary') % for blurredBoundaryExp  boundary;
                         redbarflash_flag = 0;
@@ -437,10 +443,10 @@ for block = 1:blockNumber
                         end
                     end
                     
-                case 3   
+                case 3
                     back.alpha = 1;
                     redbarflash_flag = 1;
-                    if  strcmp(whichExp,'blurredBoundary') % for blurredBoundaryExp  off_sync;  
+                    if  strcmp(whichExp,'blurredBoundary') % for blurredBoundaryExp  off_sync;
                         if strcmp(condition, 'vi2invi')
                             barTiltNow = bar_only(block) + multiplier * 10;
                             str_trial = ['\n Adjust the bar from visible to invisible'    '\n\n Fix on the cross to start the trial'];
@@ -458,10 +464,10 @@ for block = 1:blockNumber
                         end
                     end
                     
-                case 4  
+                case 4
                     back.alpha = 1;
                     redbarflash_flag = 1;
-                    if  strcmp(whichExp,'blurredBoundary')  % for blurredBoundaryExp  flash grab; 
+                    if  strcmp(whichExp,'blurredBoundary')  % for blurredBoundaryExp  flash grab;
                         if strcmp(condition, 'vi2invi')
                             str_trial = ['\n Adjust the bar from visible to invisible and \n\n remember the last location you have seen'  '\n\n Fix on the cross to start the trial'];
                             barTiltNow = bar_only(block) + multiplier * 10;
@@ -483,7 +489,7 @@ for block = 1:blockNumber
             barTiltNow = barTiltStartNormal;
             str_trial = '\n Adjust the bar until horizon   \n\n Fix on the cross to start the trial'
         end
-       
+        
         DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor,[],[],[],[],[],topLeftQuadRect);
         Screen('Flip',wptr);
         if trial == 4 && trial == 5
@@ -496,6 +502,8 @@ for block = 1:blockNumber
         %  'Fast' method (sample only)
         %----------------------------------------------------------------------
         if isEyelink
+            
+            
             while 1
                 err = Eyelink('CheckRecording');
                 
@@ -552,7 +560,7 @@ for block = 1:blockNumber
                     %          if evtype == el.ENDSACC % if end of saccade (ENDSACC) event is returned
                     %              evt = Eyelink('GetFloatData',evtype); % access the ENDSACC event structure
                     %
-                                        
+                    
                     Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                     Screen('Flip',wptr);
                 end
@@ -573,6 +581,29 @@ for block = 1:blockNumber
                 if currentframe == 1
                     back.CurrentAngle = barTiltNow - 2;  % back.reverse_anlge_end
                     %                     back.CurrentAngle = back.reverse_anlge_start - barTiltNow ;
+                end
+                
+                if isEyelink
+                    err = Eyelink('CheckRecording');
+                    if err ~= 0
+                        trialNumber = trialNumber + 1;
+                    end
+                    if Eyelink('NewFloatSampleAvailable') > 0
+                        
+                        % Get sample data in a Matlab structure
+                        evt = Eyelink('NewestFloatSample');
+                        
+                        % save sample properties as variables. See Eyelink
+                        % Programmers Guide manual > Data Structures > FSAMPLE
+                        x = evt.gx(eyeUsed + 1); % [left eye gaze x, right eye gaze x] + 1 as we're accessing a Matlab array
+                        y = evt.gy(eyeUsed + 1); % [Left eye gaze y,right eye gaze y]
+                        
+                        
+                        if (x >= xCenter - gaze_away_pixel && x <= xCenter + gaze_away_pixel) && ...
+                                (y >= yCenter - gaze_away_pixel && y <= yCenter + gaze_away_pixel)
+                            break;
+                        end
+                    end
                 end
                 
                 
@@ -656,8 +687,8 @@ for block = 1:blockNumber
                 Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                 %                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                 if strcmp(artificialScotomaExp,'y')
-                Screen('FillOval',wptr,blindfieldColor,[xCenter + blindfield_deviate_center_pixel - blindfieldRadius_pixel, yCenter - blindfieldRadius_pixel,...
-                    xCenter + blindfield_deviate_center_pixel + blindfieldRadius_pixel, yCenter + blindfieldRadius_pixel]);
+                    Screen('FillOval',wptr,blindfieldColor,[xCenter + blindfield_deviate_center_pixel - blindfieldRadius_pixel, yCenter - blindfieldRadius_pixel,...
+                        xCenter + blindfield_deviate_center_pixel + blindfieldRadius_pixel, yCenter + blindfieldRadius_pixel]);
                 end
                 
                 Screen('Flip',wptr);
@@ -848,25 +879,30 @@ if isEyelink
     %     disp(conditional(iSuccess > 0, ['Eyelink File Received, file size is ' num2str(iSuccess)], ...
     %         'Something went wrong with receiving the Eyelink File'));
     KbWait;
-    WaitSecs(2);
+    WaitSecs(1);
     Screen('CloseAll');
-    Eyelink('CloseFile');
+     
     
-    
+%     % Save the data to a .edf file
+%     Eyelink('CloseFile', filename);
+
     try
         fprint('Receiving data file "%s"\n',edfFile);
         status = Eyelink('ReceivingFile');
+        
         if status > 0
             fprintf('ReciveFile status %d\n',status);
         end
         
-        eyelinkDataSavePath = '../../../data/corticalBlindness/Eyelink_guiding/';
+        
+%         eyeTrackInfo.status = Eyelink('receivefile','',expInfo.file_edf);
+         Eyelink('ReceivingFile', fileName);
         
         if exist(edfFile,'file') == 2
-            fprintf('Data file "%s" can be found in "%s"\n',edfFile,eyelinkDataSavePath)
+            fprintf('Data file "%s" can be found in "%s"\n',fileName)
         end
         
-        fprintf('Problem Receiving data file "%s"\n',edfFile);
+        fprintf('Problem Receiving data file "%s"\n',fileName);
     end
     
     Eyelink('ShutDown');
@@ -876,8 +912,6 @@ end
 %                      save parameters files
 %----------------------------------------------------------------------
 
-datadir = '../../../data/corticalBlindness/Eyelink_guiding/';
-datadir = sprintf([datadir '%s/'],whichExp);
 
 if strcmp(artificialScotomaExp,'y')
     expdir = strcat(datadir,'/artificial_scotoma/') ;
