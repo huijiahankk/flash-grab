@@ -31,9 +31,9 @@ if 1
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
     barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
     condition = 'invi2vi';   % 'vi2invi'  'invi2vi'   'normal'
-    isEyelink = 0;
+    isEyelink = 0;  % 0 1
     whichExp = 'sectorEight';  % blindspot blurredBoundary  sectorEight
-    artificialScotomaExp = 'y';
+    artificialScotomaExp = 'n';
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
     %     barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
@@ -184,94 +184,123 @@ barTexture = Screen('MakeTexture', wptr, barMat);
 barRect = Screen('Rect',barTexture);
 
 %----------------------------------------------------------------------
+%%%          parameters of black adjustable line
+%----------------------------------------------------------------------
+
+lineWidth = 8;
+lineLength = 20;
+lineRect = [-lineLength/2  -lineWidth/2  lineLength/2  lineWidth/2];
+
+% Define a vertical red rectangle
+lineMat(:,:,1) = repmat(0,  lineLength,lineWidth);
+lineMat(:,:,2) = zeros(lineLength,  lineWidth) * 255;
+lineMat(:,:,3) = lineMat(:,:,2);
+
+% % % Make the rectangle into a texure
+lineTexture = Screen('MakeTexture', wptr, lineMat);
+lineRect = Screen('Rect',lineTexture);
+
+%----------------------------------------------------------------------
 %%%            Eyelink setting up
 %----------------------------------------------------------------------
-if isEyelink
-    dummymode = 0;
-    enableCallbacks = 1;
-    %     % script trial run without link eyelink
-    %     [status] = Eyelink('Initialize',displayCallbackFunction);
-    
-    %Initialize
-    el=EyelinkInitDefaults(wptr);
-    if ~EyelinkInit(dummymode,enableCallbacks)   % enableCallbacks = 1 show  eye image
-        fprintf('Eyelink Init aborted.\n');
-        cleanup;
-        return;
-    end
-    
-    % open file to record data to
-    datadir = '../../../data/corticalBlindness/Eyelink_guiding/';
-    datadir = sprintf([datadir '%s/'],whichExp);
-    
-    fileName = fullfile(datadir, 'eyelinkDataFile.edf');
+
+constants.eyelink_data_fname = [sbjname, '.edf'];
+window.pointer = wptr;
+window.background = greycolor;
+window.white = whitecolor;
+window.winRect = ScreenRect;
+[el, exit_flag] = setupEyeTracker(isEyelink, window, constants );
+
+
+% if isEyelink
+%     dummymode = 0;
+%     enableCallbacks = 1;
+%     %     % script trial run without link eyelink
+%     %     [status] = Eyelink('Initialize',displayCallbackFunction);
+%     
+%     %Initialize
+%     el=EyelinkInitDefaults(wptr);
+%     if ~EyelinkInit(dummymode,enableCallbacks)   % enableCallbacks = 1 show  eye image
+%         fprintf('Eyelink Init aborted.\n');
+%         cleanup;
+%         return;
+%     end
+%     
+% %     % open file to record data to
+% %     datadir = '../../../data/corticalBlindness/Eyelink_guiding/';
+% %     datadir = sprintf([datadir '%s/'],whichExp);
+% %     
+% %     fileName = fullfile(datadir, 'eyelinkDataFile.edf');
+% 
+%        % open file to record data to
+%     eyelinkfilename_eye = sbjname;
 %     edfFile=[eyelinkfilename_eye '.edf'];
-    
-    open=Eyelink('Openfile',fileName);
-    
-    if open ~=0
-        fprintf('Can not open the edfile');
-        Eyelink('Shutdown');
-        return;
-    end
-    
-    % make sure we're still connected.
-    if Eyelink('IsConnected')~=1 && ~dummymode
-        %     cleanup;
-        Eyelink('Shutdown');
-        Screen('CloseAll');
-        return;
-    end
-    
-    Eyelink('command', 'add_file_preamble_text ''Recorded by FGI experiment''');
-    % SET UP TRACKER CONFIGURATION
-    % Setting the proper recording resolution, proper calibration type,
-    % as well as the data file content;
-    Eyelink('command','screen_pixel_coords = %ld %ld %ld %ld', 0, 0, ScreenRect(3)-1, ScreenRect(4)-1);
-    Eyelink('message', 'DISPLAY_COORDS %ld %ld %ld %ld', 0, 0, ScreenRect(3)-1, ScreenRect(4)-1);
-    % set calibration type.
-    Eyelink('command', 'calibration_type = HV5'); %  setting the usual 5-point calibration
-    
-    % set EDF file contents using the file_sample_data and
-    % file-event_filter commands
-    % set link data thtough link_sample_data and link_event_filter
-    Eyelink('command', 'file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT');
-    Eyelink('command', 'link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT');
-    
-    % check the software version
-    % add "HTARGET" to record possible target data for EyeLink Remote
-    Eyelink('command', 'file_sample_data  = LEFT,RIGHT,GAZE,HREF,GAZERES,AREA,HTARGET,STATUS,INPUT');
-    Eyelink('command', 'link_sample_data  = LEFT,RIGHT,GAZE,HREF,GAZERES,AREA,HTARGET,STATUS,INPUT');
-    
-    
-    %     Eyelink('command','link sample data = LEFT,GAZE ,GAZERES,HREF,AREA,PUPIL');
-    %     Eyelink('command','link event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
-    %     Eyelink('command','link event filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
-    %
-    %     Eyelink('command','file sample data = LEFT,GAZE ,GAZERES,HREF,AREA,PUPIL');
-    %     Eyelink('command','file event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
-    %     Eyelink('Command','file_event_filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
-    
-    
-    % make sure we're still connected.
-    if Eyelink('IsConnected')~=1 && input.dummymode == 0
-        exit_flag = 'ESC';
-        return;
-    end
-    
-    % possible changes from EyelinkPictureCustomCalibration
-    
-    % set sample rate in camera setup screen
-    Eyelink('command', 'sample_rate = %d', 1000);
-    
-    % Will call the calibration routine
-    EyelinkDoTrackerSetup(el);
-    
-    
-    %Calibrate
-    % EyelinkUpdateDefaults(el); what dose this mean?
-    EyelinkDoTrackerSetup(el);
-    
+%     open=Eyelink('Openfile',edfFile);
+%     
+%     if open ~=0
+%         fprintf('Can not open the edfile');
+%         Eyelink('Shutdown');
+%         return;
+%     end
+%     
+%     % make sure we're still connected.
+%     if Eyelink('IsConnected')~=1 && ~dummymode
+%         %     cleanup;
+%         Eyelink('Shutdown');
+%         Screen('CloseAll');
+%         return;
+%     end
+%     
+%     Eyelink('command', 'add_file_preamble_text ''Recorded by FGI experiment''');
+%     % SET UP TRACKER CONFIGURATION
+%     % Setting the proper recording resolution, proper calibration type,
+%     % as well as the data file content;
+%     Eyelink('command','screen_pixel_coords = %ld %ld %ld %ld', 0, 0, ScreenRect(3)-1, ScreenRect(4)-1);
+%     Eyelink('message', 'DISPLAY_COORDS %ld %ld %ld %ld', 0, 0, ScreenRect(3)-1, ScreenRect(4)-1);
+%     % set calibration type.
+%     Eyelink('command', 'calibration_type = HV5'); %  setting the usual 5-point calibration
+%     
+%     % set EDF file contents using the file_sample_data and
+%     % file-event_filter commands
+%     % set link data thtough link_sample_data and link_event_filter
+%     Eyelink('command', 'file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT');
+%     Eyelink('command', 'link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT');
+%     
+%     % check the software version
+%     % add "HTARGET" to record possible target data for EyeLink Remote
+%     Eyelink('command', 'file_sample_data  = LEFT,RIGHT,GAZE,HREF,GAZERES,AREA,HTARGET,STATUS,INPUT');
+%     Eyelink('command', 'link_sample_data  = LEFT,RIGHT,GAZE,HREF,GAZERES,AREA,HTARGET,STATUS,INPUT');
+%     
+%     
+%     %     Eyelink('command','link sample data = LEFT,GAZE ,GAZERES,HREF,AREA,PUPIL');
+%     %     Eyelink('command','link event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
+%     %     Eyelink('command','link event filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
+%     %
+%     %     Eyelink('command','file sample data = LEFT,GAZE ,GAZERES,HREF,AREA,PUPIL');
+%     %     Eyelink('command','file event data = GAZE ,GAZERES,HREF,AREA,VELOCITY');
+%     %     Eyelink('Command','file_event_filter = LEFT,FIXATION,FIXUPDATE,BLINK,SACCADE,MESSAGE,BUTTON');
+%     
+%     
+%     % make sure we're still connected.
+%     if Eyelink('IsConnected')~=1 && input.dummymode == 0
+%         exit_flag = 'ESC';
+%         return;
+%     end
+%     
+%     % possible changes from EyelinkPictureCustomCalibration
+%     
+%     % set sample rate in camera setup screen
+%     Eyelink('command', 'sample_rate = %d', 1000);
+%     
+%     % Will call the calibration routine
+%     EyelinkDoTrackerSetup(el);
+%     
+%     
+%     %Calibrate
+%     % EyelinkUpdateDefaults(el); what dose this mean?
+%     EyelinkDoTrackerSetup(el);
+
+if isEyelink    
     % Must be offline to draw to EyeLink screen
     Eyelink('Command', 'set_idle_mode');
     % clear tracker display
@@ -583,28 +612,28 @@ for block = 1:blockNumber
                     %                     back.CurrentAngle = back.reverse_anlge_start - barTiltNow ;
                 end
                 
-                if isEyelink
-                    err = Eyelink('CheckRecording');
-                    if err ~= 0
-                        trialNumber = trialNumber + 1;
-                    end
-                    if Eyelink('NewFloatSampleAvailable') > 0
-                        
-                        % Get sample data in a Matlab structure
-                        evt = Eyelink('NewestFloatSample');
-                        
-                        % save sample properties as variables. See Eyelink
-                        % Programmers Guide manual > Data Structures > FSAMPLE
-                        x = evt.gx(eyeUsed + 1); % [left eye gaze x, right eye gaze x] + 1 as we're accessing a Matlab array
-                        y = evt.gy(eyeUsed + 1); % [Left eye gaze y,right eye gaze y]
-                        
-                        
-                        if (x >= xCenter - gaze_away_pixel && x <= xCenter + gaze_away_pixel) && ...
-                                (y >= yCenter - gaze_away_pixel && y <= yCenter + gaze_away_pixel)
-                            break;
-                        end
-                    end
-                end
+%                 if isEyelink
+%                     err = Eyelink('CheckRecording');
+%                     if err ~= 0
+%                         trialNumber = trialNumber + 1;
+%                     end
+%                     if Eyelink('NewFloatSampleAvailable') > 0
+%                         
+%                         % Get sample data in a Matlab structure
+%                         evt = Eyelink('NewestFloatSample');
+%                         
+%                         % save sample properties as variables. See Eyelink
+%                         % Programmers Guide manual > Data Structures > FSAMPLE
+%                         x = evt.gx(eyeUsed + 1); % [left eye gaze x, right eye gaze x] + 1 as we're accessing a Matlab array
+%                         y = evt.gy(eyeUsed + 1); % [Left eye gaze y,right eye gaze y]
+%                         
+%                         
+%                         if (x >= xCenter - gaze_away_pixel && x <= xCenter + gaze_away_pixel) && ...
+%                                 (y >= yCenter - gaze_away_pixel && y <= yCenter + gaze_away_pixel)
+%                             break;
+%                         end
+%                     end
+%                 end
                 
                 
                 if data.flashTiltDirection == 1    % CCW
@@ -678,8 +707,6 @@ for block = 1:blockNumber
                 back.FlagSpinDirecA = 0;
                 back.FlagSpinDirecB = 0;
                 
-                
-                
                 % draw fixation
                 
                 fixcolor = 0;
@@ -742,15 +769,29 @@ for block = 1:blockNumber
             
             while respToBeMade
                 
-                barRectTiltDegree =  barTiltNow;
-                barDrawTiltDegree = barTiltNow;
+
                 
-                barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree) - perc_loc_shift_pixel, yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
-                Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
-                
+                if strcmp(whichExp,'blindspot')
+                    lineRectTiltDegree =  barTiltNow;
+                    lineDrawTiltDegree = barTiltNow;
+                    lineDestinationRect = CenterRectOnPoint(lineRect,xCenter + (centerRingRadius2Center - perc_loc_shift_pixel) * sind(lineRectTiltDegree), yCenter - (centerRingRadius2Center - perc_loc_shift_pixel) * cosd(lineRectTiltDegree));
+                    Screen('DrawTexture',wptr,lineTexture,lineRect,lineDestinationRect,lineDrawTiltDegree);
+                    
+                    refFrameDestinationRect = [xCenter - centerRingRadius2Center + perc_loc_shift_pixel,...
+                        yCenter - centerRingRadius2Center + perc_loc_shift_pixel,...
+                        xCenter + centerRingRadius2Center - perc_loc_shift_pixel,...
+                        yCenter + centerRingRadius2Center - perc_loc_shift_pixel];
+                    
+                    % draw a black circle in the visible visual area
+                    Screen('FrameOval', wptr, blackcolor, refFrameDestinationRect,3,3);
+                else
+                    barRectTiltDegree =  barTiltNow;
+                    barDrawTiltDegree = barTiltNow;
+                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
+                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
+                end
                 
                 % draw fixation
-                
                 fixcolor = 0;
                 Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                 %                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
@@ -878,33 +919,19 @@ if isEyelink
     %     iSuccess = Eyelink('ReceiveFile', [], edfdir, 1);
     %     disp(conditional(iSuccess > 0, ['Eyelink File Received, file size is ' num2str(iSuccess)], ...
     %         'Something went wrong with receiving the Eyelink File'));
-    KbWait;
-    WaitSecs(1);
-    Screen('CloseAll');
-     
-    
-%     % Save the data to a .edf file
-%     Eyelink('CloseFile', filename);
 
     try
-        fprint('Receiving data file "%s"\n',edfFile);
-        status = Eyelink('ReceivingFile');
-        
+        fprintf('Receiving data file ''%s''\n',  constants.eyelink_data_fname );
+       status = Eyelink('ReceiveFile',constants.eyelink_data_fname) ;
         if status > 0
-            fprintf('ReciveFile status %d\n',status);
+            fprintf('ReceiveFile status %d\n', status);
         end
-        
-        
-%         eyeTrackInfo.status = Eyelink('receivefile','',expInfo.file_edf);
-         Eyelink('ReceivingFile', fileName);
-        
-        if exist(edfFile,'file') == 2
-            fprintf('Data file "%s" can be found in "%s"\n',fileName)
+        if 2==exist(edfFile, 'file')
+            fprintf('Data file ''%s'' can be found in ''%s''\n',  constants.eyelink_data_fname, pwd );
         end
-        
-        fprintf('Problem Receiving data file "%s"\n',fileName);
+    catch
+        fprintf('Problem receiving data file ''%s''\n',  constants.eyelink_data_fname );
     end
-    
     Eyelink('ShutDown');
 end
 
