@@ -73,9 +73,9 @@ sectorRadius_in_pixel = round(tand(sectorRadius_in_visual_degree) * eyeScreenDis
 centerRingRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 
 % eye gaze distance from center
-fixRadius_dva = 0.5;
+fixRadius_dva = 2;
 fixRadius = round(tand(fixRadius_dva) * eyeScreenDistence *  rect(4)/screenHeight);
-
+fixateTimeDura = 600; %ms
 %----------------------------------------------------------------------
 %    flash dot parameter to map the blind spot postion
 %----------------------------------------------------------------------
@@ -127,56 +127,59 @@ for trial = 1 : trialNumber
     respToBeMade = true;
     currentframe = 0;
     flashPresentFlag = 0;
+    fixdrifttime = 0;
     
-    if trial == 1
-        str = 'Fix on the cross to start the trial';
-        %     DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
-        Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
-        Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
-        Screen('Flip', wptr);
-        WaitSecs (2);
-        %     end
-        
-        %----------------------------------------------------------------------
-        %  Eyelink file transfer to Display PC and check if fixation correct
-        %  'Fast' method (sample only)
-        %----------------------------------------------------------------------
-        if isEyelink
-            while 1
-                err = Eyelink('CheckRecording');
-                if (err ~= 0)
-                    fprint('EyeLink Recording stopped! \n')
-                    % Transfer a copy of the EDF file to Display PC
-                    Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode
-                    Eyelink('CloseFile'); % Close EDF file on Host PC
-                    Eyelink('Commond','clear_screen 0'); % Clear trial image on Host PC at the end of the experiment
-                    WaitSecs(0.1) %Allow some time for screen drawing
-                    % Transfer a copy of the EDF to Display PC
-                    transferFile; % See transferFile function below
-                    cleanup ; % Abort experiment(see cleanup function below)
-                    return
-                end
-                
-                [x, y] = getEyelinkCoordinates();
-                if isnan(x) || isnan(y)
-                    fprintf('Eye tracker lost track of eyes \n');
-                else
-                    % Check if gaze is within fixation window
-                    if isWithinFixationWindow(x, y, xCenter, yCenter, fixRadius)
-                        gazeRect=[ x-9 y-9 x+10 y+10];
-                        colour=round(rand(3,1)*255); % coloured dot
-                        Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
-                        Screen('FillOval', wptr, colour, gazeRect);
-                        Screen('Flip',wptr);
-                        break;
-                    else
-                        fprintf('Gaze is outside fixation window \n');
-                    end
-                end
-                %             end
+    %     if trial == 1
+    str = 'Fix on the cross to start the trial';
+    %     DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
+    Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
+    Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+    Screen('Flip', wptr);
+    WaitSecs (2);
+    %     end
+    
+    %----------------------------------------------------------------------
+    %  Eyelink file transfer to Display PC and check if fixation correct
+    %  'Fast' method (sample only)
+    %----------------------------------------------------------------------
+    if isEyelink
+        %             fixateTime = GetSecs + fixateTimeDura;
+        while 1
+            err = Eyelink('CheckRecording');
+            if (err ~= 0)
+                fprint('EyeLink Recording stopped! \n')
+                % Transfer a copy of the EDF file to Display PC
+                Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode
+                Eyelink('CloseFile'); % Close EDF file on Host PC
+                Eyelink('Commond','clear_screen 0'); % Clear trial image on Host PC at the end of the experiment
+                WaitSecs(0.1) %Allow some time for screen drawing
+                % Transfer a copy of the EDF to Display PC
+                transferFile; % See transferFile function below
+                cleanup ; % Abort experiment(see cleanup function below)
+                return
             end
+            
+            [x, y] = getEyelinkCoordinates();
+            if isnan(x) || isnan(y)
+                fprintf('Eye tracker lost track of eyes \n');
+            else
+                % Check if gaze is within fixation window
+                if isWithinFixationWindow(x, y, xCenter, yCenter, fixRadius)
+                    gazeRect=[ x-9 y-9 x+10 y+10];
+                    %                         fixationcolour=round(rand(3,1)*255); % coloured dot
+                    fixationcolour = greycolor + 10;
+                    Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+                    Screen('FillOval', wptr, fixationcolour, gazeRect);
+                    Screen('Flip',wptr);
+                    break;
+                else
+                    fprintf('Gaze is outside fixation window \n');
+                end
+            end
+            %             end
         end
     end
+    %     end
     %----------------------------------------------------------------------
     %%%                  parameters of red dot
     %----------------------------------------------------------------------
@@ -191,7 +194,7 @@ for trial = 1 : trialNumber
         currentframe = currentframe + 1;
         
         if mod(trial,2) == 1 && currentframe < 20
-            dotcolor = blackcolor;
+            dotcolor = redcolor;
         else
             dotcolor = redcolor;
         end
@@ -203,6 +206,8 @@ for trial = 1 : trialNumber
         end
         
         if isEyelink
+            %             fixateTime = GetSecs + fixateTimeDura;
+            %             while GetSecs <  fixateTime
             [x, y] = getEyelinkCoordinates();
             if isnan(x) || isnan(y)
                 fprintf('Eye tracker lost track of eyes \n');
@@ -210,23 +215,24 @@ for trial = 1 : trialNumber
                 % Check if gaze is within fixation window
                 if isWithinFixationWindow(x, y, xCenter, yCenter, fixRadius)
                     gazeRect=[ x-9 y-9 x+10 y+10];
-                    colour=round(rand(3,1)*255); % coloured dot
+                    %                     fixationcolour=round(rand(3,1)*255); % coloured dot
+                    fixationcolour = greycolor + 10;
                     Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
-                    Screen('FillOval', wptr, colour, gazeRect);
+                    Screen('FillOval', wptr, fixationcolour, gazeRect);
                     Screen('Flip',wptr);
                 else
                     fprintf('Gaze is outside fixation window \n');
-                    trialNumber = trialNumber + 1;
-                    break;
+                    fixdrifttime = 1;
                 end
             end
+            
         else
             % draw fixation
             %             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
             Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
             vbl = Screen('Flip',wptr);
         end
-        
+        %         end
         %----------------------------------------------------------------------
         %                      Response record
         %----------------------------------------------------------------------
@@ -278,8 +284,12 @@ for trial = 1 : trialNumber
     
     data.position(trial) = dot.position;
     data.position_dva(trial) = atand(screenHeight * dot.position/(rect(4)*eyeScreenDistence));
+    data.fixdrifttrial(trial) = fixdrifttime;
     WaitSecs (0.5);
     
+    if  fixdrifttime == 1
+        trialNumber = trialNumber + 1;
+    end
 end
 
 
@@ -298,7 +308,7 @@ if isEyelink
         status = Eyelink('ReceiveFile',constants.eyelink_data_fname) ;
         if status > 0
             fprintf('ReceiveFile status %d\n', status);
-        end  
+        end
         if 2==exist(edfFile, 'file')
             fprintf('Data file ''%s'' can be found in ''%s''\n',  constants.eyelink_data_fname, pwd );
         end
