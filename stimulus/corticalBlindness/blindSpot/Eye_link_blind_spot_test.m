@@ -76,6 +76,7 @@ centerRingRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 fixRadius_dva = 2;
 fixRadius = round(tand(fixRadius_dva) * eyeScreenDistence *  rect(4)/screenHeight);
 fixateTimeDura = 600; %ms
+driftDuation = 30; %  frame
 %----------------------------------------------------------------------
 %    flash dot parameter to map the blind spot postion
 %----------------------------------------------------------------------
@@ -120,14 +121,16 @@ end
 %----------------------------------------------------------------------
 %                       Experimental loop
 %----------------------------------------------------------------------
-
-for trial = 1 : trialNumber
-    
+trial = 0;
+while trial <= trialNumber
+    trial = trial +1;
     TrialOnset = GetSecs;
     respToBeMade = true;
     currentframe = 0;
     flashPresentFlag = 0;
-    fixdrifttime = 0;
+    fixDriftFrame = 0;
+    isOutFixationWindowFrame = 0;
+    isOutFixationWindowTimes = 0;
     
     %     if trial == 1
     str = 'Fix on the cross to start the trial';
@@ -135,7 +138,7 @@ for trial = 1 : trialNumber
     Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
     Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
     Screen('Flip', wptr);
-    WaitSecs (2);
+    WaitSecs (1);
     %     end
     
     %----------------------------------------------------------------------
@@ -168,18 +171,22 @@ for trial = 1 : trialNumber
                     gazeRect=[ x-9 y-9 x+10 y+10];
                     %                         fixationcolour=round(rand(3,1)*255); % coloured dot
                     fixationcolour = greycolor + 10;
+                    Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
                     Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                     Screen('FillOval', wptr, fixationcolour, gazeRect);
                     Screen('Flip',wptr);
+                    fixDriftFrame = fixDriftFrame + 1;
+                    isOutFixationWindowFrame  = fixDriftFrame;
+                else  isOutFixationWindowFrame >= driftDuation
                     break;
-                else
-                    fprintf('Gaze is outside fixation window \n');
+                    %                 elseif isOutFixationWindowFrame  < driftDuation
+                    %                     fprintf('Gaze is outside fixation window before experiment   \n');
                 end
             end
-            %             end
         end
     end
-    %     end
+    fixDriftFrame = 0;
+    isOutFixationWindowFrame = 0;
     %----------------------------------------------------------------------
     %%%                  parameters of red dot
     %----------------------------------------------------------------------
@@ -220,9 +227,14 @@ for trial = 1 : trialNumber
                     Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                     Screen('FillOval', wptr, fixationcolour, gazeRect);
                     Screen('Flip',wptr);
-                else
-                    fprintf('Gaze is outside fixation window \n');
-                    fixdrifttime = 1;
+                elseif  isOutFixationWindowFrame <= driftDuation
+                    fixDriftFrame = fixDriftFrame + 1;
+                    isOutFixationWindowFrame  = fixDriftFrame;
+                elseif isOutFixationWindowFrame  > driftDuation
+                    trialNumber = trialNumber + 1;
+                    isOutFixationWindowTimes = isOutFixationWindowTimes + 1;
+                    fprintf('Gaze is outside fixation window during experiment   \n');
+                    break;
                 end
             end
             
@@ -284,12 +296,9 @@ for trial = 1 : trialNumber
     
     data.position(trial) = dot.position;
     data.position_dva(trial) = atand(screenHeight * dot.position/(rect(4)*eyeScreenDistence));
-    data.fixdrifttrial(trial) = fixdrifttime;
+    data.fixdrifttrial(trial) = fixDriftFrame;
     WaitSecs (0.5);
     
-    if  fixdrifttime == 1
-        trialNumber = trialNumber + 1;
-    end
 end
 
 

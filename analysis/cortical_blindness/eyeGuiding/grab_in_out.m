@@ -3,10 +3,10 @@
 clear all;
 addpath '../../../function';
 
-artificialScotomaExp = 'y';
-whichExp = 'sectorEight';  % blindspot blurredBoundary sectorEight
+artificialScotomaExp = 'n';
+whichExp = 'blindspot';  % blindspot blurredBoundary sectorEight
 
-sbjnames = {'hjh'};
+sbjnames = {'k'};
 
 if strcmp(artificialScotomaExp,'y')
     datapath = sprintf(['../../../data/corticalBlindness/Eyelink_guiding/sectorEight/artificial_scotoma/'  '%s/'],sbjnames{1});
@@ -30,6 +30,11 @@ for expcondition = 1:length(upperExp)
     Files = dir(s4);
     load (Files.name);
     
+%     % Find abandoned trial and set the Index to 0    valid trial index is 1
+%     validTrialIndex = ones(1,length(bar_only));
+%     back.flashTiltDirectionMat(ValidTrialIndex);
+    
+    
     illusionCCWIndex = find(back.flashTiltDirectionMat == 1); % CCW
     illusionCWIndex = find(back.flashTiltDirectionMat == 2);  % CW
     
@@ -51,6 +56,7 @@ for expcondition = 1:length(lowerExp)
     
     Files = dir(s4);
     load (Files.name);
+    
     
     illusionCCWIndex = find(back.flashTiltDirectionMat == 1); % CCW
     illusionCWIndex = find(back.flashTiltDirectionMat == 2);  % CW

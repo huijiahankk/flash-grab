@@ -29,8 +29,8 @@ if 1
     sbjname = 'k';
     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
-    barLocation = 'l';  % u  upper visual field   l   lower visual field n  normal
-    condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
+    barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
+    condition = 'invi2vi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 1;  % 0 1
     whichExp = 'blindspot';  % blindspot blurredBoundary  sectorEight
     artificialScotomaExp = 'n';
@@ -74,7 +74,9 @@ blindfieldColor = 110;
 [wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
-% HideCursor;
+fixsize = 12;
+
+HideCursor;
 
 centerMovePix = 0;
 framerate = FrameRate(wptr);
@@ -108,7 +110,7 @@ KbName('UnifyKeyNames');
 eyeScreenDistence = 66;  % 78cm  68sunnannan
 screenHeight = 33.5; % 26.8 cm
 if strcmp(whichExp,'blindspot')
-    sectorRadius_out_visual_degree = 15.5; % sunnannan 9.17  mali 11.5
+    sectorRadius_out_visual_degree = 15.25; % sunnannan 9.17  mali 11.5
     sectorRadius_in_visual_degree = 13.5; % sunnannan 5.5   mali7.9
 else
     sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
@@ -123,7 +125,7 @@ centerRingRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 fixRadius_dva = 3;
 fixRadius = round(tand(fixRadius_dva) * eyeScreenDistence *  rect(4)/screenHeight);
 fixateTimeDura = 600; %ms
-driftDuation = 2 * framerate; %  frame
+driftDuation = 30; %  frame
 %----------------------------------------------------------------------
 %             Blind field parameter
 %----------------------------------------------------------------------
@@ -169,7 +171,7 @@ end
 
 barWidth = 20;
 barLength = (sectorRadius_out_pixel - sectorRadius_in_pixel);
-% barRect = [-barLength/2  -barWidth/2  barLength/2  barWidth/2];
+barRect = [-barLength/2  -barWidth/2  barLength/2  barWidth/2];
 
 
 % Define a vertical red rectangle
@@ -188,10 +190,10 @@ barRect = Screen('Rect',barTexture);
 
 lineWidth = 8;
 lineLength = 20;
-% lineRect = [-lineLength/2  -lineWidth/2  lineLength/2  lineWidth/2];
+lineRect = [-lineLength/2  -lineWidth/2  lineLength/2  lineWidth/2];
 
 % Define a vertical red rectangle
-lineMat(:,:,1) = zeros(lineLength,lineWidth);
+lineMat(:,:,1) = repmat(0,  lineLength,lineWidth);
 lineMat(:,:,2) = zeros(lineLength,  lineWidth) * 255;
 lineMat(:,:,3) = lineMat(:,:,2);
 
@@ -255,17 +257,14 @@ back.velocity = back.SpinSpeed * framerate;
 back.ReverseAngle = 90; % duration frame of checkerboard
 % each experiment generate the same sequence for flash direction,
 % different contrast same direction sequence
-preblockNumber = 10;
-% back.flashTiltDirectionMat = Shuffle(repmat([1;2],preblockNumber,1))';
-back.flashTiltDirectionMat = repmat([1;2],preblockNumber,1)'
-abandonBlockMat = zeros(1,preblockNumber);
+back.flashTiltDirectionMat = Shuffle(repmat([1;2],blockNumber/2,1))';
+
 barTiltStep = 1; %2.8125   1.40625;
 
 if strcmp(artificialScotomaExp,'y')
     if strcmp(condition,'invi2vi')
         upperStartAdjustDegree = - blindfield_from_horizontal_degree + 5;
         lowerStartAdjustDegree = blindfield_from_horizontal_degree - 5;
-        
     elseif strcmp(condition,'vi2invi')
         upperStartAdjustDegree = -15 - blindfield_from_horizontal_degree;
         lowerStartAdjustDegree = 15 + blindfield_from_horizontal_degree;
@@ -282,7 +281,6 @@ end
 
 barTiltStartUpper = 90 + upperStartAdjustDegree;
 barTiltStartLower = 90 + lowerStartAdjustDegree;
-bar_only = repmat(barTiltStartUpper,1,blockNumber);
 
 barTiltStartNormal = 0;
 
@@ -299,8 +297,8 @@ perc_loc_shift_pixel = round(tand(perc_loc_shift_dva) * eyeScreenDistence *  rec
 
 ScanOnset = GetSecs;
 
-block = 1;
-while block <= blockNumber
+
+for block = 1:blockNumber
     
     BlockOnset = GetSecs;
     
@@ -308,7 +306,7 @@ while block <= blockNumber
     %       present a start screen and wait for a key-press
     %----------------------------------------------------------------------
     
-    formatSpec = 'This is the %dth of %d block. \n \n Press Any Key To Begin';
+    formatSpec = 'This is the %dth of %d block. \n Press Any Key To Begin';
     A1 = block;
     A2 = blockNumber;
     str = sprintf(formatSpec,A1,A2);
@@ -354,7 +352,7 @@ while block <= blockNumber
         fixDriftFrame = 0;
         isOutFixationWindowFrame = 0;
         isOutFixationWindowTimes = 0;
-        abandonTrialFlag = 0;
+        
         
         if barLocation ~= 'n'
             switch trial
@@ -372,19 +370,19 @@ while block <= blockNumber
                         redbarflash_flag = 0;
                         if strcmp(condition, 'vi2invi')
                             barTiltNow = bar_only(block) + multiplier * 10;
-                            str_trial = '\n Adjust the bourdary from visible to invisible'  ;
+                            str_trial = ['\n Adjust the bourdary from visible to invisible'    '\n\n Fix on the cross to start the trial'];
                         elseif strcmp(condition,'invi2vi')
                             barTiltNow = bar_only(block) - multiplier * 10;
-                            str_trial = '\n Adjust the boundary from invisible to visible' ;
+                            str_trial = ['\n Adjust the boundary from invisible to visible'     '\n\n Fix on the cross to start the trial'];
                         end
                     else    % for 8 sectorExp off-sync
                         redbarflash_flag = 1;
                         if strcmp(condition, 'vi2invi')
                             barTiltNow = bar_only(block) + multiplier * 10;
-                            str_trial = '\n Adjust the bar from visible to invisible' ;
+                            str_trial = ['\n Adjust the bar from visible to invisible'    '\n\n Fix on the cross to start the trial'];
                         elseif strcmp(condition,'invi2vi')
                             barTiltNow = bar_only(block) - multiplier * 10;
-                            str_trial = '\n Adjust the bar from invisible to visible'  ;
+                            str_trial = ['\n Adjust the bar from invisible to visible'     '\n\n Fix on the cross to start the trial'];
                         end
                     end
                     
@@ -394,17 +392,17 @@ while block <= blockNumber
                     if  strcmp(whichExp,'blurredBoundary') % for blurredBoundaryExp  off_sync;
                         if strcmp(condition, 'vi2invi')
                             barTiltNow = bar_only(block) + multiplier * 10;
-                            str_trial = '\n Adjust the bar from visible to invisible' ;
+                            str_trial = ['\n Adjust the bar from visible to invisible'    '\n\n Fix on the cross to start the trial'];
                         elseif strcmp(condition,'invi2vi')
                             barTiltNow = bar_only(block) - multiplier * 10;
-                            str_trial = '\n Adjust the bar from invisible to visible'  ;
+                            str_trial = ['\n Adjust the bar from invisible to visible'     '\n\n Fix on the cross to start the trial'];
                         end
                     else  % for 8 sectorExp flash grab
                         if strcmp(condition, 'vi2invi')
-                            str_trial = '\n Adjust the bar from visible to invisible and \n\n remember the last location you have seen';
+                            str_trial = ['\n Adjust the bar from visible to invisible and \n\n remember the last location you have seen'  '\n\n Fix on the cross to start the trial'];
                             barTiltNow = bar_only(block) + multiplier * 10;
                         elseif strcmp(condition,'invi2vi')
-                            str_trial = '\n Adjust the bar from invisible to visible and remember the location' ;
+                            str_trial = ['\n Adjust the bar from invisible to visible and remember the location'   '\n\n Fix on the cross to start the trial'];
                             barTiltNow = bar_only(block) - multiplier * 10;
                         end
                     end
@@ -414,25 +412,25 @@ while block <= blockNumber
                     redbarflash_flag = 1;
                     if  strcmp(whichExp,'blurredBoundary')  % for blurredBoundaryExp  flash grab;
                         if strcmp(condition, 'vi2invi')
-                            str_trial = '\n Adjust the bar from visible to invisible and \n\n remember the last location you have seen'  ;
+                            str_trial = ['\n Adjust the bar from visible to invisible and \n\n remember the last location you have seen'  '\n\n Fix on the cross to start the trial'];
                             barTiltNow = bar_only(block) + multiplier * 10;
                         elseif strcmp(condition,'invi2vi')
-                            str_trial = '\n Adjust the bar from invisible to visible and remember the location'  ;
+                            str_trial = ['\n Adjust the bar from invisible to visible and remember the location'   '\n\n Fix on the cross to start the trial'];
                             barTiltNow = bar_only(block) - multiplier * 10;
                         end
                     else     % for 8 sectorExp perceived location
-                        str_trial = '\n Adjust the bar to the perceived location'  ;
+                        str_trial = ['\n Adjust the bar to the perceived location'    '\n\n Fix on the cross to start the trial'];
                         barTiltNow = bar_only(block);
                     end
                     
                 case  5
-                    str_trial = '\n Adjust the bar to the perceived location';
+                    str_trial = ['\n Adjust the bar to the perceived location'    '\n\n Fix on the cross to start the trial'];
                     barTiltNow = bar_only(block);
             end
             
         elseif barLocation == 'n'
             barTiltNow = barTiltStartNormal;
-            str_trial = '\n Adjust the bar until horizon   \n\n Fix on the cross to start the trial';
+            str_trial = '\n Adjust the bar until horizon   \n\n Fix on the cross to start the trial'
         end
         
         DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor,[],[],[],[],[],topLeftQuadRect);
@@ -457,14 +455,14 @@ while block <= blockNumber
                         gazeRect=[ x-9 y-9 x+10 y+10];
                         %                     fixationcolour=round(rand(3,1)*255); % coloured dot
                         fixationcolour = greycolor + 10;
-%                         str = 'Fix on the cross to start the trial';
-%                         Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
+                        str = 'Fix on the cross to start the trial';
+                        Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
                         Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                         Screen('FillOval', wptr, fixationcolour, gazeRect);
                         Screen('Flip',wptr);
                         fixDriftFrame = fixDriftFrame + 1;
                         isOutFixationWindowFrame  = fixDriftFrame;
-                    else  isOutFixationWindowFrame >= driftDuation;
+                    else  isOutFixationWindowFrame >= driftDuation
                         break;
                     end
                 end
@@ -473,7 +471,6 @@ while block <= blockNumber
         
         fixDriftFrame = 0;
         isOutFixationWindowFrame = 0;
-        isOutFixationWindowTimesMat = [];
         
         if trial ~= trialNumber
             
@@ -509,17 +506,15 @@ while block <= blockNumber
                             isOutFixationWindowFrame  = fixDriftFrame;
                         elseif isOutFixationWindowFrame  > driftDuation
                             isOutFixationWindowTimes = isOutFixationWindowTimes + 1;
-                            isOutFixationWindowTimesMat = [isOutFixationWindowTimes;    isOutFixationWindowTimesMat];
-                            sprintf('Gaze is outside fixation window during block %d  trial  %d\n',  block, trial)
-                            abandonTrialFlag = 1;
-                            trial = trialNumber + 1;
-                            blockNumber = blockNumber + 1;
-                            abandonBlockMat(block) = abandonTrialFlag;
+                            isOutFixationWindowTimesMat = [isOutFixationWindowTimes      isOutFixationWindowTimesMat];
+                            fprintf('Gaze is outside fixation window during experiment   \n');
                             break;
                         end
                     end
                 end
-                     
+                
+                
+                
                 if data.flashTiltDirection == 1    % CCW
                     % when larger than certain degree reverse  CCW
                     if back.CurrentAngle >= 0 + barTiltNow  %   back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
@@ -789,13 +784,9 @@ while block <= blockNumber
         
         WaitSecs (0.5);
     end
-      block = block + 1;
-    abandonBlock(block) = abandonTrialFlag;
 end
 
-runTrialIndex = ones(1,length(bar_only));
-back.flashTiltDirectionMat = back.flashTiltDirectionMat(1:length(runTrialIndex));
-% abandonBlockMat = abandonBlockMat(runTrialInde(x);
+
 display(GetSecs - ScanOnset);
 
 %----------------------------------------------------------------------
@@ -827,7 +818,6 @@ end
 %                      save parameters files
 %----------------------------------------------------------------------
 
-datadir = strcat( '../../../data/corticalBlindness/eyelink_guiding/',  whichExp,'/');
 
 if strcmp(artificialScotomaExp,'y')
     expdir = strcat(datadir,'/artificial_scotoma/') ;
