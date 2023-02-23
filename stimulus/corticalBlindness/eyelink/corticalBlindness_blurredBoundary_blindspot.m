@@ -29,10 +29,11 @@ if 1
     sbjname = 'k';
     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
-    barLocation = 'l';  % u  upper visual field   l   lower visual field n  normal
+    barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
-    isEyelink = 1;  % 0 1
-    whichExp = 'blindspot';  % blindspot blurredBoundary  sectorEight
+    isEyelink = 0;  % 0 1
+    annulusType = 'blurredBoundary'; % blurredBoundary  sector
+    annulusWidth =  'blindspot'; % blindspot general
     artificialScotomaExp = 'n';
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -43,13 +44,13 @@ else
     
     prompt = {'subject''s name','barLocation(u for upper\l for lower\n for normal)',...
         'condition(vi2invi  invi2vi normal)', 'isEyelink(without eyelink 0 or use eyelink 1)',...
-        'whichExp(blindspot/blurredBoundary/sectorEight)','artificialScotomaExp(y/n)'};
+        'annulusType(blurredBoundary/sector)','annulusWidth(blindspot/general)', 'artificialScotomaExp(y/n)'};
     dlg_title = 'Set experiment parameters ';
     answer  = inputdlg(prompt,dlg_title);
-    [sbjname,barLocation,condition,isEyelink,whichExp,artificialScotomaExp] = answer{:};
-    fprintf(['sbjname: %s\n','barLocation: %s\n','condition: %s\n','isEyelink: %s\n','whichExp: %s\n' 'artificialScotomaExp: %s\n'],...
-        sbjname,barLocation,condition,isEyelink,whichExp,artificialScotomaExp);
-    
+    [sbjname,barLocation,condition,isEyelink,annulusType,annulusWidth,artificialScotomaExp] = answer{:};
+    fprintf(['sbjname: %s\n','barLocation: %s\n','condition: %s\n','isEyelink: %d\n','annulusType: %s\n','annulusWidth: %s\n', 'artificialScotomaExp: %s\n'],...
+        sbjname,barLocation,condition,isEyelink,annulusType,annulusWidth,artificialScotomaExp);
+    isEyelink = str2num(isEyelink);
 end
 
 debug = 'n';
@@ -71,7 +72,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 greycolor = 128; %(whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 % HideCursor;
@@ -107,7 +108,7 @@ KbName('UnifyKeyNames');
 
 eyeScreenDistence = 66;  % 78cm  68sunnannan
 screenHeight = 33.5; % 26.8 cm
-if strcmp(whichExp,'blindspot')
+if strcmp(annulusWidth,'blindspot')
     sectorRadius_out_visual_degree = 15.5; % sunnannan 9.17  mali 11.5
     sectorRadius_in_visual_degree = 13.5; % sunnannan 5.5   mali7.9
 else
@@ -122,8 +123,9 @@ centerRingRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
 % eye gaze distance from center
 fixRadius_dva = 3;
 fixRadius = round(tand(fixRadius_dva) * eyeScreenDistence *  rect(4)/screenHeight);
-fixateTimeDura = 600; %ms
-driftDuation = 2 * framerate; %  frame
+% fixateTimeDura = 600; %ms
+driftDuation_pre = 1; %  sec
+driftDuation_dur = 2; % sec
 %----------------------------------------------------------------------
 %             Blind field parameter
 %----------------------------------------------------------------------
@@ -140,17 +142,13 @@ blindfield_from_horizontal_degree = asind(blindfieldRadius_pixel/blindfield_devi
 %----------------------------------------------------------------------
 %%%          parameters of blurred boundary
 %----------------------------------------------------------------------
-if strcmp(whichExp,'blurredBoundary')
+if strcmp(annulusType,'blurredBoundary')
     ramp_slope = 0.1;
     ramp_degree = 20;
     ringBlurredBoundaryMat = DrawRingWithBlurredBoundary(sectorRadius_out_pixel*2,sectorRadius_in_pixel*2,blackcolor,1,ramp_slope,ramp_degree);
     % imshow(ringBlurredBoundaryMat);
     ringBlurredBoundaryMat = whitecolor*ringBlurredBoundaryMat;
     backgroundTexture = Screen('MakeTexture', wptr, ringBlurredBoundaryMat);
-    backgroundRect = Screen('Rect',backgroundTexture);
-    backgroundDestinationRect = CenterRectOnPoint(backgroundRect,xCenter,yCenter);
-    Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
     %----------------------------------------------------------------------
     %                      draw background 8 sector
     %----------------------------------------------------------------------
@@ -158,10 +156,10 @@ else
     sectorNumber = 8;
     [sector] = drawBackgroundSector(sectorNumber,sectorRadius_in_pixel,sectorRadius_out_pixel,blackcolor,whitecolor,xCenter,yCenter,centerMovePix);
     backgroundTexture = Screen('MakeTexture', wptr, sector);
-    backgroundRect = Screen('Rect',backgroundTexture);
-    backgroundDestinationRect = CenterRectOnPoint(backgroundRect,xCenter,yCenter-centerMovePix);
-    Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 end
+backgroundRect = Screen('Rect',backgroundTexture);
+backgroundDestinationRect = CenterRectOnPoint(backgroundRect,xCenter,yCenter-centerMovePix);
+Screen('BlendFunction', wptr, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 %----------------------------------------------------------------------
 %%%          parameters of red bar
@@ -237,7 +235,7 @@ blockNumber = 4;
 if strcmp(condition, 'normal')
     trialNumber = 1;
 else
-    if strcmp(whichExp,'blurredBoundary')
+    if strcmp(annulusType,'blurredBoundary')
         trialNumber = 5;
     else
         trialNumber = 4;
@@ -255,10 +253,10 @@ back.velocity = back.SpinSpeed * framerate;
 back.ReverseAngle = 90; % duration frame of checkerboard
 % each experiment generate the same sequence for flash direction,
 % different contrast same direction sequence
-preblockNumber = 10;
+% preblockNumber = 10;
 % back.flashTiltDirectionMat = Shuffle(repmat([1;2],preblockNumber,1))';
-back.flashTiltDirectionMat = repmat([1;2],preblockNumber,1)'
-abandonBlockMat = zeros(1,preblockNumber);
+% back.flashTiltDirectionMat = repmat([1;2],preblockNumber,1)'
+abandonBlockMat = zeros(1,20);
 barTiltStep = 1; %2.8125   1.40625;
 
 if strcmp(artificialScotomaExp,'y')
@@ -286,8 +284,8 @@ bar_only = repmat(barTiltStartUpper,1,blockNumber);
 
 barTiltStartNormal = 0;
 
-if strcmp(whichExp,'blindspot')
-    perc_loc_shift_dva = 4;
+if strcmp(annulusWidth,'blindspot')
+    perc_loc_shift_dva = 5;
 else
     perc_loc_shift_dva = 0;
 end
@@ -298,12 +296,13 @@ perc_loc_shift_pixel = round(tand(perc_loc_shift_dva) * eyeScreenDistence *  rec
 %----------------------------------------------------------------------
 
 ScanOnset = GetSecs;
-
 block = 1;
+
 while block <= blockNumber
     
     BlockOnset = GetSecs;
-    
+    abandonTrialFlag = 0;
+    trial = 1;
     %----------------------------------------------------------------------
     %       present a start screen and wait for a key-press
     %----------------------------------------------------------------------
@@ -316,14 +315,14 @@ while block <= blockNumber
     Screen ('TextSize',wptr,30);
     Screen('TextFont',wptr,'Courier');
     
-    topLeftQuadRect = [0 0 xmid ymid];
-    topRightQuadRect = [xmid 0 0 ymid];
-    bottomLeftQuadRect = [0 ymid xmid 0];
-    bottomRightQuadRect = [xmid ymid 0 0];
+%     topLeftQuadRect = [0 0 xCenter yCenter];
+    topCenterQuadRect = [xCenter/2 0  xCenter*3/2 yCenter];
+%     topRightQuadRect = [xCenter 0 0 yCenter];
+%     bottomLeftQuadRect = [0 yCenter xCenter 0];
+%     bottomRightQuadRect = [xCenter yCenter 0 0];
     
-    DrawFormattedText(wptr, str, 'center', 'center', blackcolor,[],[],[],[],[],topLeftQuadRect);
-    %         DrawFormattedText(wptr, '\n\nPress Any Key To Begin', 'center', 'center', blackcolor);
-    %         fprintf(1,'\tTrial number: %2.0f\n',trialNumber);
+    DrawFormattedText(wptr, str, 'center', 'center', blackcolor,[],[],[],[],[],topCenterQuadRect);
+
     
     Screen('Flip', wptr);
     KbStrokeWait;
@@ -338,10 +337,12 @@ while block <= blockNumber
         barTiltNow = barTiltStartNormal;
     end
     
+    if block == 1
+        data.flashTiltDirection = 1;
+    end
     
-    data.flashTiltDirection = back.flashTiltDirectionMat(block);
     
-    for trial = 1:trialNumber
+    while abandonTrialFlag == 0 && trial <= trialNumber
         
         %----------------------------------------------------------------------
         %                      background rotate
@@ -354,7 +355,7 @@ while block <= blockNumber
         fixDriftFrame = 0;
         isOutFixationWindowFrame = 0;
         isOutFixationWindowTimes = 0;
-        abandonTrialFlag = 0;
+        readIntruTime = 1;
         
         if barLocation ~= 'n'
             switch trial
@@ -366,9 +367,10 @@ while block <= blockNumber
                     elseif strcmp(condition,'invi2vi')
                         str_trial = ['Adjust the bar from invisible to visible.\n '    '\n\n Fix on the cross to start the trial. \n'];
                     end
+                    readIntruTime = 2;
                 case 2
                     back.alpha = 1;
-                    if  strcmp(whichExp,'blurredBoundary') % for blurredBoundaryExp  boundary;
+                    if  strcmp(annulusType,'blurredBoundary') % for blurredBoundaryExp  boundary;
                         redbarflash_flag = 0;
                         if strcmp(condition, 'vi2invi')
                             barTiltNow = bar_only(block) + multiplier * 10;
@@ -387,11 +389,11 @@ while block <= blockNumber
                             str_trial = '\n Adjust the bar from invisible to visible'  ;
                         end
                     end
-                    
+                    readIntruTime = 2;
                 case 3
                     back.alpha = 1;
                     redbarflash_flag = 1;
-                    if  strcmp(whichExp,'blurredBoundary') % for blurredBoundaryExp  off_sync;
+                    if  strcmp(annulusType,'blurredBoundary') % for blurredBoundaryExp  off_sync;
                         if strcmp(condition, 'vi2invi')
                             barTiltNow = bar_only(block) + multiplier * 10;
                             str_trial = '\n Adjust the bar from visible to invisible' ;
@@ -408,11 +410,11 @@ while block <= blockNumber
                             barTiltNow = bar_only(block) - multiplier * 10;
                         end
                     end
-                    
+                    readIntruTime = 2;
                 case 4
                     back.alpha = 1;
                     redbarflash_flag = 1;
-                    if  strcmp(whichExp,'blurredBoundary')  % for blurredBoundaryExp  flash grab;
+                    if  strcmp(annulusType,'blurredBoundary')  % for blurredBoundaryExp  flash grab;
                         if strcmp(condition, 'vi2invi')
                             str_trial = '\n Adjust the bar from visible to invisible and \n\n remember the last location you have seen'  ;
                             barTiltNow = bar_only(block) + multiplier * 10;
@@ -420,28 +422,27 @@ while block <= blockNumber
                             str_trial = '\n Adjust the bar from invisible to visible and remember the location'  ;
                             barTiltNow = bar_only(block) - multiplier * 10;
                         end
-                    else     % for 8 sectorExp perceived location
-                        str_trial = '\n Adjust the bar to the perceived location'  ;
-                        barTiltNow = bar_only(block);
+                        readIntruTime = 2;
+%                     else     % for 8 sectorExp perceived location
+%                         str_trial = '\n Adjust the bar to the perceived location'  ;
+%                         barTiltNow = bar_only(block);
                     end
                     
-                case  5
-                    str_trial = '\n Adjust the bar to the perceived location';
-                    barTiltNow = bar_only(block);
+%                 case  5
+%                     str_trial = '\n Adjust the bar to the perceived location';
+%                     barTiltNow = bar_only(block);
             end
             
         elseif barLocation == 'n'
             barTiltNow = barTiltStartNormal;
             str_trial = '\n Adjust the bar until horizon   \n\n Fix on the cross to start the trial';
         end
-        
-        DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor,[],[],[],[],[],topLeftQuadRect);
+        DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor,[],[],[],[],[],topCenterQuadRect);
+        str_trial = [];
         Screen('Flip',wptr);
-        if trial == 4 && trial == 5
-            WaitSecs(0.5);
-        else
-            WaitSecs(2);
-        end
+        
+         WaitSecs(readIntruTime);
+
         %----------------------------------------------------------------------
         %  Eyelink file transfer to Display PC and check if fixation correct
         %  'Fast' method (sample only)
@@ -457,14 +458,15 @@ while block <= blockNumber
                         gazeRect=[ x-9 y-9 x+10 y+10];
                         %                     fixationcolour=round(rand(3,1)*255); % coloured dot
                         fixationcolour = greycolor + 10;
-%                         str = 'Fix on the cross to start the trial';
-%                         Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
+                        %                         str = 'Fix on the cross to start the trial';
+                        %                         Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
                         Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                         Screen('FillOval', wptr, fixationcolour, gazeRect);
                         Screen('Flip',wptr);
                         fixDriftFrame = fixDriftFrame + 1;
                         isOutFixationWindowFrame  = fixDriftFrame;
-                    else  isOutFixationWindowFrame >= driftDuation;
+                    else  isOutFixationWindowFrame >= driftDuation_pre*framerate;
+                        Eyelink('Message','trial start');
                         break;
                     end
                 end
@@ -487,11 +489,9 @@ while block <= blockNumber
                 % the rotation
                 if currentframe == 1
                     back.CurrentAngle = barTiltNow - 2;  % back.reverse_anlge_end
-                    %                     back.CurrentAngle = back.reverse_anlge_start - barTiltNow ;
                 end
                 
                 if isEyelink
-                    %                     while 1
                     [x, y] = getEyelinkCoordinates();
                     if isnan(x) || isnan(y)
                         fprintf('Eye tracker lost track of eyes \n');
@@ -500,26 +500,25 @@ while block <= blockNumber
                         if isWithinFixationWindow(x, y, xCenter, yCenter, fixRadius)
                             gazeRect=[ x-9 y-9 x+10 y+10];
                             %                     fixationcolour=round(rand(3,1)*255); % coloured dot
-                            fixationcolour = greycolor + 10;
+                            fixationcolour = greycolor + 8;
                             Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                             Screen('FillOval', wptr, fixationcolour, gazeRect);
-%                             Screen('Flip',wptr);
-                        elseif  isOutFixationWindowFrame <= driftDuation
+                            %                             Screen('Flip',wptr);
+                        elseif  isOutFixationWindowFrame <= driftDuation_dur * framerate
                             fixDriftFrame = fixDriftFrame + 1;
                             isOutFixationWindowFrame  = fixDriftFrame;
-                        elseif isOutFixationWindowFrame  > driftDuation
+                        elseif isOutFixationWindowFrame  > driftDuation_dur * framerate
                             isOutFixationWindowTimes = isOutFixationWindowTimes + 1;
                             isOutFixationWindowTimesMat = [isOutFixationWindowTimes;    isOutFixationWindowTimesMat];
                             sprintf('Gaze is outside fixation window during block %d  trial  %d\n',  block, trial)
-                            abandonTrialFlag = 1;
-                            trial = trialNumber + 1;
+                            abandonTrialFlag = 1;  % the whole block was abandoned
                             blockNumber = blockNumber + 1;
                             abandonBlockMat(block) = abandonTrialFlag;
                             break;
                         end
                     end
                 end
-                     
+                
                 if data.flashTiltDirection == 1    % CCW
                     % when larger than certain degree reverse  CCW
                     if back.CurrentAngle >= 0 + barTiltNow  %   back.ReverseAngle - wedgeTiltNow  % + wedgeTiltNow - (360/sectorNumber/2 + 0.75 + adjustAngle)
@@ -543,7 +542,7 @@ while block <= blockNumber
                 end
                 
                 %    draw background each frame
-                if strcmp(whichExp,'blurredBoundary')
+                if strcmp(annulusType,'blurredBoundary')
                     if trial == 3
                         back.presentAngle = back.CurrentAngle + 90;
                     else
@@ -573,6 +572,9 @@ while block <= blockNumber
                         barTiltNowMat(trial,flashtimes,block) = barTiltNow;
                         back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
                         flashPresentFlag = 1;
+                        if isEyelink
+                            Eyelink('Message','flash');
+                        end
                         
                     elseif data.flashTiltDirection == 2  && back.FlagSpinDirecB == 1
                         
@@ -582,6 +584,9 @@ while block <= blockNumber
                         flashtimes = flashtimes + 1;
                         barTiltNowMat(trial,flashtimes,block) = barTiltNow;
                         back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
+                        if isEyelink
+                            Eyelink('Message','flash');
+                        end
                         
                         flashPresentFlag = 1;
                     else
@@ -655,7 +660,7 @@ while block <= blockNumber
                 
                 
                 
-                if strcmp(whichExp,'blindspot')
+                if strcmp(annulusWidth,'blindspot')
                     lineRectTiltDegree =  barTiltNow;
                     lineDrawTiltDegree = barTiltNow;
                     lineDestinationRect = CenterRectOnPoint(lineRect,xCenter + (centerRingRadius2Center - perc_loc_shift_pixel) * sind(lineRectTiltDegree), yCenter - (centerRingRadius2Center - perc_loc_shift_pixel) * cosd(lineRectTiltDegree));
@@ -719,23 +724,22 @@ while block <= blockNumber
                         switch trial
                             case 1
                                 Eyelink('Message','Bar Only');
-                                
                             case 2
-                                if  strcmp(whichExp,'blurredBoundary')
+                                if  strcmp(annulusType,'blurredBoundary')
                                     Eyelink('Message','blurredBoundary')
                                 else
                                     Eyelink('Message','Off Sync');
                                 end
                                 
                             case  3
-                                if strcmp(whichExp,'blurredBoundary')
+                                if strcmp(annulusType,'blurredBoundary')
                                     Eyelink('Message','Off Sync');
                                 else
                                     Eyelink('Message','Flash Grab');
                                 end
                                 
                             case 4
-                                if strcmp(whichExp,'blurredBoundary')
+                                if strcmp(annulusType,'blurredBoundary')
                                     Eyelink('Message','Flash Grab');
                                 else
                                     Eyelink('Message','Perceived Location');
@@ -760,20 +764,20 @@ while block <= blockNumber
                 case  1      % flash bar only
                     bar_only(block) = barTiltNow;
                 case  2   % blurred boundary
-                    if strcmp(whichExp,'blurredBoundary')
+                    if strcmp(annulusType,'blurredBoundary')
                         boundary(block) = barTiltNow;
                     else  % off-sync
                         off_sync(block) = barTiltNow;
                     end
                 case 3
-                    if strcmp(whichExp,'blurredBoundary')
+                    if strcmp(annulusType,'blurredBoundary')
                         off_sync(block) = barTiltNow;
                     else
                         % flash grab
                         flash_grab(block) = barTiltNow;
                     end
                 case 4
-                    if strcmp(whichExp,'blurredBoundary')
+                    if strcmp(annulusType,'blurredBoundary')
                         flash_grab(block) = barTiltNow;
                     else
                         % perceived location or none
@@ -786,16 +790,37 @@ while block <= blockNumber
         else
             grab_effect_degree(block) = barTiltNow;
         end
-        
+        trial = trial + 1;
         WaitSecs (0.5);
+        
+        if keyCode(KbName('q'))
+            break;
+        end
     end
-      block = block + 1;
+    
+    data.flashTiltDirectionMat(block) = data.flashTiltDirection;
+    
+    if abandonTrialFlag == 1
+        data.flashTiltDirection = data.flashTiltDirectionMat(block);
+    elseif abandonTrialFlag == 0
+        if data.flashTiltDirectionMat(block) == 2
+            data.flashTiltDirection = data.flashTiltDirectionMat(block) - 1;
+        elseif data.flashTiltDirectionMat(block) == 1
+            data.flashTiltDirection = data.flashTiltDirectionMat(block) + 1;
+        end
+    end
+    
+    block = block + 1;
     abandonBlock(block) = abandonTrialFlag;
+    
+    
+    if keyCode(KbName('q'))
+        break;
+    end
 end
 
-runTrialIndex = ones(1,length(bar_only));
-back.flashTiltDirectionMat = back.flashTiltDirectionMat(1:length(runTrialIndex));
-% abandonBlockMat = abandonBlockMat(runTrialInde(x);
+runTrialIndex = ones(1,length(perceived_location));
+validTrialIndex = find(perceived_location ~= 0);
 display(GetSecs - ScanOnset);
 
 %----------------------------------------------------------------------
@@ -827,7 +852,7 @@ end
 %                      save parameters files
 %----------------------------------------------------------------------
 
-datadir = strcat( '../../../data/corticalBlindness/eyelink_guiding/',  whichExp,'/');
+datadir = strcat( '../../../data/corticalBlindness/eyelink_guiding/',  annulusType,'/');
 
 if strcmp(artificialScotomaExp,'y')
     expdir = strcat(datadir,'/artificial_scotoma/') ;
