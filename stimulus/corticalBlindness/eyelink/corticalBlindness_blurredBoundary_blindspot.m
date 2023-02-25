@@ -213,6 +213,8 @@ if isEyelink
     Eyelink('Command', 'set_idle_mode');
     % clear tracker display
     Eyelink('Command', 'clear_screen 0');
+    Eyelink('Command','draw_box %d %d %d %d ',xCenter-50,yCenter-50,xCenter+50,yCenter+50);
+    EyelinkDoDriftCorrection(el);
     Eyelink('StartRecording');
     
     eyeUsed = Eyelink('EyeAvailable'); % get eye that's tracked
@@ -440,8 +442,7 @@ while block <= blockNumber
         DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor,[],[],[],[],[],topCenterQuadRect);
         str_trial = [];
         Screen('Flip',wptr);
-        
-         WaitSecs(readIntruTime);
+        WaitSecs(readIntruTime);
 
         %----------------------------------------------------------------------
         %  Eyelink file transfer to Display PC and check if fixation correct
@@ -450,6 +451,7 @@ while block <= blockNumber
         if isEyelink
             while 1
                 [x, y] = getEyelinkCoordinates();
+                
                 if isnan(x) || isnan(y)
                     fprintf('Eye tracker lost track of eyes \n');
                 else
@@ -466,7 +468,7 @@ while block <= blockNumber
                         fixDriftFrame = fixDriftFrame + 1;
                         isOutFixationWindowFrame  = fixDriftFrame;
                     else  isOutFixationWindowFrame >= driftDuation_pre*framerate;
-                        Eyelink('Message','trial start');
+                        Eyelink('Message','Block %d',block);
                         break;
                     end
                 end
@@ -492,6 +494,7 @@ while block <= blockNumber
                 end
                 
                 if isEyelink
+                    Eyelink('Message','TRIALID %d',trial);
                     [x, y] = getEyelinkCoordinates();
                     if isnan(x) || isnan(y)
                         fprintf('Eye tracker lost track of eyes \n');
@@ -855,16 +858,17 @@ end
 datadir = strcat( '../../../data/corticalBlindness/eyelink_guiding/',  annulusType,'/');
 
 if strcmp(artificialScotomaExp,'y')
-    expdir = strcat(datadir,'/artificial_scotoma/') ;
-else
-    expdir = sprintf([datadir '%s/'],sbjname);
-    if ~isdir(expdir)
-        mkdir(expdir)
-    end
+    datadirSpecify = strcat(datadir,'/artificial_scotoma/') ; 
+elseif strcmp(annulusWidth,'blindspot')
+    datadirSpecify = strcat(datadir,'/blindspot/') ;
 end
 
+expdir = sprintf([datadirSpecify '%s/'],sbjname);
+if ~isdir(expdir)
+    mkdir(expdir)
+end
+    
 savePath = expdir;
-
 time = clock;
 
 filename = sprintf('%s_%s_%s_%02g_%02g_%02g_%02g_%02g',sbjname,condition,barLocation,time(1),time(2),time(3),time(4),time(5));
