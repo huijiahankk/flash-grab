@@ -1,26 +1,44 @@
 
 clear all;
-datapath = '../../data/corticalBlindness/Eyelink_asc/artificial_scotoma/';
+datapath = '../../data/corticalBlindness/Eyelink_asc/blurredBoundary/artificial_scotoma/';
 
 % addpath('/Users/huijiajia/Documents/Psychtoolbox-3-3.0.17.9/Psychtoolbox/PsychHardware/EyelinkToolbox');
 % Read the EyeLink ASCII data file
-dataFile = 'hjh_invi2vi_l_2023_02_22_09_39.asc';
+dataFile = 'hjh_invi2vi_l_2023_02_23_09_25.asc';
 
 % Specify the path to the Eyelink asc file
 asc_file_path = strcat(datapath,dataFile);
 
 % Open the asc file
 asc_file_id = fopen(asc_file_path, 'r');
+% read the file line by line
+line = fgetl(asc_file_id);
 
-% Read the data from the asc file
-asc_data = textscan(asc_file_id, '%f%f%f%f%f%f%f%f%f%f%f%f%f%s%s%s%s%s%s%s', 'HeaderLines', 71);
-% asc_data = textscan(asc_file_id, '%f%f%s', 'HeaderLines', 71);
+while ischar(line)
+    % check if the line contains eye data
+    if strncmp(line, 'E', 1) == 1
+        % extract the relevant information from the line
+        fields = strsplit(line, '\t');
+        time = str2double(fields{2});
+        x = str2double(fields{3});
+        y = str2double(fields{4});
+        
+        % do something with the eye data
+        disp([time, x, y]);
+    end
+    
+    % read the next line
+    line = fgetl(asc_file_id);
+end
 
-% Close the asc file
-fclose(asc_file_id);
+% close the file
+fclose(fid);
+This script reads the Eyelink data file line by line and checks if each line contains eye data (identified by the 'E' at the beginning of the line). If a line contains eye data, it extracts the relevant information (time, x position, and y position) using the strsplit function and converts the strings to doubles using the str2double function. Finally, the script displays the eye data using the disp function, but you can modify this part to process the data as needed. Note that the script assumes that the Eyelink data is tab-separated and contains no header information. If your data is different, you may need to modify the script accordingly.
 
-% Extract the relevant data from the cell array
-eye_data = [asc_data{1} asc_data{2} asc_data{3}];
+
+
+
+
 
 % Plot the gaze data
 plot(eye_data(:,1), eye_data(:,2));

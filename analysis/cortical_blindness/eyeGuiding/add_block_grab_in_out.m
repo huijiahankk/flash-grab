@@ -6,15 +6,17 @@ clear all;
 addpath '../../../function';
 
 artificialScotomaExp = 'y';
-whichExp = 'sectorEight';  % blindspot blurredBoundary sectorEight
+annulusType = 'blurredBoundary';  %  blurredBoundary sector
+annulusWidth = 'blindspot'; % general 
 
 sbjnames = {'hjh'};
+path = strcat('../../../data/corticalBlindness/Eyelink_guiding/',annulusType,'/');
 
-if strcmp(artificialScotomaExp,'y')
-    datapath = sprintf(['../../../data/corticalBlindness/Eyelink_guiding/sectorEight/artificial_scotoma/'  '%s/'],sbjnames{1});
-else
-    path1 = '../../../data/corticalBlindness/Eyelink_guiding/';
-    datapath = strcat(path1,'/',whichExp,'/',sbjnames{1});
+
+if strcmp(artificialScotomaExp,'n')
+    datapath = sprintf([strcat(path,'artificial_scotoma/')  '%s/'],sbjnames{1});
+elseif strcmp(annulusWidth,'blindspot')
+    datapath = strcat(path,'blindspot/',sbjnames{1});
 end
 
 cd(datapath);

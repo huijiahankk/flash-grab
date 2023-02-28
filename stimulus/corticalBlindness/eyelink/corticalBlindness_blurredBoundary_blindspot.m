@@ -25,16 +25,16 @@
 
 clear all;close all;
 
-if 1
+if 0
     sbjname = 'k';
     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
-    barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
-    condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
+    barLocation = 'n';  % u  upper visual field   l   lower visual field n  normal
+    condition = 'normal';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 0;  % 0 1
-    annulusType = 'blurredBoundary'; % blurredBoundary  sector
-    annulusWidth =  'blindspot'; % blindspot general
-    artificialScotomaExp = 'n';
+    annulusPattern = 'blurredBoundary'; % blurredBoundary  sector
+    annulusWidth =  'blindspot'; % blindspot   artificialScotoma
+%     artificialScotomaExp = 'n';
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
     %     barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
@@ -44,17 +44,17 @@ else
     
     prompt = {'subject''s name','barLocation(u for upper\l for lower\n for normal)',...
         'condition(vi2invi  invi2vi normal)', 'isEyelink(without eyelink 0 or use eyelink 1)',...
-        'annulusType(blurredBoundary/sector)','annulusWidth(blindspot/general)', 'artificialScotomaExp(y/n)'};
+        'annulusPattern(blurredBoundary/sector)','annulusWidth(blindspot/artificial_Scotoma)'};
     dlg_title = 'Set experiment parameters ';
     answer  = inputdlg(prompt,dlg_title);
-    [sbjname,barLocation,condition,isEyelink,annulusType,annulusWidth,artificialScotomaExp] = answer{:};
-    fprintf(['sbjname: %s\n','barLocation: %s\n','condition: %s\n','isEyelink: %d\n','annulusType: %s\n','annulusWidth: %s\n', 'artificialScotomaExp: %s\n'],...
-        sbjname,barLocation,condition,isEyelink,annulusType,annulusWidth,artificialScotomaExp);
+    [sbjname,barLocation,condition,isEyelink,annulusPattern,annulusWidth] = answer{:};
+    fprintf(['sbjname: %s\n','barLocation: %s\n','condition: %s\n','isEyelink: %d\n','annulusType: %s\n','annulusWidth: %s\n'],...
+        sbjname,barLocation,condition,isEyelink,annulusPattern,annulusWidth);
     isEyelink = str2num(isEyelink);
 end
 
 debug = 'n';
-flashRepresentFrame = 4.2; %input('>>>flash represent frames? (0.8/2.2):  ');
+flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
 eyelinkfilename_eye = sbjname;
 
 %----------------------------------------------------------------------
@@ -72,7 +72,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 greycolor = 128; %(whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 % HideCursor;
@@ -142,7 +142,7 @@ blindfield_from_horizontal_degree = asind(blindfieldRadius_pixel/blindfield_devi
 %----------------------------------------------------------------------
 %%%          parameters of blurred boundary
 %----------------------------------------------------------------------
-if strcmp(annulusType,'blurredBoundary')
+if strcmp(annulusPattern,'blurredBoundary')
     ramp_slope = 0.1;
     ramp_degree = 20;
     ringBlurredBoundaryMat = DrawRingWithBlurredBoundary(sectorRadius_out_pixel*2,sectorRadius_in_pixel*2,blackcolor,1,ramp_slope,ramp_degree);
@@ -231,13 +231,18 @@ end
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
 %----------------------------------------------------------------------
-
-blockNumber = 4;
+if strcmp(condition,'normal')
+    blockNumber = 10;
+else
+    blockNumber = 6;
+end
 
 if strcmp(condition, 'normal')
     trialNumber = 1;
+    upperStartAdjustDegree = 0;
+    lowerStartAdjustDegree = 0;
 else
-    if strcmp(annulusType,'blurredBoundary')
+    if strcmp(annulusPattern,'blurredBoundary')
         trialNumber = 5;
     else
         trialNumber = 4;
@@ -261,7 +266,7 @@ back.ReverseAngle = 90; % duration frame of checkerboard
 abandonBlockMat = zeros(1,20);
 barTiltStep = 1; %2.8125   1.40625;
 
-if strcmp(artificialScotomaExp,'y')
+if strcmp(annulusWidth,'artificialScotoma')
     if strcmp(condition,'invi2vi')
         upperStartAdjustDegree = - blindfield_from_horizontal_degree + 5;
         lowerStartAdjustDegree = blindfield_from_horizontal_degree - 5;
@@ -284,7 +289,7 @@ barTiltStartUpper = 90 + upperStartAdjustDegree;
 barTiltStartLower = 90 + lowerStartAdjustDegree;
 bar_only = repmat(barTiltStartUpper,1,blockNumber);
 
-barTiltStartNormal = 0;
+barTiltStartNormal = 270;
 
 if strcmp(annulusWidth,'blindspot')
     perc_loc_shift_dva = 5;
@@ -317,14 +322,14 @@ while block <= blockNumber
     Screen ('TextSize',wptr,30);
     Screen('TextFont',wptr,'Courier');
     
-%     topLeftQuadRect = [0 0 xCenter yCenter];
+    %     topLeftQuadRect = [0 0 xCenter yCenter];
     topCenterQuadRect = [xCenter/2 0  xCenter*3/2 yCenter];
-%     topRightQuadRect = [xCenter 0 0 yCenter];
-%     bottomLeftQuadRect = [0 yCenter xCenter 0];
-%     bottomRightQuadRect = [xCenter yCenter 0 0];
+    %     topRightQuadRect = [xCenter 0 0 yCenter];
+    %     bottomLeftQuadRect = [0 yCenter xCenter 0];
+    %     bottomRightQuadRect = [xCenter yCenter 0 0];
     
     DrawFormattedText(wptr, str, 'center', 'center', blackcolor,[],[],[],[],[],topCenterQuadRect);
-
+    
     
     Screen('Flip', wptr);
     KbStrokeWait;
@@ -339,6 +344,7 @@ while block <= blockNumber
         barTiltNow = barTiltStartNormal;
     end
     
+    % in each block the illusion direction is CCW 
     if block == 1
         data.flashTiltDirection = 1;
     end
@@ -372,7 +378,7 @@ while block <= blockNumber
                     readIntruTime = 2;
                 case 2
                     back.alpha = 1;
-                    if  strcmp(annulusType,'blurredBoundary') % for blurredBoundaryExp  boundary;
+                    if  strcmp(annulusPattern,'blurredBoundary') % for blurredBoundaryExp  boundary;
                         redbarflash_flag = 0;
                         if strcmp(condition, 'vi2invi')
                             barTiltNow = bar_only(block) + multiplier * 10;
@@ -395,7 +401,7 @@ while block <= blockNumber
                 case 3
                     back.alpha = 1;
                     redbarflash_flag = 1;
-                    if  strcmp(annulusType,'blurredBoundary') % for blurredBoundaryExp  off_sync;
+                    if  strcmp(annulusPattern,'blurredBoundary') % for blurredBoundaryExp  off_sync;
                         if strcmp(condition, 'vi2invi')
                             barTiltNow = bar_only(block) + multiplier * 10;
                             str_trial = '\n Adjust the bar from visible to invisible' ;
@@ -416,7 +422,7 @@ while block <= blockNumber
                 case 4
                     back.alpha = 1;
                     redbarflash_flag = 1;
-                    if  strcmp(annulusType,'blurredBoundary')  % for blurredBoundaryExp  flash grab;
+                    if  strcmp(annulusPattern,'blurredBoundary')  % for blurredBoundaryExp  flash grab;
                         if strcmp(condition, 'vi2invi')
                             str_trial = '\n Adjust the bar from visible to invisible and \n\n remember the last location you have seen'  ;
                             barTiltNow = bar_only(block) + multiplier * 10;
@@ -425,25 +431,21 @@ while block <= blockNumber
                             barTiltNow = bar_only(block) - multiplier * 10;
                         end
                         readIntruTime = 2;
-%                     else     % for 8 sectorExp perceived location
-%                         str_trial = '\n Adjust the bar to the perceived location'  ;
-%                         barTiltNow = bar_only(block);
                     end
                     
-%                 case  5
-%                     str_trial = '\n Adjust the bar to the perceived location';
-%                     barTiltNow = bar_only(block);
             end
             
         elseif barLocation == 'n'
             barTiltNow = barTiltStartNormal;
+            back.alpha = 1;
+            redbarflash_flag = 1;
             str_trial = '\n Adjust the bar until horizon   \n\n Fix on the cross to start the trial';
         end
         DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor,[],[],[],[],[],topCenterQuadRect);
         str_trial = [];
         Screen('Flip',wptr);
         WaitSecs(readIntruTime);
-
+        
         %----------------------------------------------------------------------
         %  Eyelink file transfer to Display PC and check if fixation correct
         %  'Fast' method (sample only)
@@ -468,7 +470,7 @@ while block <= blockNumber
                         fixDriftFrame = fixDriftFrame + 1;
                         isOutFixationWindowFrame  = fixDriftFrame;
                     else  isOutFixationWindowFrame >= driftDuation_pre*framerate;
-                        Eyelink('Message','Block %d',block);
+                        Eyelink('Message','BLOCKID %d',block);
                         break;
                     end
                 end
@@ -479,7 +481,7 @@ while block <= blockNumber
         isOutFixationWindowFrame = 0;
         isOutFixationWindowTimesMat = [];
         
-        if trial ~= trialNumber
+        if trialNumber == 1 ||  trial ~= trialNumber
             
             while respToBeMade
                 
@@ -491,10 +493,13 @@ while block <= blockNumber
                 % the rotation
                 if currentframe == 1
                     back.CurrentAngle = barTiltNow - 2;  % back.reverse_anlge_end
+                    if isEyelink
+                        Eyelink('Message','TRIALID %d',trial);
+                    end
                 end
                 
                 if isEyelink
-                    Eyelink('Message','TRIALID %d',trial);
+%                     Eyelink('Message','TRIALID %d',trial);
                     [x, y] = getEyelinkCoordinates();
                     if isnan(x) || isnan(y)
                         fprintf('Eye tracker lost track of eyes \n');
@@ -545,7 +550,7 @@ while block <= blockNumber
                 end
                 
                 %    draw background each frame
-                if strcmp(annulusType,'blurredBoundary')
+                if strcmp(annulusPattern,'blurredBoundary')
                     if trial == 3
                         back.presentAngle = back.CurrentAngle + 90;
                     else
@@ -605,7 +610,7 @@ while block <= blockNumber
                 
                 Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                 %                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-                if strcmp(artificialScotomaExp,'y')
+                if strcmp(annulusWidth,'artificialScotoma')
                     Screen('FillOval',wptr,blindfieldColor,[xCenter + blindfield_deviate_center_pixel - blindfieldRadius_pixel, yCenter - blindfieldRadius_pixel,...
                         xCenter + blindfield_deviate_center_pixel + blindfieldRadius_pixel, yCenter + blindfieldRadius_pixel]);
                 end
@@ -655,7 +660,7 @@ while block <= blockNumber
             
             
             
-        elseif trial == trialNumber
+        elseif ~strcmp(condition,'normal') &&  trial == trialNumber 
             
             barMovStep = 0.1;
             
@@ -719,46 +724,39 @@ while block <= blockNumber
                 %                 prekeyIsDown = keyIsDown;
                 
                 
-                %----------------------------------------------------------------------
-                %                      Eyelink  recording
-                %----------------------------------------------------------------------
-                if isEyelink
-                    if currentframe==1
-                        switch trial
-                            case 1
-                                Eyelink('Message','Bar Only');
-                            case 2
-                                if  strcmp(annulusType,'blurredBoundary')
-                                    Eyelink('Message','blurredBoundary')
-                                else
-                                    Eyelink('Message','Off Sync');
-                                end
-                                
-                            case  3
-                                if strcmp(annulusType,'blurredBoundary')
-                                    Eyelink('Message','Off Sync');
-                                else
-                                    Eyelink('Message','Flash Grab');
-                                end
-                                
-                            case 4
-                                if strcmp(annulusType,'blurredBoundary')
-                                    Eyelink('Message','Flash Grab');
-                                else
-                                    Eyelink('Message','Perceived Location');
-                                end
-                            case 5
-                                Eyelink('Message','Perceived Location');
-                        end
-                    end
-                    
-                    %                     if frameK == PresentFlyFrames+1
-                    %                         Eyelink('Message',['ball ' num2str(Ntrial) 'stopped at' num2str(GetSecs(), '%10.5f')]);
-                    %                     end
-                    
-                end
-                
-                
+%                 %----------------------------------------------------------------------
+%                 %                      Eyelink  recording
+%                 %----------------------------------------------------------------------
+%                 if isEyelink
+%                     if currentframe==1
+%                         switch trial
+%                             case 1
+%                                 Eyelink('Message','Bar Only');
+%                             case 2
+%                                 if  strcmp(annulusType,'blurredBoundary')
+%                                     Eyelink('Message','blurredBoundary')
+%                                 else
+%                                     Eyelink('Message','Off Sync');
+%                                 end
+%                                 
+%                             case  3
+%                                 if strcmp(annulusType,'blurredBoundary')
+%                                     Eyelink('Message','Off Sync');
+%                                 else
+%                                     Eyelink('Message','Flash Grab');
+%                                 end
+%                                 
+%                             case 4
+%                                 if strcmp(annulusType,'blurredBoundary')
+%                                     Eyelink('Message','Flash Grab');
+%                                 else
+%                                     Eyelink('Message','Perceived Location');
+%                                 end
+%                             case 5
+%                                 Eyelink('Message','Perceived Location');
+%                         end
+%                     end
+%                 end 
             end
         end
         
@@ -767,20 +765,20 @@ while block <= blockNumber
                 case  1      % flash bar only
                     bar_only(block) = barTiltNow;
                 case  2   % blurred boundary
-                    if strcmp(annulusType,'blurredBoundary')
+                    if strcmp(annulusPattern,'blurredBoundary')
                         boundary(block) = barTiltNow;
                     else  % off-sync
                         off_sync(block) = barTiltNow;
                     end
                 case 3
-                    if strcmp(annulusType,'blurredBoundary')
+                    if strcmp(annulusPattern,'blurredBoundary')
                         off_sync(block) = barTiltNow;
                     else
                         % flash grab
                         flash_grab(block) = barTiltNow;
                     end
                 case 4
-                    if strcmp(annulusType,'blurredBoundary')
+                    if strcmp(annulusPattern,'blurredBoundary')
                         flash_grab(block) = barTiltNow;
                     else
                         % perceived location or none
@@ -796,9 +794,9 @@ while block <= blockNumber
         trial = trial + 1;
         WaitSecs (0.5);
         
-        if keyCode(KbName('q'))
-            break;
-        end
+%         if keyCode(KbName('q'))
+%             break;
+%         end
     end
     
     data.flashTiltDirectionMat(block) = data.flashTiltDirection;
@@ -817,13 +815,16 @@ while block <= blockNumber
     abandonBlock(block) = abandonTrialFlag;
     
     
-    if keyCode(KbName('q'))
-        break;
-    end
+%     if keyCode(KbName('q'))
+%         break;
+%     end
 end
 
+if ~strcmp(condition,'normal')
 runTrialIndex = ones(1,length(perceived_location));
 validTrialIndex = find(perceived_location ~= 0);
+end
+
 display(GetSecs - ScanOnset);
 
 %----------------------------------------------------------------------
@@ -855,19 +856,18 @@ end
 %                      save parameters files
 %----------------------------------------------------------------------
 
-datadir = strcat( '../../../data/corticalBlindness/eyelink_guiding/',  annulusType,'/');
 
-if strcmp(artificialScotomaExp,'y')
-    datadirSpecify = strcat(datadir,'/artificial_scotoma/') ; 
-elseif strcmp(annulusWidth,'blindspot')
-    datadirSpecify = strcat(datadir,'/blindspot/') ;
+datadir = strcat( '../../../data/corticalBlindness/eyelink_guiding/',  annulusPattern,'/',annulusWidth,'/');
+
+if barLocation == 'n'
+  datadir = strcat( datadir,condition,'/');
 end
 
-expdir = sprintf([datadirSpecify '%s/'],sbjname);
+expdir = sprintf([datadir '%s/'],sbjname);
 if ~isdir(expdir)
     mkdir(expdir)
 end
-    
+
 savePath = expdir;
 time = clock;
 
