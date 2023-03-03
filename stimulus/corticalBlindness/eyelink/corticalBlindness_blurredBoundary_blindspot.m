@@ -25,14 +25,14 @@
 
 clear all;close all;
 
-if 0
+if 1
     sbjname = 'k';
     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
-    barLocation = 'n';  % u  upper visual field   l   lower visual field n  normal
-    condition = 'normal';   % 'vi2invi'  'invi2vi'   'normal'
+    barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
+    condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 0;  % 0 1
-    annulusPattern = 'blurredBoundary'; % blurredBoundary  sector
+    annulusPattern = 'sector'; % blurredBoundary  sector
     annulusWidth =  'blindspot'; % blindspot   artificialScotoma
 %     artificialScotomaExp = 'n';
 else
@@ -44,7 +44,7 @@ else
     
     prompt = {'subject''s name','barLocation(u for upper\l for lower\n for normal)',...
         'condition(vi2invi  invi2vi normal)', 'isEyelink(without eyelink 0 or use eyelink 1)',...
-        'annulusPattern(blurredBoundary/sector)','annulusWidth(blindspot/artificial_Scotoma)'};
+        'annulusPattern(blurredBoundary/sector)','annulusWidth(blindspot/artificialScotoma)'};
     dlg_title = 'Set experiment parameters ';
     answer  = inputdlg(prompt,dlg_title);
     [sbjname,barLocation,condition,isEyelink,annulusPattern,annulusWidth] = answer{:};
@@ -58,11 +58,21 @@ flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
 eyelinkfilename_eye = sbjname;
 
 %----------------------------------------------------------------------
+%            load blindspot test file and data 
+%----------------------------------------------------------------------
+datapath = '../../../data/corticalBlindness/Eyelink_guiding/blindspottest/';
+cd(datapath);
+s1 = sbjname;
+s2 = '*.mat';
+s3 = strcat(s1,s2);
+
+Files = dir(s3);
+load (Files.name,'blindspot_loc_x_dva','blindspot_loc_y_dva','blindspot_width');
+%----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
 
 addpath ../../../function;
-addpath ../../../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
@@ -72,7 +82,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 greycolor = 128; %(whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 % HideCursor;
@@ -109,8 +119,8 @@ KbName('UnifyKeyNames');
 eyeScreenDistence = 66;  % 78cm  68sunnannan
 screenHeight = 33.5; % 26.8 cm
 if strcmp(annulusWidth,'blindspot')
-    sectorRadius_out_visual_degree = 15.5; % sunnannan 9.17  mali 11.5
-    sectorRadius_in_visual_degree = 13.5; % sunnannan 5.5   mali7.9
+    sectorRadius_in_visual_degree = blindspot_loc_x_dva; % sunnannan 5.5   mali7.9
+    sectorRadius_out_visual_degree = sectorRadius_in_visual_degree + blindspot_width; % sunnannan 9.17  mali 11.5
 else
     sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
     sectorRadius_in_visual_degree = 5.5; % sunnannan 5.5   mali7.9
@@ -508,7 +518,7 @@ while block <= blockNumber
                         if isWithinFixationWindow(x, y, xCenter, yCenter, fixRadius)
                             gazeRect=[ x-9 y-9 x+10 y+10];
                             %                     fixationcolour=round(rand(3,1)*255); % coloured dot
-                            fixationcolour = greycolor + 8;
+                            fixationcolour = greycolor + 5;
                             Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                             Screen('FillOval', wptr, fixationcolour, gazeRect);
                             %                             Screen('Flip',wptr);
@@ -723,40 +733,6 @@ while block <= blockNumber
                 %                 end
                 %                 prekeyIsDown = keyIsDown;
                 
-                
-%                 %----------------------------------------------------------------------
-%                 %                      Eyelink  recording
-%                 %----------------------------------------------------------------------
-%                 if isEyelink
-%                     if currentframe==1
-%                         switch trial
-%                             case 1
-%                                 Eyelink('Message','Bar Only');
-%                             case 2
-%                                 if  strcmp(annulusType,'blurredBoundary')
-%                                     Eyelink('Message','blurredBoundary')
-%                                 else
-%                                     Eyelink('Message','Off Sync');
-%                                 end
-%                                 
-%                             case  3
-%                                 if strcmp(annulusType,'blurredBoundary')
-%                                     Eyelink('Message','Off Sync');
-%                                 else
-%                                     Eyelink('Message','Flash Grab');
-%                                 end
-%                                 
-%                             case 4
-%                                 if strcmp(annulusType,'blurredBoundary')
-%                                     Eyelink('Message','Flash Grab');
-%                                 else
-%                                     Eyelink('Message','Perceived Location');
-%                                 end
-%                             case 5
-%                                 Eyelink('Message','Perceived Location');
-%                         end
-%                     end
-%                 end 
             end
         end
         
@@ -810,19 +786,15 @@ while block <= blockNumber
             data.flashTiltDirection = data.flashTiltDirectionMat(block) + 1;
         end
     end
-    
-    block = block + 1;
+     
     abandonBlock(block) = abandonTrialFlag;
-    
-    
-%     if keyCode(KbName('q'))
-%         break;
-%     end
+    block = block + 1;
+   
 end
 
 if ~strcmp(condition,'normal')
-runTrialIndex = ones(1,length(perceived_location));
-validTrialIndex = find(perceived_location ~= 0);
+    runTrialIndex = ones(1,length(perceived_location));
+    validTrialIndex = find(perceived_location ~= 0);
 end
 
 display(GetSecs - ScanOnset);
@@ -875,42 +847,5 @@ filename = sprintf('%s_%s_%s_%02g_%02g_%02g_%02g_%02g',sbjname,condition,barLoca
 filename2 = [savePath,filename];
 % save(filename2,'data','back');
 save(filename2);
-
-
-% %----------------------------------------------------------------------
-% %                    average illusion size
-% %----------------------------------------------------------------------
-%
-% illusionCCWIndex = find(data.flashTiltDirection == 1);
-% illusionCWIndex = find(data.flashTiltDirection == 2);
-%
-% % if strcmp(barlocation,'u')
-% %     quardant
-% bar_CCWDegree = mean(bar_only(illusionCCWIndex));
-% bar_CWDegree = mean(bar_only(illusionCWIndex));
-% off_sync_CCWDegree = mean(off_sync(illusionCCWIndex));
-% off_sync_CWDegree = mean(off_sync(illusionCWIndex));
-% flash_grab_CCWDegree = mean(flash_grab(illusionCCWIndex));
-% flash_grab_CWDegree = mean(flash_grab(illusionCWIndex));
-%
-% if strcmp(condition, 'invi2vi')
-%     perceived_location_CCWDegree = mean(perceived_location(illusionCCWIndex));
-%     perceived_location_CWDegree = mean(perceived_location(illusionCWIndex));
-% end
-%
-% if strcmp(condition, 'vi2invi')
-%     y = [bar_CCWDegree off_sync_CCWDegree flash_grab_CCWDegree bar_CWDegree off_sync_CWDegree flash_grab_CWDegree];
-%     h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1);
-%     set(gca, 'XTick', 1:6, 'XTickLabels', {'bar-CCW' 'off-sync-CCW' 'grab-CCW'  'bar-CW' 'off-sync-CW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
-% elseif strcmp(condition, 'invi2vi')
-%     y = [bar_CCWDegree off_sync_CCWDegree flash_grab_CCWDegree perceived_location_CCWDegree bar_CWDegree off_sync_CWDegree flash_grab_CWDegree perceived_location_CWDegree];
-%     h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1);
-%     set(gca, 'XTick', 1:8, 'XTickLabels', {'bar-CCW' 'off-sync-CCW' 'grab-CCW' 'perc-CCW' 'bar-CW' 'off-sync-CW' 'grab-CW' 'perc-CW'},'fontsize',20,'FontWeight','bold');
-% end
-%
-%
-% set(gcf,'color','w');
-% set(gca,'box','off');
-% % title('Illusion size','FontSize',25);
 
 sca;
