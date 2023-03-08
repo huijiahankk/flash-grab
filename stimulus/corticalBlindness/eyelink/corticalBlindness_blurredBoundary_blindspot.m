@@ -702,11 +702,25 @@ while block <= blockNumber
                     
                     % draw a black circle in the visible visual area
                     Screen('FrameOval', wptr, blackcolor, refFrameDestinationRect,3,3);
-                else
-                    barRectTiltDegree =  barTiltNow;
-                    barDrawTiltDegree = barTiltNow;
-                    barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
-                    Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
+                else strcmp(annulusWidth,'artificialScotoma')
+%                     % using red bar to present the perceived location
+%                     barRectTiltDegree =  barTiltNow;
+%                     barDrawTiltDegree = barTiltNow;
+%                     barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
+%                     Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
+                    % using black dot to present the perceived location
+                        lineRectTiltDegree =  barTiltNow;
+                    lineDrawTiltDegree = barTiltNow;
+                    lineDestinationRect = CenterRectOnPoint(lineRect,xCenter + (centerRingRadius2Center - perc_loc_shift_pixel) * sind(lineRectTiltDegree), yCenter - (centerRingRadius2Center - perc_loc_shift_pixel) * cosd(lineRectTiltDegree));
+                    Screen('DrawTexture',wptr,lineTexture,lineRect,lineDestinationRect,lineDrawTiltDegree);
+                    
+                    refFrameDestinationRect = [xCenter - centerRingRadius2Center + perc_loc_shift_pixel,...
+                        yCenter - centerRingRadius2Center + perc_loc_shift_pixel,...
+                        xCenter + centerRingRadius2Center - perc_loc_shift_pixel,...
+                        yCenter + centerRingRadius2Center - perc_loc_shift_pixel];
+                    
+                    % draw a black circle in the visible visual area
+                    Screen('FrameOval', wptr, blackcolor, refFrameDestinationRect,3,3);
                 end
                 
                 % draw fixation
