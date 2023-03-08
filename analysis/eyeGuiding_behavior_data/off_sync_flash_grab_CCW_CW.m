@@ -5,8 +5,8 @@
 clear all;
 addpath '../../function';
 
-annulusPattern = 'blurredBoundary';  %  blurredBoundary   sector
-annulusWidth = 'artificialScotoma'; % blindspot   artificialScotoma
+annulusPattern = 'sector';  %  blurredBoundary   sector
+annulusWidth = 'blindspot'; % blindspot   artificialScotoma
 
 sbjnames = {'hjh'};
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
@@ -15,6 +15,7 @@ datapath = sprintf([path  '%s/'],sbjnames{1});
 cd(datapath);
 
 visualField = 'u'; % u for upper l for lower
+% upperExp = { '_vi2invi_u'};
 
 upperExp = { '_vi2invi_u','_invi2vi_u'}; %  'k_invi2vi_l','k_vi2invi_l' 'k_invi2vi_u' 'k_vi2invi_u'
 lowerExp = { '_vi2invi_l','_invi2vi_l'};
@@ -166,9 +167,10 @@ set(gca, 'XTick', 1:7, 'XTickLabels', {'bar-only' 'off-sync-CCW' 'off-sync-CW' '
 % set(gca, 'XTick', 1:3, 'XTickLabels', {'bar-only' 'grab-CCW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
 set(gcf,'color','w');
 set(gca,'box','off');
+% ylim([20,40]);
 xtickangle(45);
 hold on;
-ylabel('Shift degree from blindspot border','FontName','Arial','FontSize',25);
+ylabel('Shift degree from horizontal meridian','FontName','Arial','FontSize',25);
 
 if strcmp(artificialScotomaExp,'y')
     if strcmp(visualField,'u')

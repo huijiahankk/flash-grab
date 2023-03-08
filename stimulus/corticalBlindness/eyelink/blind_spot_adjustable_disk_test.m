@@ -11,10 +11,10 @@ clear all;close all;
 
 if 1
     sbjname = 'hjh';
-    isEyelink = 0;
+    isEyelink = 1;
 else
     sbjname = input('>>>Please input the subject''s name:   ','s');
-    isEyelink = input('>>>Use eye link? (y for yes\n for no):  ','s');
+    isEyelink = input('>>>Use eye link? (1 for yes\0 for no):  ','d');
 end
 
 
@@ -33,7 +33,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 redcolor = [255 0 0]; %(whitecolor + blackcolor) / 2; % 128
 greycolor = (whitecolor + blackcolor) / 2;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -49,7 +49,7 @@ allCoords = [xCoords; yCoords];
 LineWithPix = 6;
 
 
-trialNumber = 4;
+trialNumber = 6;
 
 %----------------------------------------------------------------------
 %                       Keyboard information
@@ -82,12 +82,12 @@ driftDuation = 30; %  frame
 %----------------------------------------------------------------------
 %    flash dot parameter to map the blind spot postion
 %----------------------------------------------------------------------
-disk.color = [128 0 0];
-disk.startRadius_dva = 3;
+disk.color = [255 0 0];
+disk.startRadius_dva = 1.5;
 % disk.startRadius_pixel = dva2pix(disk.startRadius_dva,eyeScreenDistence,rect,screenHeight);
 disk.moveStep_dva = 0.1; % dva
 disk.moveStep_pixel =  dva2pix(disk.moveStep_dva,eyeScreenDistence,rect,screenHeight); % pixel
-disk.startLoca_dva = 10;  % from center
+disk.startLoca_dva = 12.5;  % from center
 disk.startLoca_pixel = dva2pix(disk.startLoca_dva,eyeScreenDistence,rect,screenHeight); % pixel
 disk.flashFreq = 2; % Hz
 disk.flashRepresentFrame = 8; % frame
@@ -145,7 +145,8 @@ while trial <= trialNumber
     prekeyIsDown = 0;
     
     %     if trial == 1
-    str = 'Fix on the cross to start the trial';
+    str = sprintf('This is the %dth of %d trial.\n\n Fix the cross to start the trial',trial,trialNumber);
+%     str = 'Fix on the cross to start the trial';
     %     DrawFormattedText(wptr, str, 'center', 'center', blackcolor);
     Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
     Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
@@ -221,7 +222,7 @@ while trial <= trialNumber
                 elseif isOutFixationWindowFrame  > driftDuation_dur * framerate
                     isOutFixationWindowTimes = isOutFixationWindowTimes + 1;
                     isOutFixationWindowTimesMat = [isOutFixationWindowTimes;    isOutFixationWindowTimesMat];
-                    sprintf('Gaze is outside fixation window during block %d  trial  %d\n',  block, trial)
+                    sprintf('Gaze is outside fixation window during  trial  %d\n',  trial)
                     abandonTrialFlag = 1;  % the whole block was abandoned
                     trialNumber = trialNumber + 1;
                     abandonBlockMat(trial) = abandonTrialFlag;
@@ -323,7 +324,7 @@ blindspot_from_fixation_y = round(mean(data.loc_y));
 
 blindspot_loc_x_dva = atand(blindspot_from_fixation_x * screenHeight/(rect(4)*eyeScreenDistence))
 blindspot_loc_y_dva = atand(blindspot_from_fixation_y * screenHeight/(rect(4)*eyeScreenDistence))
-blindspot_width = round(mean(data.Radius_dva)/2)
+blindspot_width = round(mean(data.Radius_dva)*2)
 
 %----------------------------------------------------------------------
 %                      save parameters files
@@ -338,16 +339,5 @@ filename = sprintf('%s_%02g_%02g_%02g_%02g_%02g',sbjname,time(1),time(2),time(3)
 filename2 = [savePath,filename];
 % save(filename2,'data','back');
 save(filename2);
-
-%----------------------------------------------------------------------
-%        average blind spot width and distance
-%----------------------------------------------------------------------
-
-blindspot_from_fixation_x = round(mean(data.loc_x));
-blindspot_from_fixation_y = round(mean(data.loc_y));
-
-blindspot_loc_x_dva = atand(blindspot_from_fixation_x * screenHeight/(rect(4)*eyeScreenDistence))
-blindspot_loc_y_dva = atand(blindspot_from_fixation_y * screenHeight/(rect(4)*eyeScreenDistence))
-blindspot_width = round(mean(data.Radius_dva)/2)
 
 sca;

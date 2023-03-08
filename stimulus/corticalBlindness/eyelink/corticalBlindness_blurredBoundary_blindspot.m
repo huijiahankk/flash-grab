@@ -26,14 +26,14 @@
 clear all;close all;
 
 if 1
-    sbjname = 'k';
+    sbjname = 'hjh';
     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
     barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 0;  % 0 1
-    annulusPattern = 'sector'; % blurredBoundary  sector
-    annulusWidth =  'blindspot'; % blindspot   artificialScotoma
+    annulusPattern = 'blurredBoundary'; % blurredBoundary  sector
+    annulusWidth =  'artificialScotoma'; % blindspot   artificialScotoma
 %     artificialScotomaExp = 'n';
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -57,17 +57,6 @@ debug = 'n';
 flashRepresentFrame = 2.2; %input('>>>flash represent frames? (0.8/2.2):  ');
 eyelinkfilename_eye = sbjname;
 
-%----------------------------------------------------------------------
-%            load blindspot test file and data 
-%----------------------------------------------------------------------
-datapath = '../../../data/corticalBlindness/Eyelink_guiding/blindspottest/';
-cd(datapath);
-s1 = sbjname;
-s2 = '*.mat';
-s3 = strcat(s1,s2);
-
-Files = dir(s3);
-load (Files.name,'blindspot_loc_x_dva','blindspot_loc_y_dva','blindspot_width');
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
@@ -119,8 +108,26 @@ KbName('UnifyKeyNames');
 eyeScreenDistence = 66;  % 78cm  68sunnannan
 screenHeight = 33.5; % 26.8 cm
 if strcmp(annulusWidth,'blindspot')
-    sectorRadius_in_visual_degree = blindspot_loc_x_dva; % sunnannan 5.5   mali7.9
-    sectorRadius_out_visual_degree = sectorRadius_in_visual_degree + blindspot_width; % sunnannan 9.17  mali 11.5
+    %----------------------------------------------------------------------
+    %            load blindspot test file and data
+    %----------------------------------------------------------------------
+%     datapath = '../../../data/corticalBlindness/Eyelink_guiding/blindspottest/';
+%     cd(datapath);
+%     s1 = sbjname;
+%     s2 = '*.mat';
+%     s3 = strcat(s1,s2);
+%      1111111111111111112221111111111 1111111 1111111111 11  1111111111111
+%      11111 111111111 222222222222222222222222222222222222222222
+%      111111111111111 1111 111111 1111  1111111111111 111111111111
+%      111111111 111111111 222222222222222222222221  11111111111111
+%      1111111111111111111111111111111222222221111 1111111111 111111
+%      1111111111 11  11111111111 1111111 11111111111
+%      22222222222222222222222222222222222222222222121 
+%     Files = dir(s3);
+%     load (Files.name,'blindspot_loc_x_dva','blindspot_loc_y_dva','blindspot_width');
+    sectorRadius_in_visual_degree = 12;% blindspot_loc_x_dva; % sunnannan 5.5   mali7.9
+    sectorRadius_out_visual_degree =14.5; % sectorRadius_in_visual_degree + blindspot_width; % sunnannan 9.17  mali 11.5
+%     cd('../../../../stimulus/corticalBlindness/eyelink/');
 else
     sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
     sectorRadius_in_visual_degree = 5.5; % sunnannan 5.5   mali7.9
@@ -264,8 +271,11 @@ back.SpinDirec = 1; % 1 means clockwise     -1 means counter-clockwise
 back.FlagSpinDirecA = 0;  % flash tilt right
 back.FlagSpinDirecB = 0;  % flash tilt left
 % back.alpha = 1; % background transparence
-
-back.SpinSpeed = 3;%  3  2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
+if framerate > 63
+    back.SpinSpeed = 1.5;
+else
+    back.SpinSpeed = 3;%  3  2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
+end
 back.velocity = back.SpinSpeed * framerate;
 back.ReverseAngle = 90; % duration frame of checkerboard
 % each experiment generate the same sequence for flash direction,
@@ -381,9 +391,9 @@ while block <= blockNumber
                     back.alpha = 0;
                     redbarflash_flag = 1;
                     if strcmp(condition, 'vi2invi')
-                        str_trial = ['Adjust the bar from visible to invisible.\n '   '\n\n Fixation on the cross to start the trial. \n'];
+                        str_trial = ['Adjust the bar from visible to invisible.\n '   '\n\n Fix the cross to start the trial. \n'];
                     elseif strcmp(condition,'invi2vi')
-                        str_trial = ['Adjust the bar from invisible to visible.\n '    '\n\n Fix on the cross to start the trial. \n'];
+                        str_trial = ['Adjust the bar from invisible to visible.\n '    '\n\n Fix the cross to start the trial. \n'];
                     end
                     readIntruTime = 2;
                 case 2
@@ -567,12 +577,13 @@ while block <= blockNumber
                         back.presentAngle = back.CurrentAngle;
                     end
                 else
-                    if trial == 2
+                    if  trial == 2
                         back.presentAngle = back.CurrentAngle + 22.5;
                     else
                         back.presentAngle = back.CurrentAngle;
                     end
                 end
+                
                 
                 Screen('DrawTexture',wptr,backgroundTexture,backgroundRect,backgroundDestinationRect,back.presentAngle,[],back.alpha);
                 
@@ -585,7 +596,7 @@ while block <= blockNumber
                         
                         barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
                         Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);  % DrawTexture 0 deg. = upright
-                        
+                                            
                         flashtimes = flashtimes + 1;
                         barTiltNowMat(trial,flashtimes,block) = barTiltNow;
                         back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
@@ -599,7 +610,7 @@ while block <= blockNumber
                         barDestinationRect = CenterRectOnPoint(barRect,xCenter + centerRingRadius2Center * sind(barRectTiltDegree), yCenter - centerRingRadius2Center * cosd(barRectTiltDegree));
                         Screen('DrawTexture',wptr,barTexture,barRect,barDestinationRect,barDrawTiltDegree);
                         
-                        flashtimes = flashtimes + 1;
+                      flashtimes = flashtimes + 1;
                         barTiltNowMat(trial,flashtimes,block) = barTiltNow;
                         back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
                         if isEyelink
