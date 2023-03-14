@@ -33,7 +33,7 @@ if 1
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 0;  % 0 1
     annulusPattern = 'blurredBoundary'; % blurredBoundary  sector
-    annulusWidth =  'artificialScotoma'; % blindspot   artificialScotoma
+    annulusWidth =  'CB'; % blindspot   artificialScotoma  CB
 %     artificialScotomaExp = 'n';
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -116,13 +116,6 @@ if strcmp(annulusWidth,'blindspot')
 %     s1 = sbjname;
 %     s2 = '*.mat';
 %     s3 = strcat(s1,s2);
-%      1111111111111111112221111111111 1111111 1111111111 11  1111111111111
-%      11111 111111111 222222222222222222222222222222222222222222
-%      111111111111111 1111 111111 1111  1111111111111 111111111111
-%      111111111 111111111 222222222222222222222221  11111111111111
-%      1111111111111111111111111111111222222221111 1111111111 111111
-%      1111111111 11  11111111111 1111111 11111111111
-%      22222222222222222222222222222222222222222222121 
 %     Files = dir(s3);
 %     load (Files.name,'blindspot_loc_x_dva','blindspot_loc_y_dva','blindspot_width');
     sectorRadius_in_visual_degree = 12;% blindspot_loc_x_dva; % sunnannan 5.5   mali7.9
