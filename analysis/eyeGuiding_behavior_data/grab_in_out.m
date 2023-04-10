@@ -8,7 +8,7 @@ addpath '../../function';
 annulusPattern = 'blurredBoundary';  %  blurredBoundary   sector
 annulusWidth = 'blindspot'; % blindspot   artificialScotoma
 
-sbjnames = {'hjh'};
+sbjnames = {'sry'};
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
 
 datapath = sprintf([path  '%s/'],sbjnames{1});
@@ -79,8 +79,8 @@ for expcondition = 1:length(lowerExp)
     perceived_location_out_l(expcondition,:)   = perceived_location(illusionCWIndex) - 90;
 end
 
-
-bar_only_ave = mean(mean([bar_only_u; bar_only_l]));
+bar_only_ave = 0;
+bar_only_ave_temp = mean(mean([bar_only_u; bar_only_l]));
 off_sync_ave = mean(mean([off_syn_u; off_syn_l])) - bar_only_ave;
 
 bar_only_ana = [bar_only_u; bar_only_l] - bar_only_ave;
@@ -98,7 +98,7 @@ perceived_location_in_ave = mean(mean(perceived_location_in));
 
 ave_illusion = abs((flash_grab_out_ave - perceived_location_out_ave) + (perceived_location_in_ave - flash_grab_in_ave))/2
 
-y = [0 off_sync_ave flash_grab_out_ave perceived_location_out_ave flash_grab_in_ave perceived_location_in_ave];
+y = [bar_only_ave_temp off_sync_ave flash_grab_out_ave perceived_location_out_ave flash_grab_in_ave perceived_location_in_ave];
 
 
 % y = [bar_onlyDegreeMean flash_grab_CCWDegreeMean flash_grab_CWDegreeMean];
@@ -114,7 +114,7 @@ xtickangle(45);
 
 hold on;
 ylabel('Shift degree from blindspot border','FontName','Arial','FontSize',25);
-if strcmp(artificialScotomaExp,'y')
+if strcmp(annulusWidth,'artificialScotoma')
     ylabel('Shift degree from mapped blindfield border','FontName','Arial','FontSize',25);
     line([0 7], [(blindfield_from_horizontal_degree - bar_only_ave) (blindfield_from_horizontal_degree-bar_only_ave)],'LineWidth',1.5);
 end

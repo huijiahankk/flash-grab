@@ -377,4 +377,4 @@ elseif bar_only_mark == 2
     
 end
 
-cd ../../../../../analysis/cortical_blindness/
+cd ../../../../../analysis/vi2invi_in2vi_perc_off_sync/

@@ -25,15 +25,15 @@
 
 clear all;close all;
 
-if 1
+if 0
     sbjname = 'hjh';
     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
     barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
-    isEyelink = 0;  % 0 1
-    annulusPattern = 'blurredBoundary'; % blurredBoundary  sector
-    annulusWidth =  'CB'; % blindspot   artificialScotoma  CB
+    isEyelink = 1;  % 0 1
+    annulusPattern = 'sector'; % blurredBoundary  sector
+    annulusWidth =  'blindspot'; % blindspot   artificialScotoma
 %     artificialScotomaExp = 'n';
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -71,7 +71,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 greycolor = 128; %(whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 % HideCursor;
@@ -118,8 +118,8 @@ if strcmp(annulusWidth,'blindspot')
 %     s3 = strcat(s1,s2);
 %     Files = dir(s3);
 %     load (Files.name,'blindspot_loc_x_dva','blindspot_loc_y_dva','blindspot_width');
-    sectorRadius_in_visual_degree = 12;% blindspot_loc_x_dva; % sunnannan 5.5   mali7.9
-    sectorRadius_out_visual_degree =14.5; % sectorRadius_in_visual_degree + blindspot_width; % sunnannan 9.17  mali 11.5
+    sectorRadius_in_visual_degree = 13;% blindspot_loc_x_dva; % sunnannan 5.5   mali7.9
+    sectorRadius_out_visual_degree =16; % sectorRadius_in_visual_degree + blindspot_width; % sunnannan 9.17  mali 11.5
 %     cd('../../../../stimulus/corticalBlindness/eyelink/');
 else
     sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
@@ -244,7 +244,7 @@ end
 if strcmp(condition,'normal')
     blockNumber = 10;
 else
-    blockNumber = 6;
+    blockNumber = 6;  % 6 for normal subjects
 end
 
 if strcmp(condition, 'normal')
@@ -677,6 +677,10 @@ while block <= blockNumber
         elseif ~strcmp(condition,'normal') &&  trial == trialNumber 
             
             barMovStep = 0.1;
+            
+            if isEyelink
+                Eyelink('Message','TRIALID %d',trial);
+            end
             
             while respToBeMade
                 

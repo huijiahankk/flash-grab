@@ -10,7 +10,7 @@
 clear all;close all;
 
 if 1
-    sbjname = 'hjh';
+    sbjname = 'sry';
     isEyelink = 1;
 else
     sbjname = input('>>>Please input the subject''s name:   ','s');
