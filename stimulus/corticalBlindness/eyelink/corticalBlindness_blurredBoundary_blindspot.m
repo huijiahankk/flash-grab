@@ -25,15 +25,15 @@
 
 clear all;close all;
 
-if 0
+if 1
     sbjname = 'hjh';
     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
     barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
-    isEyelink = 1;  % 0 1
-    annulusPattern = 'sector'; % blurredBoundary  sector
-    annulusWidth =  'blindspot'; % blindspot   artificialScotoma
+    isEyelink = 0;  % 0 1
+    annulusPattern = 'blurredBoundary'; % blurredBoundary  sector
+    annulusWidth =  'artificialScotoma'; % blindspot   artificialScotoma  corticalBlindness
 %     artificialScotomaExp = 'n';
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -71,7 +71,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 greycolor = 128; %(whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 960 540]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 % HideCursor;
@@ -105,8 +105,8 @@ KbName('UnifyKeyNames');
 %               Screen parameter
 %----------------------------------------------------------------------
 
-eyeScreenDistence = 66;  % 78cm  68sunnannan
-screenHeight = 33.5; % 26.8 cm
+eyeScreenDistence = 68;  % 78cm  68sunnannan
+screenHeight = 33.5; % 26.8 cm in cortical blindness original lab   33.5cm in eyelink exp lab
 if strcmp(annulusWidth,'blindspot')
     %----------------------------------------------------------------------
     %            load blindspot test file and data
@@ -119,7 +119,7 @@ if strcmp(annulusWidth,'blindspot')
 %     Files = dir(s3);
 %     load (Files.name,'blindspot_loc_x_dva','blindspot_loc_y_dva','blindspot_width');
     sectorRadius_in_visual_degree = 13;% blindspot_loc_x_dva; % sunnannan 5.5   mali7.9
-    sectorRadius_out_visual_degree =16; % sectorRadius_in_visual_degree + blindspot_width; % sunnannan 9.17  mali 11.5
+    sectorRadius_out_visual_degree = 16; % sectorRadius_in_visual_degree + blindspot_width; % sunnannan 9.17  mali 11.5
 %     cd('../../../../stimulus/corticalBlindness/eyelink/');
 else
     sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
@@ -195,7 +195,7 @@ barRect = Screen('Rect',barTexture);
 %----------------------------------------------------------------------
 
 lineWidth = 8;
-lineLength = 20;
+lineLength = 40;
 % lineRect = [-lineLength/2  -lineWidth/2  lineLength/2  lineWidth/2];
 
 % Define a vertical red rectangle
@@ -594,6 +594,7 @@ while block <= blockNumber
                         barTiltNowMat(trial,flashtimes,block) = barTiltNow;
                         back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
                         flashPresentFlag = 1;
+                        
                         if isEyelink
                             Eyelink('Message','flash');
                         end
@@ -606,6 +607,7 @@ while block <= blockNumber
                       flashtimes = flashtimes + 1;
                         barTiltNowMat(trial,flashtimes,block) = barTiltNow;
                         back_currentAngleMat(trial,flashtimes,block) = back.CurrentAngle;
+                        
                         if isEyelink
                             Eyelink('Message','flash');
                         end
@@ -699,7 +701,7 @@ while block <= blockNumber
                     
                     % draw a black circle in the visible visual area
                     Screen('FrameOval', wptr, blackcolor, refFrameDestinationRect,3,3);
-                else strcmp(annulusWidth,'artificialScotoma')
+                else  % strcmp(annulusWidth,'artificialScotoma')
 %                     % using red bar to present the perceived location
 %                     barRectTiltDegree =  barTiltNow;
 %                     barDrawTiltDegree = barTiltNow;

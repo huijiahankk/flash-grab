@@ -10,7 +10,7 @@
 clear all;
 
 addpath '../../function'
-bar_only_mark = 1; % 1 means show bar_only data   2 means no bar_only data  every data was normalized by bar_only
+bar_only_mark = 2; % 1 means show bar_only data   2 means no bar_only data  every data was normalized by bar_only
 % pValue = input('>>>Calculate p Value? (y/n):  ','s');
 
 folderNum = 1;
@@ -86,7 +86,7 @@ end
 %----------------------------------------------------------------------
 
 % y = [visible2invisibleCCWmean invisible2visibleCCWmean perceived_locationCCWmean visible2invisibleCWmean invisible2visibleCWmean perceived_locationCWmean];
-% 
+%
 % % h = bar(y,'FaceColor',[0 .5 .5],'EdgeColor',[0 .9 .9],'LineWidth',1.5);
 % h = bar(3:8,y,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
 % set(gca, 'XTick', 1:8,'XTickLabels', {'bar-only'  'off-sync'  'vi2inviCCW' 'invi2viCCW' 'perc-CCW' 'vi2inviCW' 'invi2viCW' 'perc-CW'},'fontsize',20,'FontWeight','bold');
@@ -98,7 +98,7 @@ end
 % ylabel('Shift degree from horizontal meridian','FontSize',20,'FontWeight','bold')
 % eachtrialdegree = [visible2invisibleCCW; invisible2visibleCCW; perceived_location_CCWDegree;...
 %     visible2invisibleCW; invisible2visibleCW; perceived_location_CWDegree];
-% 
+%
 % for condition = 1: size(eachtrialdegree,1)
 %     for i = 1:size(eachtrialdegree(1,:),2)
 %         plot(condition+2,eachtrialdegree(condition,:),'r--o');
@@ -111,22 +111,22 @@ if bar_only_mark == 1 % 1 means show bar_only data   2 means no bar_only data  e
     %  plot CCW & CW & perceived location  mean and each trial
     %----------------------------------------------------------------------
     
-        y = [visible2invisibleCCWmean invisible2visibleCCWmean perceived_locationCCWmean visible2invisibleCWmean invisible2visibleCWmean perceived_locationCWmean];
-    y = [flash_grab_CCWMean perceived_locationCCWmean flash_grab_CWMean perceived_locationCWmean];
+%     y = [visible2invisibleCCWmean invisible2visibleCCWmean perceived_locationCCWmean visible2invisibleCWmean invisible2visibleCWmean perceived_locationCWmean];
+    y_flash_grab_perc = [flash_grab_CCWMean perceived_locationCCWmean flash_grab_CWMean perceived_locationCWmean];
     
-    h = bar(3:6,y,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
+    h = bar(3:6,y_flash_grab_perc,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
     % set(gca, 'XTick', 1:8, 'XTickLabels', {'blind field' 'off-sync control' 'CCW-vi2invi'  'CCW-vi2invi' 'percCCW' 'CW-vi2invi' 'CW-vi2invi' 'percCW'},'fontsize',20,'FontWeight','bold');
     % y = [flash_grab_CCWMean flash_grab_CWMean];
     % h = bar(2:3,y,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
-    set(gca, 'XTick', 1:6, 'XTickLabels', {'blind field' 'off-sync control' 'grab-outward'...
-        'perc-outward' 'grab-toward' 'perc-toward'},'fontsize',20,'FontWeight','bold');
+    set(gca, 'XTick', 1:6, 'XTickLabels', {'blind field' 'off-sync control' 'grab-out'...
+        'perc-out' 'grab-in' 'perc-in'},'fontsize',20,'FontWeight','bold');
     % set(gca, 'XTick', 1:3, 'XTickLabels', {'blind field' 'grab-CCW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
     xtickangle(45);
     set(gcf,'color','w');
     set(gca,'box','off');
     ylabel('Shift degree from horizontal meridian','FontSize',20,'FontWeight','bold')
-%     title('Shift degree from horizontal meridian','FontSize',25);
-%     set(gca,'ylim',[-10 70],'FontName','Arial','FontSize',25);
+    %     title('Shift degree from horizontal meridian','FontSize',25);
+    %     set(gca,'ylim',[-10 70],'FontName','Arial','FontSize',25);
     if barLocation == 'l'
         %         set(gca, 'YDir', 'reverse');
         % set the origin on the left top
@@ -140,16 +140,16 @@ if bar_only_mark == 1 % 1 means show bar_only data   2 means no bar_only data  e
     eachtrialdegree_Perc = [perceived_location_CCWDegree; perceived_location_CWDegree];
     % plot CCW value(first row of eachtrialdegree_CCW_CW) on first bar
     for condition_CCW_CW = 1: size(eachtrialdegree_CCW_CW,1)
-        plot(condition_CCW_CW*2 + 1,eachtrialdegree_CCW_CW(condition_CCW_CW,:),'r--o');
+        plot(condition_CCW_CW*2 + 1 + randn/20,eachtrialdegree_CCW_CW(condition_CCW_CW,:),'r--o');
     end
     
     
     hold on;
-
+    
     for condition_perc = 1:size(eachtrialdegree_Perc,1)
-        plot((condition_perc+1)*2,eachtrialdegree_Perc(condition_perc,:),'r--o');
+        plot((condition_perc+1)*2 + randn/20,eachtrialdegree_Perc(condition_perc,:),'r--o');
     end
-
+    
     %----------------------------------------------------------------------
     %               off sync control  border
     %----------------------------------------------------------------------
@@ -182,11 +182,11 @@ if bar_only_mark == 1 % 1 means show bar_only data   2 means no bar_only data  e
     
     eachtrialdegree_off_sync = [visible2invisible  invisible2visible];
     hold on;
-    y_barData = off_sync_edge_degree;
-    h = bar(2,y_barData,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
+    y_off_sync = off_sync_edge_degree;
+    h = bar(2,y_off_sync,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
     hold on;
     for off_sync = 1: size(eachtrialdegree_off_sync,2)
-        plot(2,eachtrialdegree_off_sync(off_sync),'r--o');
+        plot(2 + randn/20,eachtrialdegree_off_sync(off_sync),'r--o');
     end
     
     
@@ -209,22 +209,22 @@ if bar_only_mark == 1 % 1 means show bar_only data   2 means no bar_only data  e
     if folderNum == 1   % 'upper_field'
         blindFieldUpper = 90 + data.wedgeTiltEachBlock(1,:);
         bar_onlyDegreeMean = mean(blindFieldUpper);
-        y = bar_onlyDegreeMean;
+        y_bar_only = bar_onlyDegreeMean;
         eachtrialdegree_blindfield = blindFieldUpper;
     elseif folderNum == 2   % 'lower_field'
         blindFieldLower = 90 - data.wedgeTiltEachBlock(2,:);
         bar_onlyDegreeMean = mean(blindFieldLower);
-        y = bar_onlyDegreeMean ;
+        y_bar_only = bar_onlyDegreeMean ;
         eachtrialdegree_blindfield = blindFieldLower;
     end
     
     hold on;
-    bar(1,y,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
+    bar(1 + randn/20,y_bar_only,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
     hold on;
     for blindfield = 1: size(eachtrialdegree_blindfield,2)
         plot(1,eachtrialdegree_blindfield(blindfield),'r--o');
     end
- 
+    
     
 elseif bar_only_mark == 2  % 1 means show bar_only data   2 means no bar_only data  every data was normalized by bar_only
     %----------------------------------------------------------------------
@@ -293,17 +293,12 @@ elseif bar_only_mark == 2  % 1 means show bar_only data   2 means no bar_only da
     end
     
     eachtrialdegree_off_sync = [visible2invisible  invisible2visible] - bar_onlyDegreeMean;
-    hold on;
+    
+    
     y_barData = off_sync_edge_degree  - bar_onlyDegreeMean;
     h = bar(1,y_barData,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
     hold on;
-    for off_sync = 1: size(eachtrialdegree_off_sync,2)
-        plot(1,eachtrialdegree_off_sync(off_sync),'r--o');
-    end
-    %----------------------------------------------------------------------
-    %  plot CCW & CW & perceived location  mean and each trial
-    %----------------------------------------------------------------------
-    
+
     %     y = [visible2invisibleCCWmean invisible2visibleCCWmean perceived_locationCCWmean visible2invisibleCWmean invisible2visibleCWmean perceived_locationCWmean];
     y = [flash_grab_CCWMean perceived_locationCCWmean flash_grab_CWMean perceived_locationCWmean] - bar_onlyDegreeMean;
     
@@ -325,6 +320,14 @@ elseif bar_only_mark == 2  % 1 means show bar_only data   2 means no bar_only da
     end
     hold on;
     
+    %----------------------------------------------------------------------
+    %  plot CCW & CW & perceived location  mean and each trial
+    %----------------------------------------------------------------------
+    for off_sync = 1: size(eachtrialdegree_off_sync,2)
+        plot(1 + randn,eachtrialdegree_off_sync(off_sync),'r--o');
+    end
+    
+    
     % plot grab_CCW data
     eachtrialdegree_grab_CCW = flash_grab_CCWDegree - bar_onlyDegreeMean;
     % plot perc_CCW data
@@ -337,19 +340,19 @@ elseif bar_only_mark == 2  % 1 means show bar_only data   2 means no bar_only da
     
     
     for condition = 1: length(eachtrialdegree_grab_CCW)
-        plot(2,eachtrialdegree_grab_CCW(condition),'r--o');
-        plot(4,eachtrialdegree_grab_CW(condition),'r--o');
+        plot(2 + randn,eachtrialdegree_grab_CCW(condition),'r--o');
+        plot(4 + randn,eachtrialdegree_grab_CW(condition),'r--o');
     end
     
     for condition = 1: length(eachtrialdegree_perc_CCW)
-        plot(3,eachtrialdegree_perc_CCW(condition),'r--o');
-        plot(5,eachtrialdegree_perc_CW(condition),'r--o');
+        plot(3 + randn,eachtrialdegree_perc_CCW(condition),'r--o');
+        plot(5 + randn,eachtrialdegree_perc_CW(condition),'r--o');
     end
-        
+    
 end
 
 
-cd ../../../../analysis/cortical_blindness/
+cd ../../../../../../analysis/vi2invi_in2vi_perc_off_sync/
 
 % [h,p_blindfield_offsync,ci,stats] = ttest2(eachtrialdegree_blindfield,eachtrialdegree_off_sync);
 % p_blindfield_offsync

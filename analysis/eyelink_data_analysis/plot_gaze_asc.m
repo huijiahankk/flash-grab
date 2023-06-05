@@ -1,13 +1,13 @@
 clear all;
 
 addpath '/Users/huijiajia/Documents/matlab/preCompiled_edfmex';
-datapath = '../../data/corticalBlindness/Eyelink_asc/blurredBoundary/blindspot/';
+datapath = '../../data/corticalBlindness/Eyelink_asc/blurredBoundary/blindspot/sry/';
 
 
 % addpath('/Users/huijiajia/Documents/Psychtoolbox-3-3.0.17.9/Psychtoolbox/PsychHardware/EyelinkToolbox');
 % Read the EyeLink ASCII data file
 cd(datapath);
-filename_eye = 'hjh_vi2invi_u_2023_03_08_15_48.asc';
+filename_eye = 'sry_invi2vi_l_2023_03_14_16_44.asc';
 
 cfg = [];
 cfg.dataset = filename_eye;

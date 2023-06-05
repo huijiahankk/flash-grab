@@ -40,7 +40,7 @@ blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 960 540]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 fixsize = 12;
@@ -85,7 +85,7 @@ KbName('UnifyKeyNames');
 %               Screen parameter
 %----------------------------------------------------------------------
 
-eyeScreenDistence = 78;  % cm  68sunnannan
+eyeScreenDistence = 78;  % others 78 cm  68sunnannan
 screenHeight = 26.8; % cm
 sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
 sectorRadius_in_visual_degree = 5.5; % sunnannan 5.5   mali 7.9

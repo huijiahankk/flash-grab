@@ -15,7 +15,7 @@ bar_only_mark = 1; % 1 means show bar_only  2 means no bar_only data  every data
 % pValue = input('>>>Calculate p Value? (y/n):  ','s');
 sbjnames = { 'wutianjiang' } ; % 6'maguangquan'     7'wutianjiang'    5'mali' 
 
-folderNum = 1;   % choose which visual to analysis
+folderNum = 2;   % choose which visual to analysis
 folders = {'upper_field','lower_field','normal_field'};
 path = '../../../data/corticalBlindness/bar';
 areaFolderName = fullfile(path, folders{folderNum});
@@ -248,7 +248,14 @@ if bar_only_mark == 1
     
     % y = [bar_onlyDegreeMean flash_grab_CCWDegreeMean flash_grab_CWDegreeMean];
     h = bar(y,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
-    set(gca, 'XTick', 1:6, 'XTickLabels', {'bar-only' 'off-sync' 'grab-CCW' 'perc-CCW' 'grab-CW' 'perc-CW'},'fontsize',20,'FontWeight','bold');
+    
+    if strcmp(folders{folderNum} , 'upper_field')
+        XaxisMarker = {'bar-only' 'off-sync' 'grab-out' 'perc-out' 'grab-in' 'perc-in'} ;
+    elseif strcmp(folders{folderNum} , 'lower_field')
+        XaxisMarker = {'bar-only' 'off-sync' 'grab-in' 'perc-in' 'grab-out' 'perc-out'} ;
+    end
+    
+    set(gca, 'XTick', 1:6, 'XTickLabels', XaxisMarker,'fontsize',30,'FontWeight','bold');
     
     % set(gca, 'XTick', 1:3, 'XTickLabels', {'bar-only' 'grab-CCW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
     
@@ -262,7 +269,7 @@ if bar_only_mark == 1
     end
     
     hold on;
-    ylabel('Shift degree from horizontal meridian','FontName','Arial','FontSize',25);
+    ylabel('Shift degree from horizontal meridian','FontName','Arial','FontSize',30);
     % legend({'blind field border' 'reverse counter-clockwise','reverse clockwise'},'EdgeColor','w');
 %     if folderNum == 1
 %         title('Motion reversal towards and outwards the scotoma---upper visual field ','FontName','Arial','FontSize',30);
@@ -295,18 +302,18 @@ if bar_only_mark == 1
     
     
     for condition = 1: length(eachtrialdegree_bar_only)
-        plot(1,eachtrialdegree_bar_only(condition),'r--o');
-        plot(2,eachtrialdegree_off_sync(condition),'r--o');
+        plot(1 + randn/20,eachtrialdegree_bar_only(condition),'r--o');
+        plot(2 + randn/20,eachtrialdegree_off_sync(condition),'r--o');
     end
     
     for condition = 1: length(eachtrialdegree_grab_CCW)
-        plot(3,eachtrialdegree_grab_CCW(condition),'r--o');
-        plot(5,eachtrialdegree_grab_CW(condition),'r--o');
+        plot(3 + randn/20,eachtrialdegree_grab_CCW(condition),'r--o');
+        plot(5 + randn/20,eachtrialdegree_grab_CW(condition),'r--o');
     end
     
     for condition = 1: length(eachtrialdegree_perc_CCW)
-        plot(4,eachtrialdegree_perc_CCW(condition),'r--o');
-        plot(6,eachtrialdegree_perc_CW(condition),'r--o');
+        plot(4 + randn/20,eachtrialdegree_perc_CCW(condition),'r--o');
+        plot(6 + randn/20,eachtrialdegree_perc_CW(condition),'r--o');
     end
     
     
@@ -320,7 +327,12 @@ elseif bar_only_mark == 2
     
     % y = [bar_onlyDegreeMean flash_grab_CCWDegreeMean flash_grab_CWDegreeMean];
     h = bar(y,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
-    set(gca, 'XTick', 1:5, 'XTickLabels', {'off-sync' 'grab-CCW' 'perc-CCW' 'grab-CW' 'perc-CW'},'fontsize',20,'FontWeight','bold');
+        if strcmp(folders{folderNum} , 'upper_field')
+        XaxisMarker = {'off-sync' 'grab-out' 'perc-out' 'grab-in' 'perc-in'} ;
+    elseif strcmp(folders{folderNum} , 'lower_field')
+        XaxisMarker = {'off-sync' 'grab-in' 'perc-in' 'grab-out' 'perc-out'} ;
+    end
+    set(gca, 'XTick', 1:5, 'XTickLabels', XaxisMarker,'fontsize',30,'FontWeight','bold');
     
     % set(gca, 'XTick', 1:3, 'XTickLabels', {'bar-only' 'grab-CCW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
     
@@ -334,7 +346,7 @@ elseif bar_only_mark == 2
         set(gca,'XAxisLocation','top','YAxisLocation','left','ydir','reverse');
     end
     hold on;
-    ylabel('Shift degree from horizontal meridian','FontName','Arial','FontSize',25);
+    ylabel('Shift degree from horizontal meridian','FontName','Arial','FontSize',30);
     % legend({'blind field border' 'reverse counter-clockwise','reverse clockwise'},'EdgeColor','w');
     %     if folderNum == 1
     %         title('Motion reversal towards and outwards the scotoma---upper visual field ','FontName','Arial','FontSize',35);
@@ -362,17 +374,17 @@ elseif bar_only_mark == 2
     
     for condition = 1: length(eachtrialdegree_bar_only)
         %         plot(1,eachtrialdegree_bar_only(condition),'r--o');
-        plot(1,eachtrialdegree_off_sync(condition),'r--o');
+        plot(1 + randn/20,eachtrialdegree_off_sync(condition),'r--o');
     end
     
     for condition = 1: length(eachtrialdegree_grab_CCW)
-        plot(2,eachtrialdegree_grab_CCW(condition),'r--o');
-        plot(4,eachtrialdegree_grab_CW(condition),'r--o');
+        plot(2 + randn/20,eachtrialdegree_grab_CCW(condition),'r--o');
+        plot(4 + randn/20,eachtrialdegree_grab_CW(condition),'r--o');
     end
     
     for condition = 1: length(eachtrialdegree_perc_CCW)
-        plot(3,eachtrialdegree_perc_CCW(condition),'r--o');
-        plot(5,eachtrialdegree_perc_CW(condition),'r--o');
+        plot(3 + randn/20,eachtrialdegree_perc_CCW(condition),'r--o');
+        plot(5 + randn/20,eachtrialdegree_perc_CW(condition),'r--o');
     end
     
 end

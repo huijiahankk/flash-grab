@@ -5,19 +5,21 @@
 clear all;
 addpath '../../function';
 
-eachtrial = 'y';
+eachtrial = 'n';  % 'y' mean for single subject plot eachtrial  'n' for draw each subject's ave illusion
+barOnlyDraw = 'y'; % 'n' means bar only measurements was subtracted from all conditions
 annulusPattern = 'blurredBoundary';  %  blurredBoundary   sector
-annulusWidth = 'blindspot'; % blindspot   artificialScotoma
+annulusWidth = 'artificialScotoma'; % blindspot   artificialScotoma
 
-sbjnames = {'hjh'}; % 'sry', 'hbb', 'lxy', 'hjh', 'xs'
+
+sbjnames = {'hjh'}; % 'xs','sry', 'hbb','hjh', 'xs','lxy'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
 
 
-visualField = 'l'; % u for upper l for lower
-% upperExp = { '_vi2invi_u'};
+visualField = 'u'; % u for upper l for lower
 
-upperExp = { '_vi2invi_u','_invi2vi_u'}; %  '_vi2invi_u','_invi2vi_u' 
-lowerExp = { '_vi2invi_l','_invi2vi_l'}; % '_vi2invi_l','_invi2vi_l',
+
+upperExp = {'1_vi2invi_u'}; %  '_vi2invi_u','_invi2vi_u'
+lowerExp = {'_vi2invi_l','_invi2vi_l',}; % '_vi2invi_l','_invi2vi_l',
 
 
 for sbjnum = 1:length(sbjnames)
@@ -31,7 +33,7 @@ for sbjnum = 1:length(sbjnames)
     
     if strcmp(visualField,'u')
         %----------------------------------------------------------------------
-        %              data in upper visual field
+        %        restor  upper visual field data
         %----------------------------------------------------------------------
         for expcondition = 1:length(upperExp)
             s1 = sbjnames(sbjnum);
@@ -55,6 +57,11 @@ for sbjnum = 1:length(sbjnames)
                 end
             end
             
+            if strcmp(annulusPattern,'blurredBoundary')
+                boundary_CCW_u(expcondition,:) = 90 - boundary(illusionCCWIndex);
+                boundary_CW_u(expcondition,:) = 90 - boundary(illusionCWIndex);
+            end
+            
             bar_only_u(expcondition,:) = 90 - bar_only(validTrialIndex);
             off_sync_CCW_u(expcondition,:)  = 90 - off_sync(illusionCCWIndex);
             off_sync_CW_u(expcondition,:)  = 90 - off_sync(illusionCWIndex);
@@ -64,18 +71,33 @@ for sbjnum = 1:length(sbjnames)
             perceived_location_CW_u(expcondition,:)   = 90 -  perceived_location(illusionCWIndex);
         end
         
-        bar_only_u_ave = 0;
+        if strcmp(barOnlyDraw,'n')
+            bar_only_u_ave = mean(mean(bar_only_u));
+            bar_only_u_ave_temp = bar_only_u_ave;
+        elseif strcmp(barOnlyDraw,'y')
+            bar_only_u_ave = 0;
+        end
+        
         bar_only_u_ave_temp(sbjnum) = mean(mean(bar_only_u));
         off_sync_CCW_u_ave(sbjnum)  = mean(mean(off_sync_CCW_u)) - bar_only_u_ave;
         off_sync_CW_u_ave(sbjnum)  = mean(mean(off_sync_CW_u)) - bar_only_u_ave;
+        if strcmp(annulusPattern,'blurredBoundary')
+            boundary_CCW_u_ave(sbjnum) = mean(mean(boundary_CCW_u)) - bar_only_u_ave;
+            boundary_CW_u_ave(sbjnum) = mean(mean(boundary_CW_u)) - bar_only_u_ave;
+        end
         flash_grab_CCW_u_ave(sbjnum)  = mean(mean(flash_grab_CCW_u)) - bar_only_u_ave;
         perceived_location_CCW_u_ave(sbjnum)  = mean(mean(perceived_location_CCW_u)) - bar_only_u_ave;
         flash_grab_CW_u_ave(sbjnum)  = mean(mean(flash_grab_CW_u)) - bar_only_u_ave;
         perceived_location_CW_u_ave(sbjnum)  = mean(mean(perceived_location_CW_u)) - bar_only_u_ave;
         
+        
         bar_only_u_sbj_mean = mean(bar_only_u_ave_temp);
         off_sync_CCW_u_sbj_mean = mean(off_sync_CCW_u_ave);
         off_sync_CW_u_sbj_mean = mean(off_sync_CW_u_ave);
+        if strcmp(annulusPattern,'blurredBoundary')
+            boundary_CCW_u_sbj_mean = mean(boundary_CCW_u_ave);
+            boundary_CW_u_sbj_mean = mean(boundary_CW_u_ave);
+        end
         flash_grab_CCW_u_sbj_mean = mean(flash_grab_CCW_u_ave);
         perceived_location_CCW_u_sbj_mean = mean(perceived_location_CCW_u_ave);
         flash_grab_CW_u_sbj_mean = mean(flash_grab_CW_u_ave);
@@ -91,10 +113,10 @@ for sbjnum = 1:length(sbjnames)
         eachtrial_flash_grab_CW_u = reshape(flash_grab_CW_u,1,numel(flash_grab_CW_u)) - bar_only_u_ave;
         eachtrial_perceived_location_CW_u = reshape(perceived_location_CW_u,1,numel(perceived_location_CW_u)) - bar_only_u_ave;
         
-    
+        
     elseif strcmp(visualField,'l')
         %----------------------------------------------------------------------
-        %             lower visual field data
+        %        restore  lower visual field data
         %----------------------------------------------------------------------
         for expcondition = 1:length(lowerExp)
             s1 = sbjnames(sbjnum);
@@ -118,6 +140,12 @@ for sbjnum = 1:length(sbjnames)
                 end
             end
             
+            
+            if strcmp(annulusPattern,'blurredBoundary')
+                boundary_CCW_l(expcondition,:) = boundary(illusionCCWIndex) - 90;
+                boundary_CW_l(expcondition,:) = boundary(illusionCWIndex) - 90;
+            end
+            
             bar_only_l = bar_only(validTrialIndex) - 90;
             off_sync_CCW_l(expcondition,:)  = off_sync(illusionCCWIndex) - 90;
             off_sync_CW_l(expcondition,:)  = off_sync(illusionCWIndex) - 90;
@@ -127,10 +155,20 @@ for sbjnum = 1:length(sbjnames)
             perceived_location_CW_l(expcondition,:)   = perceived_location(illusionCWIndex) - 90;
         end
         
-        bar_only_l_ave = 0; %mean(mean(bar_only_l));
+        if strcmp(barOnlyDraw,'n')
+            bar_only_l_ave = mean(mean(bar_only_l));
+            bar_only_l_ave_temp = bar_only_l_ave;
+        elseif strcmp(barOnlyDraw,'y')
+            bar_only_l_ave = 0;
+        end
+        
         bar_only_l_ave_temp(sbjnum)  = mean(mean(bar_only_l));
         off_sync_CCW_l_ave(sbjnum)  = mean(mean(off_sync_CCW_l)) - bar_only_l_ave;
         off_sync_CW_l_ave(sbjnum)  = mean(mean(off_sync_CW_l)) - bar_only_l_ave;
+        if strcmp(annulusPattern,'blurredBoundary')
+            boundary_CCW_l_ave(sbjnum) = mean(mean(boundary_CCW_l)) - bar_only_l_ave;
+            boundary_CW_l_ave(sbjnum) = mean(mean(boundary_CW_l)) - bar_only_l_ave;
+        end
         flash_grab_CCW_l_ave(sbjnum)  = mean(mean(flash_grab_CCW_l)) - bar_only_l_ave;
         perceived_location_CCW_l_ave(sbjnum)  = mean(mean(perceived_location_CCW_l)) - bar_only_l_ave;
         flash_grab_CW_l_ave(sbjnum)  = mean(mean(flash_grab_CW_l)) - bar_only_l_ave;
@@ -139,6 +177,10 @@ for sbjnum = 1:length(sbjnames)
         bar_only_l_sbj_mean = mean(bar_only_l_ave_temp);
         off_sync_CCW_l_sbj_mean = mean(off_sync_CCW_l_ave);
         off_sync_CW_l_sbj_mean = mean(off_sync_CW_l_ave);
+        if strcmp(annulusPattern,'blurredBoundary')
+            boundary_CCW_l_sbj_mean = mean(boundary_CCW_l_ave);
+            boundary_CW_l_sbj_mean = mean(boundary_CW_l_ave);
+        end
         flash_grab_CCW_l_sbj_mean = mean(flash_grab_CCW_l_ave);
         perceived_location_CCW_l_sbj_mean = mean(perceived_location_CCW_l_ave);
         flash_grab_CW_l_sbj_mean = mean(flash_grab_CW_l_ave);
@@ -147,6 +189,10 @@ for sbjnum = 1:length(sbjnames)
         eachtrial_bar_only_l = reshape(bar_only_l,1,numel(bar_only_l)) - bar_only_l_ave;
         eachtrial_off_sync_CCW_l = reshape(off_sync_CCW_l,1,numel(off_sync_CCW_l)) - bar_only_l_ave;
         eachtrial_off_sync_CW_l = reshape(off_sync_CW_l,1,numel(off_sync_CW_l)) - bar_only_l_ave;
+        if strcmp(annulusPattern,'blurredBoundary')
+            eachtrial_boundary_CCW_l = reshape(boundary_CCW_l,1,numel(boundary_CCW_l)) - bar_only_l_ave;
+            eachtrial_boundary_CW_l = reshape(boundary_CW_l,1,numel(boundary_CW_l)) - bar_only_l_ave;
+        end
         eachtrial_flash_grab_CCW_l= reshape(flash_grab_CCW_l,1,numel(flash_grab_CCW_l)) - bar_only_l_ave;
         eachtrial_perceived_location_CCW_l = reshape(perceived_location_CCW_l,1,numel(perceived_location_CCW_l)) - bar_only_l_ave;
         eachtrial_flash_grab_CW_l = reshape(flash_grab_CW_l,1,numel(flash_grab_CW_l)) - bar_only_l_ave;
@@ -158,53 +204,184 @@ for sbjnum = 1:length(sbjnames)
     
 end
 
+%----------------------------------------------------------------------
+%    draw upper visual field data
+%----------------------------------------------------------------------
 if strcmp(visualField,'u')
-    y_u = [bar_only_u_sbj_mean off_sync_CCW_u_sbj_mean off_sync_CW_u_sbj_mean flash_grab_CCW_u_sbj_mean perceived_location_CCW_u_sbj_mean flash_grab_CW_u_sbj_mean perceived_location_CW_u_sbj_mean];
-%     y_u = [flash_grab_CCW_u_sbj_mean perceived_location_CCW_u_sbj_mean flash_grab_CW_u_sbj_mean perceived_location_CW_u_sbj_mean];
+    if strcmp(barOnlyDraw,'y')
+        if strcmp(annulusPattern,'blurredBoundary')
+            y_u = [bar_only_u_sbj_mean off_sync_CCW_u_sbj_mean off_sync_CW_u_sbj_mean boundary_CCW_u_sbj_mean boundary_CW_u_sbj_mean ...
+                flash_grab_CCW_u_sbj_mean perceived_location_CCW_u_sbj_mean flash_grab_CW_u_sbj_mean perceived_location_CW_u_sbj_mean];
+        else
+            
+            y_u = [bar_only_u_sbj_mean off_sync_CCW_u_sbj_mean off_sync_CW_u_sbj_mean flash_grab_CCW_u_sbj_mean...
+                perceived_location_CCW_u_sbj_mean flash_grab_CW_u_sbj_mean perceived_location_CW_u_sbj_mean];
+        end
+    elseif strcmp(barOnlyDraw,'n')
+        y_u = [off_sync_CCW_u_sbj_mean off_sync_CW_u_sbj_mean flash_grab_CCW_u_sbj_mean...
+            perceived_location_CCW_u_sbj_mean flash_grab_CW_u_sbj_mean perceived_location_CW_u_sbj_mean];
+    end
+    
+    
+    
     h_u = bar(y_u,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
     hold on;
+    %----------------------------------------------------------------------
+    %    draw each trial
+    %----------------------------------------------------------------------
     if strcmp(eachtrial,'y')
-        for condition = 1: length(eachtrial_bar_only_u)
-            plot(1,eachtrial_bar_only_u(condition),'r--o');
+        if strcmp(barOnlyDraw,'n')
+            drawEachLoca = 0;
+        elseif strcmp(barOnlyDraw,'y')
+            drawEachLoca = 1;
+            for condition = 1: length(eachtrial_bar_only_u)
+                plot(drawEachLoca + randn/20,eachtrial_bar_only_u(condition),'r--o');
+            end
         end
         hold on;
         for condition = 1: numel(off_sync_CCW_u)
-            plot(2,eachtrial_off_sync_CCW_u(condition),'r--o');
-            plot(3,eachtrial_off_sync_CW_u(condition),'b--o');
-            plot(4,eachtrial_flash_grab_CCW_u(condition),'r--o');
-            plot(5,eachtrial_perceived_location_CCW_u(condition),'r--o');
-            plot(6,eachtrial_flash_grab_CW_u(condition),'b--o');
-            plot(7,eachtrial_perceived_location_CW_u(condition),'b--o');
+            plot(drawEachLoca + 1 + randn/20,eachtrial_off_sync_CCW_u(condition),'r--o');
+            plot(drawEachLoca + 2 + randn/20,eachtrial_off_sync_CW_u(condition),'b--o');
+            plot(drawEachLoca + 3 + randn/20,eachtrial_flash_grab_CCW_u(condition),'r--o');
+            plot(drawEachLoca + 4 + randn/20,eachtrial_perceived_location_CCW_u(condition),'r--o');
+            plot(drawEachLoca + 5 + randn/20,eachtrial_flash_grab_CW_u(condition),'b--o');
+            plot(drawEachLoca + 6 + randn/20,eachtrial_perceived_location_CW_u(condition),'b--o');
         end
         hold on;
+        %----------------------------------------------------------------------
+        %    draw each subject data
+        %----------------------------------------------------------------------
+    elseif strcmp(eachtrial,'n')
+        if strcmp(barOnlyDraw,'n')
+            drawEachLoca = 0;
+        elseif strcmp(barOnlyDraw,'y')
+            drawEachLoca = 1;
+        end
+        for condition = 1:length(sbjnames)
+            if strcmp(barOnlyDraw,'y')
+                plot(drawEachLoca + randn/20,bar_only_u_ave_temp(condition),'r--o');
+            end
+            plot(drawEachLoca + 1 + randn/20,off_sync_CCW_u_ave(condition),'r--o');
+            plot(drawEachLoca + 2 + randn/20,off_sync_CW_u_ave(condition),'r--o');
+            if strcmp(annulusPattern,'blurredBoundary')
+                plot(drawEachLoca + 3 + randn/20,boundary_CCW_u_ave(condition),'r--o');
+                plot(drawEachLoca + 4 + randn/20,boundary_CW_u_ave(condition),'r--o');
+                
+                plot(drawEachLoca + 5 + randn/20,flash_grab_CCW_u_ave(condition),'r--o');
+                plot(drawEachLoca + 6 + randn/20,perceived_location_CCW_u_ave(condition),'r--o');
+                plot(drawEachLoca + 7 +randn/20,flash_grab_CW_u_ave(condition),'r--o');
+                plot(drawEachLoca + 8 +randn/20,perceived_location_CW_u_ave(condition),'r--o');
+            else
+                plot(drawEachLoca + 3 + randn/20,flash_grab_CCW_u_ave(condition),'r--o');
+                plot(drawEachLoca + 4 + randn/20,perceived_location_CCW_u_ave(condition),'r--o');
+                plot(drawEachLoca + 5 +randn/20,flash_grab_CW_u_ave(condition),'r--o');
+                plot(drawEachLoca + 6 +randn/20,perceived_location_CW_u_ave(condition),'r--o');
+            end
+        end
     end
+    
+    %----------------------------------------------------------------------
+    %    draw lower visual field data
+    %----------------------------------------------------------------------
 elseif strcmp(visualField,'l')
-    y_l = [bar_only_l_sbj_mean off_sync_CCW_l_sbj_mean off_sync_CW_l_sbj_mean flash_grab_CCW_l_sbj_mean perceived_location_CCW_l_sbj_mean flash_grab_CW_l_sbj_mean perceived_location_CW_l_sbj_mean];
-%     y_l = [bar_only_l_ave_temp off_sync_CCW_l_ave off_sync_CW_l_ave flash_grab_CCW_l_ave perceived_location_CCW_l_ave flash_grab_CW_l_ave perceived_location_CW_l_ave];
+    if strcmp(barOnlyDraw,'y')
+        drawBarNum = 6;
+        y_l = [bar_only_l_sbj_mean off_sync_CCW_l_sbj_mean off_sync_CW_l_sbj_mean flash_grab_CCW_l_sbj_mean...
+            perceived_location_CCW_l_sbj_mean flash_grab_CW_l_sbj_mean perceived_location_CW_l_sbj_mean];
+    elseif strcmp(barOnlyDraw,'n')
+        if strcmp(annulusPattern,'blurredBoundary')
+            drawBarNum = 9;
+            y_l = [bar_only_l_sbj_mean off_sync_CCW_l_sbj_mean off_sync_CW_l_sbj_mean boundary_CCW_l_sbj_mean boundary_CW_l_sbj_mean ...
+                flash_grab_CCW_l_sbj_mean perceived_location_CCW_l_sbj_mean flash_grab_CW_l_sbj_mean perceived_location_CW_l_sbj_mean];
+        else
+            drawBarNum = 7;
+            y_l = [off_sync_CCW_l_sbj_mean off_sync_CW_l_sbj_mean flash_grab_CCW_l_sbj_mean...
+                perceived_location_CCW_l_sbj_mean flash_grab_CW_l_sbj_mean perceived_location_CW_l_sbj_mean];
+        end
+    end
+    
+    
+    
     h_l = bar(y_l,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
     hold on;
+    %----------------------------------------------------------------------
+    %    draw each trial
+    %----------------------------------------------------------------------
     if strcmp(eachtrial,'y')
-        for condition = 1: length(eachtrial_bar_only_l)
-            plot(1,eachtrial_bar_only_l(condition),'r--o');
-            %     plot(2,eachtrialdegree_off_sync(condition),'r--o');
+        if strcmp(barOnlyDraw,'n')
+            drawEachLoca = 0;
+        elseif strcmp(barOnlyDraw,'y')
+            drawEachLoca = 1;
+            for condition = 1: length(eachtrial_bar_only_l)
+                plot(drawEachLoca+randn/20,eachtrial_bar_only_l(condition),'r--o');
+                %     plot(2,eachtrialdegree_off_sync(condition),'r--o');
+            end
         end
         hold on;
         for condition = 1: numel(off_sync_CCW_l)
-            plot(2,eachtrial_off_sync_CCW_l(condition),'r--o');
-            plot(3,eachtrial_off_sync_CW_l(condition),'b--o');
-            plot(4,eachtrial_flash_grab_CCW_l(condition),'r--o');
-            plot(5,eachtrial_perceived_location_CCW_l(condition),'r--o');
-            plot(6,eachtrial_flash_grab_CW_l(condition),'b--o');
-            plot(7,eachtrial_perceived_location_CW_l(condition),'b--o');
+            plot(drawEachLoca + 1 + randn/20,eachtrial_off_sync_CCW_l(condition),'r--o');
+            plot(drawEachLoca + 2 + randn/20,eachtrial_off_sync_CW_l(condition),'b--o');
+            plot(drawEachLoca + 3 + randn/20,eachtrial_flash_grab_CCW_l(condition),'r--o');
+            plot(drawEachLoca + 4 + randn/20,eachtrial_perceived_location_CCW_l(condition),'r--o');
+            plot(drawEachLoca + 5 + randn/20,eachtrial_flash_grab_CW_l(condition),'b--o');
+            plot(drawEachLoca + 6 + randn/20,eachtrial_perceived_location_CW_l(condition),'b--o');
         end
+        
+        %----------------------------------------------------------------------
+        %    draw each subject data
+        %----------------------------------------------------------------------
+    elseif strcmp(eachtrial,'n')
+        if strcmp(barOnlyDraw,'n')
+            drawEachLoca = 0;
+        elseif strcmp(barOnlyDraw,'y')
+            drawEachLoca = 1;
+        end
+        
+        for condition = 1:length(sbjnames)
+            if strcmp(barOnlyDraw,'y')
+                plot(drawEachLoca + randn/20,bar_only_l_ave_temp(condition),'r--o');
+            end
+            plot(drawEachLoca + 1 + randn/20,off_sync_CCW_l_ave(condition),'r--o');
+            plot(drawEachLoca + 2 + randn/20,off_sync_CW_l_ave(condition),'r--o');
+            if strcmp(annulusPattern,'blurredBoundary')
+                plot(drawEachLoca + 3 + randn/20,boundary_CCW_l_ave(condition),'r--o');
+                plot(drawEachLoca + 4 + randn/20,boundary_CW_l_ave(condition),'r--o');
+                plot(drawEachLoca + 5 + randn/20,flash_grab_CCW_l_ave(condition),'r--o');
+                plot(drawEachLoca + 6 + randn/20,perceived_location_CCW_l_ave(condition),'r--o');
+                plot(drawEachLoca + 7 + randn/20,flash_grab_CW_l_ave(condition),'r--o');
+                plot(drawEachLoca + 8 + randn/20,perceived_location_CW_l_ave(condition),'r--o');
+            else
+                plot(drawEachLoca + 3 + randn/20,flash_grab_CCW_l_ave(condition),'r--o');
+                plot(drawEachLoca + 4 + randn/20,perceived_location_CCW_l_ave(condition),'r--o');
+                plot(drawEachLoca + 5 + randn/20,flash_grab_CW_l_ave(condition),'r--o');
+                plot(drawEachLoca + 6 + randn/20,perceived_location_CW_l_ave(condition),'r--o');
+            end
+            
+        end
+    end
+    
+end
+
+%----------------------------------------------------------------------
+%    xLable for draw and don't draw bar_only data   and yLable
+%----------------------------------------------------------------------
+
+if strcmp(barOnlyDraw,'n')
+    drawBarNum = 6;
+    xLable = {'off-sync-CCW' 'off-sync-CW' 'flash-grab-CCW' 'perceived-location-CCW' 'flash-grab-CW' 'perceived-location-CW'};
+elseif strcmp(barOnlyDraw,'y')
+    if strcmp(annulusPattern,'blurredBoundary')
+        drawBarNum = 9;
+        xLable = {'bar-only' 'off-sync-CCW' 'off-sync-CW' 'boundary-CCW' 'boundary-CW' 'flash-grab-CCW' ...
+            'perceived-location-CCW' 'flash-grab-CW' 'perceived-location-CW'};
+    else
+        drawBarNum = 7;
+        xLable = {'bar-only' 'off-sync-CCW' 'off-sync-CW' 'flash-grab-CCW' 'perceived-location-CCW' 'flash-grab-CW' 'perceived-location-CW'};
     end
 end
 
 
-
-
-
-set(gca, 'XTick', 1:7, 'XTickLabels', {'bar-only' 'off-sync-CCW' 'off-sync-CW' 'flash-grab-CCW' 'perceived-location-CCW' 'flash-grab-CW' 'perceived-location-CW'},'fontsize',20,'FontWeight','bold');
+set(gca, 'XTick', 1:drawBarNum, 'XTickLabels',xLable ,'fontsize',20,'FontWeight','bold');
 % set(gca, 'XTick', 1:4, 'XTickLabels', {'flash-grab-CCW' 'perceived-location-CCW' 'flash-grab-CW' 'perceived-location-CW'},'fontsize',20,'FontWeight','bold');
 % set(gca, 'XTick', 1:3, 'XTickLabels', {'bar-only' 'grab-CCW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
 set(gcf,'color','w');
@@ -221,7 +398,7 @@ if strcmp(annulusWidth,'artificialScotoma')
         bar_only_ave = bar_only_l_ave;
     end
     ylabel('Shift degree from mapped blindfield border','FontName','Arial','FontSize',25);
-    line([0 8], [(blindfield_from_horizontal_degree - bar_only_ave) (blindfield_from_horizontal_degree-bar_only_ave)],'LineWidth',1.5,'LineStyle','--');
+    line([0 drawBarNum + 1], [(blindfield_from_horizontal_degree - bar_only_ave) (blindfield_from_horizontal_degree-bar_only_ave)],'LineWidth',1.5,'LineStyle','--');
 end
 
 if strcmp(visualField, 'l')

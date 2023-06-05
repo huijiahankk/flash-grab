@@ -9,7 +9,7 @@ annulusWidth = 'artificialScotoma'; % blindspot   artificialScotoma
 condition = 'normal';
 barLocation = 'n';
 
-sbjnames = {'hjh'};
+sbjnames = {'sry'};  % 'sry', 'hbb', 'lxy', 'hjh', 'xs'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/',condition,'/');
 
 datapath = sprintf([path  '%s/'],sbjnames{1});

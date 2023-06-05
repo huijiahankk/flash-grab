@@ -11,7 +11,7 @@ clear all;close all;
 
 if 1
     sbjname = 'sry';
-    isEyelink = 1;
+    isEyelink = 0;
 else
     sbjname = input('>>>Please input the subject''s name:   ','s');
     isEyelink = input('>>>Use eye link? (1 for yes\0 for no):  ','d');
@@ -33,7 +33,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 redcolor = [255 0 0]; %(whitecolor + blackcolor) / 2; % 128
 greycolor = (whitecolor + blackcolor) / 2;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
