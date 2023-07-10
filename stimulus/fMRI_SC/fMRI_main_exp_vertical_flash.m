@@ -25,7 +25,7 @@ else
     run_no=run_no;
 end
 
-optseqsubNum = '4'; % the number of subject should be string
+optseqsubNum = '1'; % the number of subject should be string
 
 % clearvars;
 
@@ -62,11 +62,13 @@ illusion = 'y';
 PsychDefaultSetup(1);
 
 
-addpath ../function;
+addpath ../../function;
 % addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
-commandwindow;
+
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
+commandwindow;
+
 screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
@@ -116,7 +118,7 @@ respSwitch = 0;
 %----------------------------------------------------------------------
 
 
-load ../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
+load ../../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
 % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 
 dacsize = 10;  %How many bits per pixel#
@@ -163,9 +165,9 @@ KbName('UnifyKeyNames');
 
 
 %----------------------------------------------------------------------
-%               7T Screen parameter
+%               3T Screen parameter
 %----------------------------------------------------------------------
-% for 7T scanner the resolution of the screen is 1024*768   the height and
+% for 3T scanner the resolution of the screen is 1024*768   the height and
 % width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
 % degree totally
 
@@ -230,7 +232,7 @@ flashRepresentFrame = 2.2; % 2.2 means 3 frame
 %----------------------------------------------------------------------
 %                       optseq parameters
 %----------------------------------------------------------------------
-optseqpath = '../optimal_seq/';
+optseqpath = '../../optimal_seq/';
 optseqsub = 'sub';
 optseqSubpath = strcat(optseqpath,optseqsub,optseqsubNum);
 
@@ -414,6 +416,7 @@ for trial = 1:trialNumber
                         flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
                     flashframes_max_in_one_trial = flashframes_max_in_one_trial-1;
+
                 end
             end
         end
@@ -481,7 +484,7 @@ display(totalTime);
 % end
 
 
-savePath = '../data/3T/main_exp/';
+savePath = '../../data/3T/main_exp/';
 
 
 time = clock;

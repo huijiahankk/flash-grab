@@ -8,17 +8,17 @@ addpath '../../function';
 eachtrial = 'n';  % 'y' mean for single subject plot eachtrial  'n' for draw each subject's ave illusion
 barOnlyDraw = 'y'; % 'n' means bar only measurements was subtracted from all conditions
 annulusPattern = 'blurredBoundary';  %  blurredBoundary   sector
-annulusWidth = 'artificialScotoma'; % blindspot   artificialScotoma
+annulusWidth = 'blindspot'; % blindspot   artificialScotoma
 
 
-sbjnames = {'hjh'}; % 'xs','sry', 'hbb','hjh', 'xs','lxy'
+sbjnames = {'hyx'}; % 'xs','sry', 'hbb','hjh', 'xs','lxy'，'zcx','hyx'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
 
 
-visualField = 'u'; % u for upper l for lower
+visualField = 'l'; % u for upper l for lower
 
 
-upperExp = {'1_vi2invi_u'}; %  '_vi2invi_u','_invi2vi_u'
+upperExp = {'_vi2invi_u','_invi2vi_u'}; %  '_vi2invi_u','_invi2vi_u'
 lowerExp = {'_vi2invi_l','_invi2vi_l',}; % '_vi2invi_l','_invi2vi_l',
 
 
@@ -284,11 +284,11 @@ if strcmp(visualField,'u')
     %    draw lower visual field data
     %----------------------------------------------------------------------
 elseif strcmp(visualField,'l')
-    if strcmp(barOnlyDraw,'y')
+    if strcmp(barOnlyDraw,'n')
         drawBarNum = 6;
         y_l = [bar_only_l_sbj_mean off_sync_CCW_l_sbj_mean off_sync_CW_l_sbj_mean flash_grab_CCW_l_sbj_mean...
             perceived_location_CCW_l_sbj_mean flash_grab_CW_l_sbj_mean perceived_location_CW_l_sbj_mean];
-    elseif strcmp(barOnlyDraw,'n')
+    elseif strcmp(barOnlyDraw,'y')
         if strcmp(annulusPattern,'blurredBoundary')
             drawBarNum = 9;
             y_l = [bar_only_l_sbj_mean off_sync_CCW_l_sbj_mean off_sync_CW_l_sbj_mean boundary_CCW_l_sbj_mean boundary_CW_l_sbj_mean ...

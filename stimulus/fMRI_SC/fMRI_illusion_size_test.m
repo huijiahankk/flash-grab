@@ -33,8 +33,8 @@ blockNumber = 1;
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
 
-addpath ../function;
-addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
+addpath ../../function;
+addpath ../../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
@@ -44,7 +44,7 @@ whitecolor = WhiteIndex(screenNumber);
 % fixationwhite = 0.8 * whitecolor;
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 960 540],[],[],0); %set window to ,[0 0 960 540]  [0 0 1920 1080]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 960 540]  [0 0 1920 1080]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -79,7 +79,7 @@ respSwitch = 0;
 %----------------------------------------------------------------------
 
 
-load ../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
+load ../../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
 % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 
 dacsize = 10;  %How many bits per pixel#

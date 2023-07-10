@@ -74,9 +74,9 @@ sectorRect = [0  yCenter - xCenter  2*xCenter yCenter + xCenter];
 %----------------------------------------------------------------------
 %                adjust screen rgb to map linear  ramp
 %----------------------------------------------------------------------
-addpath ../function;
+addpath ../../function;
 
-load ../function/calib-PC-03-Dec-2021_3t.mat;  % this is for 3T screen on the black mac pro
+load ../../function/calib-PC-03-Dec-2021_3t.mat;  % this is for 3T screen on the black mac pro
 
 dacsize = 10;  %How many bits per pixel#
 maxcol = 2.^dacsize-1;
@@ -181,7 +181,7 @@ fixFlashDura = 0.5;  % time duration of fixation color change (total time of ram
 %     load subject illusion size data
 %----------------------------------------------------------------------
 
-cd '../data/3T/illusionSize_3T/';
+cd '../../data/3T/illusionSize_3T/';
 illusionSizeFileName = strcat(sbjname,'*.mat');
 Files = dir(illusionSizeFileName);
 load (Files.name,'aveIlluSizeL','aveIlluSizeR');
