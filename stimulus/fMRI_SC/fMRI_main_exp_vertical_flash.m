@@ -25,28 +25,28 @@ else
     run_no=run_no;
 end
 
-optseqsubNum = '1'; % the number of subject should be string
+optseqsubNum = '5'; % the number of subject should be string
 
 % clearvars;
 
 % if 0
-%
+%     
 %     sbjname = 'huijiahan';
-%
+%     
 % %     debug = 'n';
 %     % have to be the mutiply of 3
 %     sbjIllusionSizeLeft = 0;  % 5
 %     sbjIllusionSizeRight = 0;
 %     run_no = '1';
-%
+%     
 % else
 %     run_no = input('>>>Please input the run number:   ','s');
 %     sbjname = input('>>>Please input the subject''s name:   ','s');
 % %     debug = input('>>>Debug? (y/n):  ','s');
-%
+%     
 %     %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
 %     % input('>>>trialNumber? (30):  ');
-%
+%     
 % end
 
 debug = 'n';
@@ -55,26 +55,24 @@ illusion = 'y';
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
-%
+% 
 % PsychImaging('PrepareConfiguration');
 % PsychImaging('AddTask','General','UseRetinaResolution');
 
 PsychDefaultSetup(1);
 
 
-addpath ../../function;
+addpath ../function;
 % addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
-
+commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
 screens = Screen('Screens');
-commandwindow;
-
 screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 
 fixationwhite = 0.8 * whitecolor;
-fixationblack = blackcolor + 0.3;
+fixationblack = blackcolor + 0.3; 
 
 
 %     mask for change contrast
@@ -118,7 +116,7 @@ respSwitch = 0;
 %----------------------------------------------------------------------
 
 
-load ../../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
+load ../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
 % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 
 dacsize = 10;  %How many bits per pixel#
@@ -138,7 +136,7 @@ Screen('LoadNormalizedGammaTable', wptr, newclut);
 % illusionSizeFileName = strcat(sbjname,'*.mat');
 % Files = dir(illusionSizeFileName);
 % load (Files.name);
-%
+% 
 % cd '../../../stimulus/'
 
 
@@ -165,16 +163,16 @@ KbName('UnifyKeyNames');
 
 
 %----------------------------------------------------------------------
-%               3T Screen parameter
+%               7T Screen parameter
 %----------------------------------------------------------------------
-% for 3T scanner the resolution of the screen is 1024*768   the height and
+% for 7T scanner the resolution of the screen is 1024*768   the height and
 % width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
 % degree totally
 
 visualDegreeOrig = 10;
 sectorRadius_in_out_magni = 1;
 visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
-visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75; %
+visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75; % 
 visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
 visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
 
@@ -232,7 +230,7 @@ flashRepresentFrame = 2.2; % 2.2 means 3 frame
 %----------------------------------------------------------------------
 %                       optseq parameters
 %----------------------------------------------------------------------
-optseqpath = '../../optimal_seq/';
+optseqpath = '../optimal_seq/';
 optseqsub = 'sub';
 optseqSubpath = strcat(optseqpath,optseqsub,optseqsubNum);
 
@@ -252,8 +250,8 @@ fileName = strcat(filePrefixName,run_no,'.par');
 [stimonset,stimtype,stimlength,junk,stimname] =  textread(fileName,'%f%n%f%s%s','delimiter',' '); %textread
 runNum = str2num(run_no);
 % make sure the rotate direction was conter balanced among the different
-% runs
-if runNum == 1 || runNum == 3  % optseq first stimtype of the 4 document in sub1 is 2 1 1 1 so we reverse all the stimtype
+% runs      
+if runNum == 1 || runNum == 3  % optseq first stimtype of the 4 document in sub1 is 2 1 1 1 so we reverse all the stimtype 
     if stimtype(1)==2
         stimtype(stimtype==1) = 3;
         stimtype(stimtype==2) = 1;
@@ -331,10 +329,10 @@ sectorArcAngle = 360/sectorNumber;
 %----------------------------------------------------------------------
 %       write the sequence
 %----------------------------------------------------------------------
-if stimtype(1)==1    % rotate leftward    22.5 means start when the wedge at the center
-    % 22.5 22.5 at the first means
+if stimtype(1)==1    % rotate leftward    22.5 means start when the wedge at the center 
+    % 22.5 22.5 at the first means 
     rotation_sequence = [22.5 22.5 22.5:-180/57:-157.5 -157.5 -157.5 -157.5:180/57:22.5];
-else     stimtype(1) == 2 % rotate rightward
+else     % stimtype(1) == 2 rotate rightward 
     rotation_sequence = [22.5 22.5 22.5:180/57:202.5 202.5 202.5 202.5:-180/57:22.5];
 end
 
@@ -359,10 +357,10 @@ end
 %----------------------------------------------------------------------
 %                       Experimental loop
 %----------------------------------------------------------------------
-dummyScanTime = 0;
+dummyScanTime = 4;
 WaitSecs(dummyScanTime); % dummy scan
 scanOnset = GetSecs;
-% response = - 1; % if the subject failed to press the key, record -1
+response = - 1; % if the subject failed to press the key, record -1
 responseMat = zeros(1,trialNumber);
 [flashTimePointMat,flashIntervalMat] = deal(zeros(trialNumber/2,1));
 % frameskippercounter = 0;
@@ -370,7 +368,6 @@ responseMat = zeros(1,trialNumber);
 flashTimePoint = [];
 flashInterval = [];
 frametimepoint = scanOnset;
-responseMat = [];
 
 for trial = 1:trialNumber
     %----------------------------------------------------------------------
@@ -378,25 +375,25 @@ for trial = 1:trialNumber
     %----------------------------------------------------------------------
     trialOnset = GetSecs;
     respToBeMade = true;
-    prekeyIsDown = 0;    
+    prekeyIsDown = 0;
+       
     frameCounter = 0;
-    flashframes_max_in_one_trial = 3;
     
-    while respToBeMade  % back.RotateTimes < testDuration %  % &&  respToBeMade
+    while GetSecs - scanOnset < stimlength(trial)+stimonset(trial)  % back.RotateTimes < testDuration %  % &&  respToBeMade
         frameCounter = frameCounter + 1;
         if frameCounter > 120
             frameCounter = frameCounter-120;
         end
-        
+
         Screen('DrawTexture',wptr,sectorTex,sectorRect,sectorDestinationRect,rotation_sequence(frameCounter),[],back.ground_alpha); %  + backGroundRota
         
         
         %----------------------------------------------------------------------
         %       flash at reverse onset
         %----------------------------------------------------------------------
-        if stimtype(trial)>0  &&  flashframes_max_in_one_trial>0
-            if stimtype(trial) == stimtype(1)  % rotate leftward
-                % illusion tilt left
+        if stimtype(trial)>0
+            if stimtype(trial) == stimtype(1)  % rotate leftward  
+                % illusion tilt left 
                 if frameCounter>60.5 && frameCounter<63.5
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
@@ -404,28 +401,25 @@ for trial = 1:trialNumber
                     if frameCounter == 61
                         flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
-                    flashframes_max_in_one_trial = flashframes_max_in_one_trial-1;
                 end
             else    %   stimtype(1) == 2 rotate rightward
-                % illusion tilt right
-                if frameCounter>0.5 && frameCounter<3.5  % when
+                % illusion tilt right   
+                if frameCounter>0.5 && frameCounter<3.5  % when 
                     Screen('FillArc',wptr,redcolor,redSectorRectAdjust,157.5,sectorArcAngle);  %  wedgeTiltNow - 360/sectorNumber/2
                     Screen('FillArc',wptr,bottomcolor,InnerSectorRectAdjust,157.5,sectorArcAngle); %wedgeTiltNow  - 360/sectorNumber/2
                     
                     if frameCounter == 1
                         flashTimePoint = [flashTimePoint; GetSecs - scanOnset];
                     end
-                    flashframes_max_in_one_trial = flashframes_max_in_one_trial-1;
-
                 end
             end
         end
-        
+
         Screen('DrawLines', wptr, allCoords,lineWidthPix, fixationwhite, [xCenter+centerMoveHoriPix yCenter+centerMoveVertiPix]);
         
         Screen('Flip',wptr);
         frametimepoint = [frametimepoint GetSecs];
-        
+                
         
         %----------------------------------------------------------------------
         %                      Response record
@@ -440,11 +434,9 @@ for trial = 1:trialNumber
                 % the bar was on the left of the gabor
             elseif keyCode(KbName('1!'))||keyCode(KbName('1'))
                 response = 1;
-                responseMat = [responseMat; 1 GetSecs - scanOnset];
                 
             elseif keyCode(KbName('2')) ||keyCode(KbName('2@'))
                 response = 2;
-                responseMat = [responseMat; 2 GetSecs - scanOnset];
                 
             elseif keyCode(KbName('3')) ||keyCode(KbName('3#'))
                 response = 0;
@@ -459,7 +451,17 @@ for trial = 1:trialNumber
         
         prekeyIsDown = keyIsDown;
         
+
+        
     end
+    
+    
+
+
+    
+    responseMat(trial) = response;
+    stimtypeMat(trial,1) = stimtype(trial);
+    %         display(GetSecs - scanOnset);
     
     
 end
@@ -484,7 +486,7 @@ display(totalTime);
 % end
 
 
-savePath = '../../data/3T/main_exp/';
+savePath = '../data/3T/main_exp/';
 
 
 time = clock;

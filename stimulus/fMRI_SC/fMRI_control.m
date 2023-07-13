@@ -57,7 +57,7 @@ illusion = 'y';
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
 
-addpath ../../function;
+addpath ../function;
 % addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
@@ -110,7 +110,7 @@ respSwitch = 0;
 %----------------------------------------------------------------------
 
 
-load ../../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
+load ../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
 % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 
 dacsize = 10;  %How many bits per pixel#
@@ -148,12 +148,12 @@ lineWidthPix = 4;
 %     load subject illusion size data
 %----------------------------------------------------------------------
 
-cd '../../data/3T/illusionSize_3T/';
+cd '../data/3T/illusionSize_3T/';
 illusionSizeFileName = strcat(sbjname,'*.mat');
 Files = dir(illusionSizeFileName);
 load (Files.name,'aveIlluSizeL','aveIlluSizeR');
 
-cd '../../../stimulus/fMRI_SC/'
+cd '../../../stimulus/'
 %----------------------------------------------------------------------
 %                       Keyboard information
 %----------------------------------------------------------------------
@@ -233,7 +233,7 @@ flashRepresentFrame = 2.2; % 2.2 means 3 frame
 %----------------------------------------------------------------------
 %                       optseq parameters
 %----------------------------------------------------------------------
-optseqpath = '../../optimal_seq/';
+optseqpath = '../optimal_seq/';
 optseqsub = 'sub';
 optseqSubpath = strcat(optseqpath,optseqsub,optseqsubNum);
 
