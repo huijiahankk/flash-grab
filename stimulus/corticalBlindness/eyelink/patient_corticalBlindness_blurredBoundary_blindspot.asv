@@ -723,9 +723,6 @@ while block <= blockNumber
                 Eyelink('Message','TRIALID %d',trial);
             end
 
-            Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-            Screen('Flip',wptr);
-            WaitSecs (1);
 
             while respToBeMade
 
@@ -766,8 +763,7 @@ while block <= blockNumber
                 % draw fixation
                 fixcolor = 0;
                 %                 Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
-            Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-            Screen('Flip',wptr);
+
 
 
                 %----------------------------------------------------------------------
