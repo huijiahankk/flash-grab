@@ -12,8 +12,8 @@ if 1
     sbjname = 'k';
     debug = 'n';
     flashRepresentFrame = 2.2;  % 2.2 means 3 frame
-    barLocation = 'n';  % u  upper visual field   l   lower visual field n  normal
-    condition = 'normal';   % 'vi2invi'  'invi2vi'   'normal'
+    barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
+    condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
 else
     
     sbjname = input('>>>Please input the subject''s name:   ','s');

@@ -3,24 +3,66 @@
 % flash tilt right:   data.flashTiltDirection(block,trial) == 1  && back.FlagSpinDirecA ==  - 1
 % flash perceived tilt left :   data.flashTiltDirection(block,trial) == 2  && back.FlagSpinDirecB ==  1
 
+% duration = (12+12+12+12)*6+12+4=304,TR=2s,152TR
+%% 7T fMRI parameter (6 scans 6 blocks)
+% Bandawidth=1200(<1000);
+% TE=30;
+% Slice=30;
+% thickness=2mm;
+% patial_fourier_factor=7/8;
+% FOV=128*128;
+% Dim=64*64;
+% grappa=off;
+%%
+function  fMRI_main_exp_vertical_flash(sbjname,run_no)
 
-% function  fMRI_main_exp_vertical_flash(sbjname,run_no,optseqsubNum)   % sbjname and run_no should have to be string
 
-
-% if nargin < 1
+if nargin < 1
     sbjname = 'hjh';
-    run_no = 1;
-    optseqsubNum = 1;
+    run_no='1';
+else
+    sbjname=sbjname;
+    run_no=run_no;
+end
+
+optseqsubNum = '5'; % the number of subject should be string
+
+% clearvars;
+
+% if 0
+%     
+%     sbjname = 'huijiahan';
+%     
+% %     debug = 'n';
+%     % have to be the mutiply of 3
+%     sbjIllusionSizeLeft = 0;  % 5
+%     sbjIllusionSizeRight = 0;
+%     run_no = '1';
+%     
+% else
+%     run_no = input('>>>Please input the run number:   ','s');
+%     sbjname = input('>>>Please input the subject''s name:   ','s');
+% %     debug = input('>>>Debug? (y/n):  ','s');
+%     
+%     %     illusion = input('>>>Illusion or no illusion? (y/n):  ','s');
+%     % input('>>>trialNumber? (30):  ');
+%     
 % end
-Screen('Preference', 'SuppressAllWarnings', 1);
+
+debug = 'n';
+illusion = 'y';
 
 %----------------------------------------------------------------------
 %                      set up Psychtoolbox and skip  sync
 %----------------------------------------------------------------------
+% 
+% PsychImaging('PrepareConfiguration');
+% PsychImaging('AddTask','General','UseRetinaResolution');
+
 PsychDefaultSetup(1);
 
 
-addpath ../../function;
+addpath ../function;
 % addpath ../FGE_subcortex_new/flashgrabExp_7T_layer;
 commandwindow;
 Screen('Preference', 'SkipSyncTests', 1);
@@ -28,7 +70,9 @@ screens = Screen('Screens');
 screenNumber = max(screens);
 blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
+
 fixationwhite = 0.8 * whitecolor;
+fixationblack = blackcolor + 0.3; 
 
 
 %     mask for change contrast
@@ -36,18 +80,35 @@ bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
 % [wptr,rect] = PsychImaging('OpenWindow',screenNumber,bottomcolor,[],[],[],0);
 
 [wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1280 720]  [0 0 1024 768] for single monitor display
-% ScreenRect = Screen('Rect',wptr);
+ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
+
+HideCursor;
+fixsize = 5;
+% coverSectorShrink = 4; % 2 big cover sector 4 small cover sector
+% coverSectorRect = [xCenter - xCenter/coverSectorShrink yCenter - xCenter/coverSectorShrink  xCenter  + xCenter/coverSectorShrink  yCenter + xCenter/coverSectorShrink]; %[0 0 256 192];
+% redSectorRect = [xCenter - xCenter*coverSectorShrink yCenter - xCenter*coverSectorShrink  xCenter  + xCenter*coverSectorShrink  yCenter + xCenter*coverSectorShrink];
+sectorRect = [0  yCenter - xCenter  2*xCenter yCenter + xCenter];
+
+% Create rotation matrix
+% theta = 90; % to rotate 90 counterclockwise
+% R = [cosd(theta) -sind(theta); sind(theta) cosd(theta)];
+% % Rotate your point(s)
+% point = coverSectorRect'; % arbitrarily selected
+% rotpoint = R .* point;
 
 
 %% set parameters
-
+fixcolor = 200; % 0 255
 framerate = FrameRate(wptr);
 redcolor = [256 0 0];
 
 % blackColor = BlackIndex(screenNumber);
 % whiteColor = WhiteIndex(screenNumber);
-[centerMoveHoriPix, centerMoveVertiPix] = deal(0);
+[centerMoveHoriPix, centerMoveVertiPix, resp] = deal(0);
+% Here we set the size of the arms of our fixation cross
+fixCrossDimPix = 10;
+respSwitch = 0;
 
 
 %----------------------------------------------------------------------
@@ -55,7 +116,7 @@ redcolor = [256 0 0];
 %----------------------------------------------------------------------
 
 
-load ../../function/calib-PC-03-Dec-2021_3t.mat;   % this is for 3T screen 
+load ../function/calib-PC-03-Dec-2021_3t.mat;   %????????????????????????????????????????????????
 % load ../function/Calibration-rog_sRGB-2020-10-28-20-35.mat;  % this is for 7T screen on the black mac pro
 
 dacsize = 10;  %How many bits per pixel#
@@ -66,11 +127,18 @@ newclut(1:ncolors,:) = newcmap./maxcol;
 newclut(isnan(newclut)) = 0;
 
 [Origgammatable, ~, ~] = Screen('ReadNormalizedGammaTable', wptr);
-% Screen('LoadNormalizedGammaTable', wptr, newclut);
+Screen('LoadNormalizedGammaTable', wptr, newclut);
 
 %----------------------------------------------------------------------
-%        Fixation cross parameter
+%        load the screen adjust parameters
 %----------------------------------------------------------------------
+% cd '../data/7T/screen_adjust_parameter/';
+% illusionSizeFileName = strcat(sbjname,'*.mat');
+% Files = dir(illusionSizeFileName);
+% load (Files.name);
+% 
+% cd '../../../stimulus/'
+
 
 % Here we set the size of the arms of our fixation cross
 fixCrossDimPix = 10;
@@ -95,23 +163,18 @@ KbName('UnifyKeyNames');
 
 
 %----------------------------------------------------------------------
-%               3T Screen parameter
+%               7T Screen parameter
 %----------------------------------------------------------------------
-% for 3T scanner the resolution of the screen is 1024*768   the height and
+% for 7T scanner the resolution of the screen is 1024*768   the height and
 % width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
 % degree totally
 
-distanceFromEyetoScreen = 75;
-resolution_height = rect(4);
-screenHeight = 28;
-cmPerPixel = screenHeight/resolution_height; 
-pixelPerDegree = tan(2*pi/360)*distanceFromEyetoScreen/cmPerPixel;  % 1 degree pixel
-% pixelPerDegree = distanceFromEyetoScreen*tan(pi/180)*resolution_height/screenHeight;
-visualDegreeDiameter_out = 9.42;  % 9.42  
-visualDegreeDiameter_in = 3.85; % 3.85
-
-sectorRadius_out_pixel = floor(visualDegreeDiameter_out/2 * pixelPerDegree)  %  169
-sectorRadius_in_pixel = floor(visualDegreeDiameter_in/2 * pixelPerDegree)   % 69 
+visualDegreeOrig = 10;
+sectorRadius_in_out_magni = 1;
+visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
+visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75; % 
+visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
+visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
 
 
 %----------------------------------------------------------------------
@@ -120,23 +183,36 @@ sectorRadius_in_pixel = floor(visualDegreeDiameter_in/2 * pixelPerDegree)   % 69
 
 sectorNumber = 8;
 
-% dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
-[sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegreeDiameter_out, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
-sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+outpara = 2 * xCenter*2/192;
+%         annnulus outer radius
+sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - outpara)/2);%  + centerMovePix; outpara = 20  % outer radii of background annulus
 
+inpara = 10 * xCenter*2/192;
+sectorRadius_in_pixel = sectorRadius_out_pixel - inpara * sectorRadius_in_out_magni; % inpara = 100   % inner diameter of background annulus
+
+
+dotRadius2Center = (sectorRadius_in_pixel + sectorRadius_out_pixel)/2;
+[~,~] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
 
 %----------------------------------------------------------------------
 %%%                     parameters of rotate background
 %----------------------------------------------------------------------
+%% Scans % duration = 4+12+(12+12+12+12)*6 = 304 s,TR=2s,152TR
+% VisualField = [2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2 1 2 3 2];
+% VisualField = [1 1 1 1];
+
+
 trialNumber = 64; %44;
+block = 1;
+
 
 back.CurrentAngle = 0; %360/sectorNumber/2;
 back.ground_alpha = 0.3;
 back.SpinDirec = 1; % 1 means clockwise     -1 means counter-clockwise
-back.FlagSpinDirecA = 0;  % flash tilt right
-back.FlagSpinDirecB = 0;  % flash tilt left
+% back.FlagSpinDirecA = 0;  % flash tilt right
+% back.FlagSpinDirecB = 0;  % flash tilt left
 
-% wedgeTiltStart = 0;
+wedgeTiltStart = 0;
 
 
 back.SpinSpeed = 360/116; %3;% 2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
@@ -147,13 +223,16 @@ back.ReverseAngle = 90; % duration frame of checkerboard
 % back.flashTiltDirectionMat = repmat([1;2],trialNumber/2,1);
 % data.flashTiltDirection = Shuffle(back.flashTiltDirectionMat);
 
+% how many times does the flash present before it gradually dissappear
+flashPresentTimesCeiling = 1;
+flashRepresentFrame = 2.2; % 2.2 means 3 frame
 
 %----------------------------------------------------------------------
 %                       optseq parameters
 %----------------------------------------------------------------------
-optseqpath = '../../optimal_seq/';
+optseqpath = '../optimal_seq/';
 optseqsub = 'sub';
-optseqSubpath = strcat(optseqpath,optseqsub,string(optseqsubNum));
+optseqSubpath = strcat(optseqpath,optseqsub,optseqsubNum);
 
 cd (optseqSubpath);
 
@@ -166,10 +245,10 @@ cd (optseqSubpath);
 % sectorTimeRound = back.AngleRange/(back.SpinSpeed * framerate);% how many second does the background rotate rightward and then leftward cost
 filePrefixName = 'FGI-00' ;
 
-fileName = strcat(filePrefixName,string(run_no),'.par');
+fileName = strcat(filePrefixName,run_no,'.par');
 % [timepoint,stim_type,SOA,~,~] = read_optseq2_data([fileName]);
-[stimonset,stimtype,stimlength,~,~] =  textread(fileName,'%f%n%f%s%s','delimiter',' '); %textread
-runNum = run_no;
+[stimonset,stimtype,stimlength,junk,stimname] =  textread(fileName,'%f%n%f%s%s','delimiter',' '); %textread
+runNum = str2double(run_no);
 % make sure the rotate direction was conter balanced among the different
 % runs      
 if runNum == 1 || runNum == 3  % optseq first stimtype of the 4 document in sub1 is 2 1 1 1 so we reverse all the stimtype 
@@ -192,11 +271,45 @@ data.flashTiltDirection = stimtype;
 
 cd ../../stimulus/
 
+
+%----------------------------------------------------------------------
+%               7T Screen parameter
+%----------------------------------------------------------------------
+
+% for 7T scanner the resolution of the screen is 1024*768   the height and
+% width of the screen is 35*28cm  the distance from the subject to screen is 75cm    the visual degree for the subject is 10
+% degree totally
+
+visualDegreeOrig = 10;
+sectorRadius_in_out_magniMat = 1;
+visualHerghtIn7T_cm_perVisualDegree = tan(deg2rad(1)) * 75;
+visualHerghtIn7T_pixel_perVisualDegree = visualHerghtIn7T_cm_perVisualDegree/28 * 768;
+
+sectorRadius_in_out_magni = sectorRadius_in_out_magniMat(1);
+visualDegree = visualDegreeOrig * sectorRadius_in_out_magni;
+visualHerghtIn7T_pixel = visualHerghtIn7T_pixel_perVisualDegree * visualDegree;
+
+
+sectorRadius_in_out_magniMat = fliplr(sectorRadius_in_out_magniMat);
+%----------------------------------------------------------------------
+%                      draw background sector
+%----------------------------------------------------------------------
+
+sectorNumber = 8;
+outpara = 20;% 2 * xCenter*2/192;
+%         annnulus outer radius
+sectorRadius_out_pixel = floor((visualHerghtIn7T_pixel - outpara)/2);%  + centerMovePix;   % outer radii of background annulus
+inpara = 100;% 10 * xCenter*2/192;
+sectorRadius_in_pixel = sectorRadius_out_pixel - inpara * sectorRadius_in_out_magni;    % inner diameter of background annulus
+[sectorTex,sectorRect] = MakeSectorTexRect(sectorNumber, visualDegree, blackcolor, whitecolor,wptr,sectorRadius_in_pixel,sectorRadius_out_pixel);
+sectorDestinationRect = CenterRectOnPoint(sectorRect,xCenter + centerMoveHoriPix,yCenter + centerMoveVertiPix);
+
+
 %----------------------------------------------------------------------
 %                      draw red wedge
 %----------------------------------------------------------------------
 
-% coverSectorShrink = 4; % 2 big cover sector 4 small cover sector
+coverSectorShrink = 4; % 2 big cover sector 4 small cover sector
 
 % coverSectorRect = [xCenter + centerMoveHoriPix - xCenter/coverSectorShrink yCenter + centerMoveVertiPix - xCenter/coverSectorShrink...
 %     xCenter + centerMoveHoriPix  + xCenter/coverSectorShrink  yCenter + centerMoveVertiPix + xCenter/coverSectorShrink];
@@ -249,24 +362,23 @@ WaitSecs(dummyScanTime); % dummy scan
 scanOnset = GetSecs;
 response = - 1; % if the subject failed to press the key, record -1
 responseMat = zeros(1,trialNumber);
-% [flashTimePointMat,flashIntervalMat] = deal(zeros(trialNumber/2,1));
+[flashTimePointMat,flashIntervalMat] = deal(zeros(trialNumber/2,1));
 % frameskippercounter = 0;
 % for block = 1 : blockNumber
 flashTimePoint = [];
-% flashInterval = [];
+flashInterval = [];
 frametimepoint = scanOnset;
 
 for trial = 1:trialNumber
     %----------------------------------------------------------------------
     %                      background rotate
     %----------------------------------------------------------------------
-%     trialOnset = GetSecs;
+    trialOnset = GetSecs;
     respToBeMade = true;
     prekeyIsDown = 0;
        
     frameCounter = 0;
     
-
     while GetSecs - scanOnset < stimlength(trial)+stimonset(trial)  % back.RotateTimes < testDuration %  % &&  respToBeMade
         frameCounter = frameCounter + 1;
         if frameCounter > 120
@@ -374,7 +486,7 @@ display(totalTime);
 % end
 
 
-savePath = '../../data/3T/main_exp/';
+savePath = '../data/3T/main_exp/';
 
 
 time = clock;
