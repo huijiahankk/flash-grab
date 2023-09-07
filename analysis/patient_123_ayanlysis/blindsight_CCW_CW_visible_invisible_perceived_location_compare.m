@@ -13,15 +13,15 @@ addpath '../function'
 
 % pValue = input('>>>Calculate p Value? (y/n):  ','s');
 
-folderNum = 3;  
+folderNum = 2;  
 folders = { 'normal_field', 'upper_field','lower_field'};
-path = '../data/corticalBlindness/bar';
+path = '../../data/corticalBlindness/bar';
 
 thisFolderName = fullfile(path, folders{folderNum});
 
 cd(thisFolderName);
 
-sbjnames = { 'mali' } ; %   'huangwenxiang2','wuzhigang','linhuangzhang','sunnan'    'linhuangzhang' has 6 trials
+sbjnames = { 'mali'} ; %   'huangwenxiang2','wuzhigang','linhuangzhang','sunnan'    'linhuangzhang' has 6 trials
 
 
 % off_sync_upper_edge_degree = 37.8750;

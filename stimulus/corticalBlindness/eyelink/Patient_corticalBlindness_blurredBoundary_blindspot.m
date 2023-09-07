@@ -27,7 +27,7 @@
 
 clear all;close all;
 
-if 1
+if 0
     sbjname = 'hjh';
     %     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
@@ -508,7 +508,8 @@ while block <= blockNumber
                         fixationcolour = greycolor + 10;
                         %                         str = 'Fix on the cross to start the trial';
                         %                         Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
-                        Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+%                         Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+                        Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                         Screen('FillOval', wptr, fixationcolour, gazeRect);
                         Screen('Flip',wptr);
                         fixDriftFrame = fixDriftFrame + 1;
@@ -554,7 +555,8 @@ while block <= blockNumber
                             gazeRect=[ x-9 y-9 x+10 y+10];
                             %                     fixationcolour=round(rand(3,1)*255); % coloured dot
                             fixationcolour = greycolor + 5;
-                            Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+%                             Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+                            Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                             Screen('FillOval', wptr, fixationcolour, gazeRect);
                             %                             Screen('Flip',wptr);
                         elseif  isOutFixationWindowFrame <= driftDuation_dur * framerate

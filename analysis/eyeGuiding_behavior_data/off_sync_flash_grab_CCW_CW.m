@@ -5,17 +5,17 @@
 clear all;
 addpath '../../function';
 
-eachtrial = 'n';  % 'y' mean for single subject plot eachtrial  'n' for draw each subject's ave illusion
+eachtrial = 'y';  % 'y' mean for single subject plot eachtrial  'n' for draw each subject's ave illusion
 barOnlyDraw = 'y'; % 'n' means bar only measurements was subtracted from all conditions
-annulusPattern = 'blurredBoundary';  %  blurredBoundary   sector
-annulusWidth = 'blindspot'; % blindspot   artificialScotoma
+annulusPattern = 'sector';  %  blurredBoundary   sector
+annulusWidth = 'CB'; % blindspot   artificialScotoma
 
 
-sbjnames = {'hyx'}; % 'xs','sry', 'hbb','hjh', 'xs','lxy'，'zcx','hyx'
+sbjnames = {'yufengqi'}; % 'xs','sry', 'hbb','hjh', 'xs','lxy'，'zcx','hyx'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
 
 
-visualField = 'l'; % u for upper l for lower
+visualField = 'u'; % u for upper l for lower
 
 
 upperExp = {'_vi2invi_u','_invi2vi_u'}; %  '_vi2invi_u','_invi2vi_u'
@@ -295,7 +295,7 @@ elseif strcmp(visualField,'l')
                 flash_grab_CCW_l_sbj_mean perceived_location_CCW_l_sbj_mean flash_grab_CW_l_sbj_mean perceived_location_CW_l_sbj_mean];
         else
             drawBarNum = 7;
-            y_l = [off_sync_CCW_l_sbj_mean off_sync_CW_l_sbj_mean flash_grab_CCW_l_sbj_mean...
+            y_l = [bar_only_l_sbj_mean off_sync_CCW_l_sbj_mean off_sync_CW_l_sbj_mean flash_grab_CCW_l_sbj_mean...
                 perceived_location_CCW_l_sbj_mean flash_grab_CW_l_sbj_mean perceived_location_CW_l_sbj_mean];
         end
     end

@@ -3,16 +3,6 @@
 % flash tilt right:   data.flashTiltDirection(block,trial) == 1  && back.FlagSpinDirecA ==  - 1
 % flash perceived tilt left :   data.flashTiltDirection(block,trial) == 2  && back.FlagSpinDirecB ==  1
 
-% duration = (12+12+12+12)*6+12+4=304,TR=2s,152TR
-%% 7T fMRI parameter (6 scans 6 blocks)
-% Bandawidth=1200(<1000);
-% TE=30;
-% Slice=30;
-% thickness=2mm;
-% patial_fourier_factor=7/8;
-% FOV=128*128;
-% Dim=64*64;
-% grappa=off;
 %%
 clear all;close all;
 

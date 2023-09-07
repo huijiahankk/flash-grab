@@ -5,10 +5,10 @@
 clear all;
 addpath '../../function';
 
-annulusPattern = 'blurredBoundary';  %  blurredBoundary   sector
+annulusPattern = 'sector';  %  blurredBoundary   sector
 annulusWidth = 'blindspot'; % blindspot   artificialScotoma
 
-sbjnames = {'hbb'};
+sbjnames = {'sry'};   % 'xs','sry', 'hbb','hjh', 'xs','lxy'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
 
 datapath = sprintf([path  '%s/'],sbjnames{1});

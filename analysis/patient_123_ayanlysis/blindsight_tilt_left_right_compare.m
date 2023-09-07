@@ -20,7 +20,7 @@ pValue = input('>>>Calculate p Value? (y/n):  ','s');
 
 folderNum = 3;
 folders = { 'normal_field', 'upper_field','lower_field'};
-path = '../data/corticalBlindness/bar';
+path = '../../data/corticalBlindness/bar';
 
 thisFolderName = fullfile(path, folders{folderNum});
 

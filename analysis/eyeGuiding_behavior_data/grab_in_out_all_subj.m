@@ -5,8 +5,8 @@
 clear all;
 addpath '../../function';
 
-annulusPattern = 'blurredBoundary';  %  blurredBoundary   sector
-annulusWidth = 'artificialScotoma'; % blindspot   artificialScotoma
+annulusPattern = 'sector';  %  blurredBoundary   sector
+annulusWidth = 'blindspot'; % blindspot   artificialScotoma
 
 sbjnames = {'xs','sry', 'hbb','hjh', 'xs','lxy'}; % 'hbb','hjh','lxy','sry','xs'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
@@ -113,9 +113,10 @@ for sbjnum = 1:length(sbjnames)
     off_sync_data = [off_sync_u  off_sync_l] - bar_only_ave;
     off_sync_out_data = [off_sync_out_u off_sync_out_l] - bar_only_ave;
     off_sync_in_data = [off_sync_in_u off_sync_in_l] - bar_only_ave;
-    boundary_out_data = [boundary_out_u boundary_out_l] -  bar_only_ave;
-    boundary_in_data = [boundary_in_u boundary_in_l] -  bar_only_ave;
-    
+    if strcmp(annulusPattern,'blurredBoundary')
+        boundary_out_data = [boundary_out_u boundary_out_l] -  bar_only_ave;
+        boundary_in_data = [boundary_in_u boundary_in_l] -  bar_only_ave;
+    end
     flash_grab_out = [flash_grab_out_u;flash_grab_out_l] - bar_only_ave;
     perceived_location_out = [perceived_location_out_u;perceived_location_out_l] - bar_only_ave;
     flash_grab_in = [flash_grab_in_u;flash_grab_in_l] - bar_only_ave;
@@ -133,9 +134,11 @@ for sbjnum = 1:length(sbjnames)
     off_sync_sbj(sbjnum) = mean(mean([off_sync_u; off_sync_l]));
     off_sync_out_sbj(sbjnum) = mean(mean([off_sync_out_u; off_sync_out_l]));
     off_sync_in_sbj(sbjnum) = mean(mean([off_sync_in_u; off_sync_in_l]));
-    boundary_out_sbj(sbjnum) = mean(mean([boundary_out_u; boundary_out_l]));
-    boundary_in_sbj(sbjnum) = mean(mean([boundary_in_u; boundary_in_l]));
-    
+    if strcmp(annulusPattern,'blurredBoundary')
+        boundary_out_sbj(sbjnum) = mean(mean([boundary_out_u; boundary_out_l]));
+        boundary_in_sbj(sbjnum) = mean(mean([boundary_in_u; boundary_in_l]));
+    end
+
     flash_grab_out_sbj(sbjnum) = mean(mean(flash_grab_out));
     perceived_location_out_sbj(sbjnum) = mean(mean(perceived_location_out));
     flash_grab_in_sbj(sbjnum) = mean(mean(flash_grab_in));
@@ -146,7 +149,7 @@ end
 
 
 % number of x axis condition
-number_x_axis = 9;
+number_x_axis = 6;
 ave = cell(1, number_x_axis);
 ave_ste = cell(1, number_x_axis);
 
@@ -160,21 +163,26 @@ ave_ste = cell(1, number_x_axis);
 %-----------------------------------------------------------------------------
 %    seperate off_sync_out and off_sync_in and add boundary_out  boundary_in
 %-----------------------------------------------------------------------------
- 
-[ave{:}] = deal(mean(bar_only_sbj),mean(off_sync_out_sbj),mean(off_sync_in_sbj),mean(boundary_out_sbj),mean(boundary_in_sbj),...
-    mean(flash_grab_out_sbj),mean(perceived_location_out_sbj),mean(flash_grab_in_sbj),mean(perceived_location_in_sbj));
-[ave_ste{:}] = deal(ste(bar_only_sbj,2),ste(off_sync_out_sbj,2),ste(off_sync_in_sbj,2),ste(boundary_out_sbj,2),ste(boundary_in_sbj,2),...
-    ste(flash_grab_out_sbj,2),ste(perceived_location_out_sbj,2),ste(flash_grab_in_sbj,2),ste(perceived_location_in_sbj,2));
-XaxisMarker = {'bar-only' 'off-sync-out' 'off-sync-in' 'boundary-out' 'boundary-in' 'grab-out' 'perc-out' 'grab-in' 'perc-in'};
+% if strcmp(annulusPattern,'blurredBoundary')
+%     [ave{:}] = deal(mean(bar_only_sbj),mean(off_sync_out_sbj),mean(off_sync_in_sbj),mean(boundary_out_sbj),mean(boundary_in_sbj),...
+%         mean(flash_grab_out_sbj),mean(perceived_location_out_sbj),mean(flash_grab_in_sbj),mean(perceived_location_in_sbj));
+%     [ave_ste{:}] = deal(ste(bar_only_sbj,2),ste(off_sync_out_sbj,2),ste(off_sync_in_sbj,2),ste(boundary_out_sbj,2),ste(boundary_in_sbj,2),...
+%         ste(flash_grab_out_sbj,2),ste(perceived_location_out_sbj,2),ste(flash_grab_in_sbj,2),ste(perceived_location_in_sbj,2));
+%     XaxisMarker = {'bar-only' 'off-sync-out' 'off-sync-in' 'boundary-out' 'boundary-in' 'grab-out' 'perc-out' 'grab-in' 'perc-in'};
+% else
+% 
+% 
+% 
+% end
 
 %---------------------------------------------------
 %     combine off_sync_out and off_sync_in
 %---------------------------------------------------
-% [ave{:}] = deal(mean(bar_only_sbj),mean(off_sync_sbj),mean(flash_grab_out_sbj),mean(perceived_location_out_sbj),...
-%     mean(flash_grab_in_sbj),mean(perceived_location_in_sbj));
-% [ave_ste{:}] = deal(ste(bar_only_sbj,2),ste(off_sync_sbj,2),ste(flash_grab_out_sbj,2),...
-%     ste(perceived_location_out_sbj,2),ste(flash_grab_in_sbj,2),ste(perceived_location_in_sbj,2));
-% XaxisMarker = {'bar-only' 'off-sync' 'grab-out' 'perc-out' 'grab-in' 'perc-in'};
+[ave{:}] = deal(mean(bar_only_sbj),mean(off_sync_sbj),mean(flash_grab_out_sbj),mean(perceived_location_out_sbj),...
+    mean(flash_grab_in_sbj),mean(perceived_location_in_sbj));
+[ave_ste{:}] = deal(ste(bar_only_sbj,2),ste(off_sync_sbj,2),ste(flash_grab_out_sbj,2),...
+    ste(perceived_location_out_sbj,2),ste(flash_grab_in_sbj,2),ste(perceived_location_in_sbj,2));
+XaxisMarker = {'bar-only' 'off-sync' 'grab-out' 'perc-out' 'grab-in' 'perc-in'};
 
 h = bar(1:number_x_axis,cell2mat(ave),'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
 hold on;
