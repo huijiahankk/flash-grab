@@ -38,7 +38,7 @@ blackcolor = BlackIndex(screenNumber);
 whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 bottomcolor = 128; %(whitecolor + blackcolor) / 2; % 128
-[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,bottomcolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 
@@ -98,8 +98,8 @@ KbName('UnifyKeyNames');
 %               Screen parameter
 %----------------------------------------------------------------------
 
-eyeScreenDistence = 78;  % cm  68sunnannan
-screenHeight = 26.8; % cm
+eyeScreenDistence = 66;  % cm  68sunnannan
+screenHeight = 33.5; % cm
 sectorRadius_out_visual_degree = 9.17; % sunnannan 9.17  mali 11.5
 sectorRadius_in_visual_degree = 5.5; % sunnannan 5.5   mali7.9
 sectorRadius_out_pixel = round(tand(sectorRadius_out_visual_degree) * eyeScreenDistence * rect(4)/screenHeight);
@@ -207,8 +207,8 @@ back.FlagSpinDirecB = 0;  % flash tilt left
 wedgeTiltStart = 0;
 wedgeTiltStep = 1; %2.8125   1.40625;
 back.alpha = 0; % background transparence 
-wedgeTiltStartLower = - 75;
-wedgeTiltStartUpper =  10;
+wedgeTiltStartLower = 75;
+wedgeTiltStartUpper =  -10;
 % wedgeTiltIncre = 0;
 back.SpinSpeed = 6;% 2.8125;   % 4 degree/frame    3.334 in Hinze's paper   22.5(sector angle)/4
 back.velocity = back.SpinSpeed * framerate;

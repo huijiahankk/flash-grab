@@ -1,13 +1,13 @@
 clear all;
 
 addpath '/Users/huijiajia/Documents/matlab/preCompiled_edfmex';
-datapath = '../../data/corticalBlindness/Eyelink_asc/sector/blindspot/lxy/';
+datapath = '../../data/corticalBlindness/Eyelink_asc/sector/artificialScotoma/hjh/';
 
 
 % addpath('/Users/huijiajia/Documents/Psychtoolbox-3-3.0.17.9/Psychtoolbox/PsychHardware/EyelinkToolbox');
 % Read the EyeLink ASCII data file
 cd(datapath);
-dataFile = 'lxy_invi2vi_l_2023_03_23_11_14.edf';
+dataFile = 'hjh_invi2vi_u_2023_04_11_16_54.edf';
 % Read EDF data into MATLAB
 edf = edfmex(dataFile);
 

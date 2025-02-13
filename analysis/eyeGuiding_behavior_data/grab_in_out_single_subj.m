@@ -8,13 +8,15 @@ addpath '../../function';
 annulusPattern = 'sector';  %  blurredBoundary   sector
 annulusWidth = 'blindspot'; % blindspot   artificialScotoma
 
-sbjnames = {'sry'};   % 'xs','sry', 'hbb','hjh', 'xs','lxy'
+sbjnames = {'hyx'};   % 'xs','sry', 'hbb','hjh', 'xs','lxy', 'hyx'  patient : 'yufengqi'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
+
+drawBarOnly = 'n';
 
 datapath = sprintf([path  '%s/'],sbjnames{1});
 cd(datapath);
 
-upperExp = { '_vi2invi_u','_invi2vi_u'}; %  'k_invi2vi_l','k_vi2invi_l' 'k_invi2vi_u' 'k_vi2invi_u'
+upperExp = { '_vi2invi_u','_invi2vi_u'}; %       'k_invi2vi_l','k_vi2invi_l' 'k_invi2vi_u' 'k_vi2invi_u'
 lowerExp = { '_vi2invi_l','_invi2vi_l'};
 
 
@@ -40,7 +42,7 @@ for expcondition = 1:length(upperExp)
         end
     end   
     
-    bar_only_u = 90 - bar_only(validTrialIndex);
+    bar_only_u(expcondition,:) = 90 - bar_only(validTrialIndex);
     off_syn_u(expcondition,:) = 90 - off_sync((validTrialIndex));
     flash_grab_out_u(expcondition,:)  = 90 - flash_grab(illusionCCWIndex);
     flash_grab_in_u(expcondition,:)  = 90 - flash_grab(illusionCWIndex);
@@ -71,7 +73,7 @@ for expcondition = 1:length(lowerExp)
         end
     end 
     
-    bar_only_l = bar_only(validTrialIndex) - 90;
+    bar_only_l(expcondition,:) = bar_only(validTrialIndex) - 90;
     off_syn_l(expcondition,:) = off_sync(validTrialIndex) - 90;
     flash_grab_in_l(expcondition,:)  = flash_grab(illusionCCWIndex) - 90;
     flash_grab_out_l(expcondition,:)  = flash_grab(illusionCWIndex) - 90;
@@ -79,32 +81,40 @@ for expcondition = 1:length(lowerExp)
     perceived_location_out_l(expcondition,:)   = perceived_location(illusionCWIndex) - 90;
 end
 
-bar_only_ave = 0;
-bar_only_ave_temp = mean(mean([bar_only_u; bar_only_l]));
-off_sync_ave = mean(mean([off_syn_u; off_syn_l])) - bar_only_ave;
+if drawBarOnly == 'y'
+    bar_only_ave_temp = 0;
+    bar_only_ave = mean(mean([bar_only_u; bar_only_l]));
+elseif drawBarOnly == 'n'
+    bar_only_ave_temp = mean(mean([bar_only_u; bar_only_l]));
+    bar_only_ave = bar_only_ave_temp;
+end
+off_sync_ave = mean(mean([off_syn_u; off_syn_l])) - bar_only_ave_temp;
 
-bar_only_ana = [bar_only_u; bar_only_l] - bar_only_ave;
-off_sync_ana = [off_syn_u; off_syn_l] - bar_only_ave;
-flash_grab_out = [flash_grab_out_u;flash_grab_out_l] - bar_only_ave;
-perceived_location_out = [perceived_location_out_u;perceived_location_out_l] - bar_only_ave;
-flash_grab_in = [flash_grab_in_u;flash_grab_in_l] - bar_only_ave;
-perceived_location_in = [perceived_location_in_u;perceived_location_in_l] - bar_only_ave;
+bar_only_ana = [bar_only_u bar_only_l] - bar_only_ave_temp;
+off_sync_ana = [off_syn_u  off_syn_l] - bar_only_ave_temp;
+
+flash_grab_in = [flash_grab_in_u  flash_grab_in_l] - bar_only_ave_temp;
+perceived_location_in = [perceived_location_in_u  perceived_location_in_l] - bar_only_ave_temp;
+flash_grab_out = [flash_grab_out_u flash_grab_out_l] - bar_only_ave_temp;
+perceived_location_out = [perceived_location_out_u  perceived_location_out_l] - bar_only_ave_temp;
 
 
-flash_grab_out_ave= mean(mean(flash_grab_out));
-flash_grab_in_ave = mean(mean(flash_grab_in));
-perceived_location_out_ave = mean(mean(perceived_location_out));
-perceived_location_in_ave = mean(mean(perceived_location_in));
+flash_grab_out_ave= mean(flash_grab_out,'all');
+flash_grab_in_ave = mean(flash_grab_in,'all');
+perceived_location_out_ave = mean(perceived_location_out,'all');
+perceived_location_in_ave = mean(perceived_location_in,'all');
 
 ave_illusion = abs((flash_grab_out_ave - perceived_location_out_ave) + (perceived_location_in_ave - flash_grab_in_ave))/2
 
-y = [bar_only_ave_temp off_sync_ave flash_grab_out_ave perceived_location_out_ave flash_grab_in_ave perceived_location_in_ave];
-
-
+if drawBarOnly == 'y'
+    y = [bar_only_ave off_sync_ave flash_grab_in_ave perceived_location_in_ave flash_grab_out_ave perceived_location_out_ave ];
+    set(gca, 'XTick', 1:6, 'XTickLabels', {'bar-only' 'off-sync' 'grab-in' 'perc-in' 'grab-out' 'perc-out'},'fontsize',20,'FontWeight','bold');
+elseif drawBarOnly == 'n'
+    y = [off_sync_ave flash_grab_in_ave perceived_location_in_ave flash_grab_out_ave perceived_location_out_ave ];
+    set(gca, 'XTick', 1:5, 'XTickLabels', {'off-sync' 'grab-in' 'perc-in' 'grab-out' 'perc-out'},'fontsize',20,'FontWeight','bold');
+end
 % y = [bar_onlyDegreeMean flash_grab_CCWDegreeMean flash_grab_CWDegreeMean];
 h = bar(y,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',1.5);
-set(gca, 'XTick', 1:6, 'XTickLabels', {'bar-only' 'off-sync' 'grab-out' 'perc-out' 'grab-in' 'perc-in'},'fontsize',20,'FontWeight','bold');
-
 % set(gca, 'XTick', 1:3, 'XTickLabels', {'bar-only' 'grab-CCW' 'grab-CW'},'fontsize',20,'FontWeight','bold');
 
 set(gcf,'color','w');
@@ -116,38 +126,52 @@ hold on;
 ylabel('Shift degree from blindspot border','FontName','Arial','FontSize',25);
 if strcmp(annulusWidth,'artificialScotoma')
     ylabel('Shift degree from mapped blindfield border','FontName','Arial','FontSize',25);
-    line([0 7], [(blindfield_from_horizontal_degree - bar_only_ave) (blindfield_from_horizontal_degree-bar_only_ave)],'LineWidth',1.5);
+    line([0 7], [(blindfield_from_horizontal_degree - bar_only_ave_temp) (blindfield_from_horizontal_degree-bar_only_ave_temp)],'LineWidth',1.5);
 end
 %----------------------------------------------------------------------
 %  plot  each trial
 %----------------------------------------------------------------------
-% plot bar_only value
-eachtrialdegree_bar_only = reshape(bar_only_ana,1,numel(bar_only_ana));
-eachtrialdegree_off_sync = reshape(off_sync_ana,1,numel(off_sync_ana));
 
-for condition = 1: length(eachtrialdegree_bar_only)
-    plot(1 + randn/20,eachtrialdegree_bar_only(condition),'r--o');
-    plot(2 + randn/20,eachtrialdegree_off_sync(condition),'r--o');
-end
-
-eachtrial_flash_grab_out = reshape(flash_grab_out,1,numel(flash_grab_out));
-eachtrial_perceived_location_out = reshape(perceived_location_out,1,numel(perceived_location_out));
-eachtrial_flash_grab_in = reshape(flash_grab_in,1,numel(flash_grab_in));
-eachtrial_perceived_location_in= reshape(perceived_location_in,1,numel(perceived_location_in));
-
-for condition = 1: numel([flash_grab_out_u;flash_grab_out_l])
-    plot(3 + randn/20,eachtrial_flash_grab_out(condition),'r--o');
-    plot(4 + randn/20,eachtrial_perceived_location_out(condition),'r--o');
-    plot(5 + randn/20,eachtrial_flash_grab_in(condition),'b--o');
-    plot(6 + randn/20,eachtrial_perceived_location_in(condition),'b--o');
+if drawBarOnly == 'y'
+    drawXnum = 1;
+    for condition = 1: size(bar_only_ana,2)
+        plot(drawXnum + randn/20,bar_only_ana(1,condition),'r--o');
+        plot(drawXnum + randn/20,bar_only_ana(2,condition),'b--o');
+    end
+elseif drawBarOnly == 'n'
+    drawXnum = 0;
 end
 
 
-% significant test
-[H1,P1,CI1] = ttest2(eachtrial_flash_grab_out,  eachtrial_perceived_location_out);
-[H2,P2,CI2] = ttest2(eachtrial_flash_grab_in,  eachtrial_perceived_location_in);
-P1
-P2
+for condition = 1: size(bar_only_ana,2)
+    plot(drawXnum + 1 + randn/20,off_sync_ana(1,condition),'r--o');
+    plot(drawXnum + 1 + randn/20,off_sync_ana(2,condition),'b--o');
+end
+
+
+
+for condition = 1: size(flash_grab_in,2)
+    plot(drawXnum + 2 + randn/20,flash_grab_in(1,condition),'r--o');
+    plot(drawXnum + 2 + randn/20,flash_grab_in(2,condition),'b--o');
+
+    plot(drawXnum + 3 + randn/20,perceived_location_in(1,condition),'r--o');
+    plot(drawXnum + 3 + randn/20,perceived_location_in(2,condition),'b--o');
+
+    plot(drawXnum + 4 + randn/20,flash_grab_out(1,condition),'r--o');
+    plot(drawXnum + 4 + randn/20,flash_grab_out(2,condition),'b--o');
+
+    plot(drawXnum + 5 + randn/20,perceived_location_out(1,condition),'r--o');
+    plot(drawXnum + 5 + randn/20,perceived_location_out(2,condition),'b--o');
+end
+
+
+cd ../../../../../../analysis/eyeGuiding_behavior_data/
+
+% % significant test
+% [H1,P1,CI1] = ttest2(eachtrial_flash_grab_out,  eachtrial_perceived_location_out);
+% [H2,P2,CI2] = ttest2(eachtrial_flash_grab_in,  eachtrial_perceived_location_in);
+% P1
+% P2
 
 %     % bootstrap treats the original sample as a proxy for the real population and then draws random samples from it
 %     bootstats = bootstrp(10000,@(x)[mean(x) ste(x)],[abs(illusionTiltLeftDegree),abs(illusionTiltRightDegree)]);

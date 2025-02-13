@@ -4,12 +4,12 @@
 clear all;
 addpath '../../function';
 
-annulusPattern = 'blurredBoundary';  %  blurredBoundary   sector
+annulusPattern = 'sector';  %  blurredBoundary   sector
 annulusWidth = 'artificialScotoma'; % blindspot   artificialScotoma
 condition = 'normal';
 barLocation = 'n';
 
-sbjnames = {'sry'};  % 'sry', 'hbb', 'lxy', 'hjh', 'xs'
+sbjnames = {'xyj'};  % 'sry', 'hbb', 'lxy', 'hjh', 'xs'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/',condition,'/');
 
 datapath = sprintf([path  '%s/'],sbjnames{1});

@@ -1,17 +1,6 @@
 
 % for cortical blindness patient/normal subject for blindspot experiment
-% generate the flash grab illusion with 2 sector.  one boundary was blurred
-% and the other with sharp bounday so this stimulus could generate flash grab illusion
-% without integrated red bar flash.
-% Test this blurred boundary pattern as control with bar only condition.
-% If this moving boundary the same as off_sync condition
-
-% blurred boundary exp  5 condition :(all from vi2invi  and then invi2vi)
-% 1 bar_only
-% 2 blurred boundary
-% 3 off_sync
-% 4 grab
-% 5 perceived
+% for patient we only use 8 sectors 
 
 % 8 sectors  4 condition :(all from vi2invi  and then invi2vi)
 % 1 bar_only
@@ -21,24 +10,25 @@
 
 % flash at reverse CCW :   data.flashTiltDirection(block,trial) == 2  &&r  back.FlagSpinDirecA ==  - 1
 % reverse CW:   data.flashTiltDirection(block,trial) == 1  && back.FlagSpinDirecB ==  1
-% The blindfield is in the left or right visual, you should revise from the line  293 to line 310
+% The blindfield is in the left or right visual, you should revise the
+% function 'paraSetBarTiltEyelinkHealthyPatient'  
 %from top vertical is 0 degree, right horizontal is 90 degree
-
+% 20230921 By Jiahan Hui
 
 clear all;close all;
 
-if 0
-    sbjname = 'hjh';
+if 1
+    sbjname = 'kk';
     %     debug = 'n';
     %     flashRepresentFrame = 4.2;  % 2.2 means 3 frame
-    barLocation = 'u';  % u  upper visual field   l   lower visual field n  normal
+    barLocation = 'l';  % u  upper visual field   l   lower visual field n  normal
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 0;  % 0 1
     annulusPattern = 'sector'; % blurredBoundary  sector
     annulusWidth =  'CB'; % blindspot   artificialScotoma corticalBlindness
     particiType = 'CB';  % 'corticalBlindness'  'healthyParticipant'
-    CBfieldDegree = 150; % the blindfield degree of corticalBlindness patient
-    blindfield = 'r'; % l for left r for right
+    CBfieldDegree = 180; % the blindfield degree of corticalBlindness patient
+    blindfield = 'l'; % l for left r for right
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
     %     barLocation = input('>>>Flash bar location? (u for upper\l for lower\n for normal):  ','s');
@@ -78,10 +68,11 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 greycolor = 128; %(whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 fixsize = 12;
+fixcolor = 0;
 % HideCursor;
 
 centerMovePix = 0;
@@ -287,35 +278,6 @@ back.ReverseAngle = 90; % duration frame of checkerboard
 abandonBlockMat = zeros(1,20);
 barTiltStep = 1; %2.8125   1.40625;
 
-% if strcmp(annulusWidth,'artificialScotoma')
-%     if strcmp(condition,'invi2vi')
-%         upperStartAdjustDegree = - blindfield_from_horizontal_degree + 5;
-%         lowerStartAdjustDegree = blindfield_from_horizontal_degree - 5;
-%
-%     elseif strcmp(condition,'vi2invi')
-%         upperStartAdjustDegree = -15 - blindfield_from_horizontal_degree;
-%         lowerStartAdjustDegree = 15 + blindfield_from_horizontal_degree;
-%     end
-% else
-%     if strcmp(condition,'invi2vi')
-%         if strcmp(blindfield,'l')
-%             barTiltStartUpper = 270;   %
-%             barTiltStartLower = 270;    %
-%         elseif strcmp(blindfield,'r')
-%             barTiltStartUpper = 90;
-%             barTiltStartLower = 90;
-%         end
-%     elseif strcmp(condition,'vi2invi')
-%         if strcmp(blindfield,'l')
-%             barTiltStartUpper = 300;
-%             barTiltStartLower = 180;
-%         elseif strcmp(blindfield,'r')
-%             barTiltStartUpper = 75;
-%             barTiltStartLower = 160;
-%         end
-%     end
-% end
-
 
 [barTiltStart,perceivedCondiStartDeg] = paraSetBarTiltEyelinkHealthyPatient(particiType, barLocation,annulusWidth,blindfield_from_horizontal_degree,CBfieldDegree,blindfield);
 
@@ -371,9 +333,9 @@ while block <= blockNumber
         multiplier = - 1;   % in vi2invi condition  off_sync degree  over than bar_only degree
     elseif barLocation == 'l'
         barTiltNow = barTiltStart;
-        multiplier = 1;
+        multiplier = 0;  %1;
     elseif barLocation == 'n'
-        barTiltNow = barTiltStartHealthy;
+        barTiltNow = barTiltStart;
     end
 
     % in each block the illusion direction is CCW
@@ -479,13 +441,14 @@ while block <= blockNumber
             end
 
         elseif barLocation == 'n'
-            barTiltNow = barTiltStartHealthy;
+            barTiltNow = barTiltStart;
             back.alpha = 1;
             redbarflash_flag = 1;
             str_trial = '\n Adjust the bar until horizon   \n\n Fix on the cross to start the trial';
         end
         DrawFormattedText(wptr, str_trial, 'center', 'center', blackcolor,[],[],[],[],[],topCenterQuadRect);
         str_trial = [];
+        Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
         Screen('Flip',wptr);
         WaitSecs(readIntruTime);
 
@@ -508,7 +471,7 @@ while block <= blockNumber
                         fixationcolour = greycolor + 10;
                         %                         str = 'Fix on the cross to start the trial';
                         %                         Screen('DrawText', wptr, str, xCenter - 100, yCenter - 100, blackcolor);
-%                         Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+                        %                         Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                         Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                         Screen('FillOval', wptr, fixationcolour, gazeRect);
                         Screen('Flip',wptr);
@@ -555,7 +518,7 @@ while block <= blockNumber
                             gazeRect=[ x-9 y-9 x+10 y+10];
                             %                     fixationcolour=round(rand(3,1)*255); % coloured dot
                             fixationcolour = greycolor + 5;
-%                             Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
+                            %                             Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
                             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
                             Screen('FillOval', wptr, fixationcolour, gazeRect);
                             %                             Screen('Flip',wptr);
@@ -656,18 +619,18 @@ while block <= blockNumber
 
                 % draw fixation
 
-                fixcolor = 0;
+                
 
                 %                 Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
 
-                Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
+                %                 Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
 
                 if strcmp(annulusWidth,'artificialScotoma')
                     Screen('FillOval',wptr,blindfieldColor,[xCenter + blindfield_deviate_center_pixel - blindfieldRadius_pixel, yCenter - blindfieldRadius_pixel,...
                         xCenter + blindfield_deviate_center_pixel + blindfieldRadius_pixel, yCenter + blindfieldRadius_pixel]);
                 end
 
-                Screen('Flip',wptr);
+                %                 Screen('Flip',wptr);
 
 
                 %----------------------------------------------------------------------
@@ -707,6 +670,8 @@ while block <= blockNumber
                 if debug== 'y' && flashPresentFlag
                     KbWait;
                 end
+                Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
+                Screen('Flip',wptr);
 
             end
 
@@ -728,6 +693,10 @@ while block <= blockNumber
             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
             Screen('Flip',wptr);
             WaitSecs (1);
+
+            if isEyelink
+                Eyelink('Message','Red bar show');
+            end
 
             while respToBeMade
 
@@ -768,8 +737,8 @@ while block <= blockNumber
                 % draw fixation
                 fixcolor = 0;
                 %                 Screen('DrawLines', wptr, allCoords, LineWithPix, blackcolor, [xCenter,yCenter]);
-            Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
-            Screen('Flip',wptr);
+                %             Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
+                %             Screen('Flip',wptr);
 
 
                 %----------------------------------------------------------------------
@@ -796,10 +765,13 @@ while block <= blockNumber
                     %                     prekeyIsDown = 1;
                     %                 WaitSecs(0.5);
                 end
-                %                 end
-                %                 prekeyIsDown = keyIsDown;
-
+                            Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
+            Screen('Flip',wptr);
             end
+            %                 prekeyIsDown = keyIsDown;
+            Screen('FillOval',wptr,fixcolor,[xCenter-fixsize,yCenter-fixsize-centerMovePix,xCenter+fixsize,yCenter+fixsize-centerMovePix]);
+            Screen('Flip',wptr);
+            %             end
         end
 
         if barLocation ~= 'n'
@@ -839,6 +811,8 @@ while block <= blockNumber
         %         if keyCode(KbName('q'))
         %             break;
         %         end
+
+
     end
 
 

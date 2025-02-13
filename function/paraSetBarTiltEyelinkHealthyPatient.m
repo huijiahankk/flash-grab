@@ -9,10 +9,10 @@ end
 
 if  strcmp(particiType,'CB')
     if strcmp(blindfield,'l') && strcmp(barLocation,'u')
-        barTiltStart = 270 + CBfieldDegree/2;
+        barTiltStart = 270 + CBfieldDegree/2;;  % for patient zhuerliang   barTiltStart = 360  others barTiltStart = 270 + CBfieldDegree/2;
         perceivedCondiStartDeg = 270 + CBfieldDegree/2;
     elseif strcmp(blindfield,'l') && strcmp(barLocation,'l')
-        barTiltStart = 270 - CBfieldDegree/2;
+        barTiltStart = 270 + CBfieldDegree/2;; % for patient zhuerliang   barTiltStart = 270  others barTiltStart = 270 - CBfieldDegree/2;
         perceivedCondiStartDeg = 270 - CBfieldDegree/2;
     elseif strcmp(blindfield,'r') && strcmp(barLocation,'u')
         barTiltStart = 90 - CBfieldDegree/2;

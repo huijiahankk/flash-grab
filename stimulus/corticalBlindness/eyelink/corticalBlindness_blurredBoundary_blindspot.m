@@ -33,7 +33,7 @@ if 1
     condition = 'vi2invi';   % 'vi2invi'  'invi2vi'   'normal'
     isEyelink = 0;  % 0 1
     annulusPattern = 'sector'; % blurredBoundary  sector
-    annulusWidth =  'blindspot'; % blindspot   artificialScotoma
+    annulusWidth =  'artificialScotoma'; % blindspot   artificialScotoma
 %     artificialScotomaExp = 'n';
 else
     %     sbjname = input('>>>Please input the subject''s name:   ','s');
@@ -71,7 +71,7 @@ whitecolor = WhiteIndex(screenNumber);
 %     mask for change contrast
 greycolor = 128; %(whitecolor + blackcolor) / 2; % 128
 blindfieldColor = 110;
-[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
+[wptr,rect]=Screen('OpenWindow',screenNumber,greycolor,[0 0 1024 768],[],[],0); %set window to ,[0 0 1000 800]  [0 0 1024 768] for single monitor display
 ScreenRect = Screen('Rect',wptr);
 [xCenter,yCenter] = WindowCenter(wptr);
 % HideCursor;
@@ -107,6 +107,7 @@ KbName('UnifyKeyNames');
 
 eyeScreenDistence = 66;  % 78cm  68sunnannan
 screenHeight = 33.5; % 26.8 cm
+
 if strcmp(annulusWidth,'blindspot')
     %----------------------------------------------------------------------
     %            load blindspot test file and data
@@ -244,7 +245,7 @@ end
 if strcmp(condition,'normal')
     blockNumber = 10;
 else
-    blockNumber = 6;  % 6 for normal subjects
+    blockNumber = 2;  % 6 for normal subjects
 end
 
 if strcmp(condition, 'normal')
@@ -530,7 +531,7 @@ while block <= blockNumber
                             isOutFixationWindowFrame  = fixDriftFrame;
                         elseif isOutFixationWindowFrame  > driftDuation_dur * framerate
                             isOutFixationWindowTimes = isOutFixationWindowTimes + 1;
-                            isOutFixationWindowTimesMat = [isOutFixationWindowTimes;    isOutFixationWindowTimesMat];
+%                             isOutFixationWindowTimesMat = [isOutFixationWindowTimes;    isOutFixationWindowTimesMat];
                             sprintf('Gaze is outside fixation window during block %d  trial  %d\n',  block, trial)
                             abandonTrialFlag = 1;  % the whole block was abandoned
                             blockNumber = blockNumber + 1;
