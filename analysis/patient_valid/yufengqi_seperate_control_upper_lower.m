@@ -19,7 +19,7 @@ annulusWidth = 'CB'; % blindspot   artificialScotoma
 sbjnames = {'yufengqi'};   % yufengqi 
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
 
-folderNum = 1;
+folderNum = 2;
 folders = {'upper_field','lower_field'};
 
 datapath = sprintf([path  '%s/'],sbjnames{1});
@@ -109,13 +109,13 @@ hold on;
 % end
 
 for condition = 1:length(flash_grab_in)
-    plot(2 + randn/20,flash_grab_in(1,condition)- bar_only_ave,'r--o');
+    plot(3 + randn/20,flash_grab_in(1,condition)- bar_only_ave,'r--o');
 %     plot(2 + randn/20,flash_grab_in(2,condition)- bar_only_ave,'b--o');
-    plot(3 + randn/20,perceived_location_in(1,condition)- bar_only_ave,'r--o');
+    plot(4 + randn/20,perceived_location_in(1,condition)- bar_only_ave,'r--o');
 %     plot(3 + randn/20,perceived_location_in(2,condition)- bar_only_ave,'b--o');
-    plot(4 + randn/20,flash_grab_out(1,condition)- bar_only_ave,'r--o');
+    plot(5 + randn/20,flash_grab_out(1,condition)- bar_only_ave,'r--o');
 %     plot(4 + randn/20,flash_grab_out(2,condition)- bar_only_ave,'b--o');
-    plot(5 + randn/20,perceived_location_out(1,condition)- bar_only_ave,'r--o');
+    plot(6 + randn/20,perceived_location_out(1,condition)- bar_only_ave,'r--o');
 %     plot(5 + randn/20,perceived_location_out(2,condition)- bar_only_ave,'b--o');
 end
 

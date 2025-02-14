@@ -172,6 +172,12 @@ elseif bar_only_mark == 2
 
 end
 
+a = control_out - bar_only_ave;
+b = flash_grab_out_data - bar_only_ave;
+c = perceived_location_out - bar_only_ave;
+d = control_in - bar_only_ave;
+e = flash_grab_in_data - bar_only_ave;
+f = perceived_location_in - bar_only_ave;
 
 set(gca,'ylim',[-45 70],'FontName','Arial','FontSize',25);
 set(gcf,'color','w');

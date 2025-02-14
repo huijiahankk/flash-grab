@@ -19,7 +19,7 @@ annulusWidth = 'CB'; % blindspot   artificialScotoma
 sbjnames = {'ht'};   % % lili
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
 
-folderNum = 2;
+folderNum = 1;
 folders = {'upper_field','lower_field'};
 
 datapath = sprintf([path  '%s/'],sbjnames{1});
@@ -119,6 +119,12 @@ for condition = 1:length(flash_grab_in)
     plot(6 + randn/20,perceived_location_out(2,condition)- bar_only_ave,'b--o');
 end
 
+a = control_out - bar_only_ave;
+b = flash_grab_out - bar_only_ave;
+c = perceived_location_out - bar_only_ave;
+d = control_in - bar_only_ave;
+e = flash_grab_in - bar_only_ave;
+f = perceived_location_in - bar_only_ave;
 
 set(gca, 'XTick', 1:6, 'XTickLabels', XaxisMarker,'fontsize',30,'FontWeight','bold');
 ylabel('          Away from blind field  --> ','FontName','Arial','FontSize',30);
@@ -130,6 +136,9 @@ set(gca,'box','off');
 % ylabel('Shift degree from blind field border','FontSize',20,'FontWeight','bold')
 % title('Shift degree from horizontal meridian','FontSize',25);
 set(gca,'ylim',[-35 70],'FontName','Arial','FontSize',25);
+
+
+
 
 % two separate groups and compare their means
 [h, p, ci, stats] = ttest2(reshape(perceived_location_in,1,6), reshape(flash_grab_in,1,6));

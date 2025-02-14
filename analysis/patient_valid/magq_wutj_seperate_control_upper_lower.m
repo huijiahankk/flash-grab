@@ -140,7 +140,7 @@ elseif bar_only_mark == 2
 
     y = [control_in_ave control_out_ave grab_in_ave perceived_in_ave  grab_out_ave  perceived_out_ave] - bar_only_ave;
     h = bar(y,'FaceColor',[1 1 1],'EdgeColor',[0 0.4470 0.7410],'LineWidth',5);
-    XaxisMarker = {'control_in' 'control_out' 'grab-in' 'perc-in' 'grab-out' 'perc-out'} ;
+    XaxisMarker = {'control-in' 'control-out' 'grab-in' 'perc-in' 'grab-out' 'perc-out'} ;
     set(gca, 'XTick', 1:6, 'XTickLabels', XaxisMarker,'fontsize',30,'FontWeight','bold')
     ylabel('Shift degree from blind border','FontName','Arial','FontSize',30);
     hold on;
@@ -156,15 +156,15 @@ elseif bar_only_mark == 2
 
     for condition = 1: length(flash_grab_in_data)
 
-        plot(2 + randn/20,flash_grab_in_data(1,condition) - bar_only_ave,'r--o');
-        plot(2 + randn/20,flash_grab_in_data(2,condition) - bar_only_ave,'b--o');
-        plot(4 + randn/20,flash_grab_out_data(1,condition) - bar_only_ave,'r--o');
-        plot(4 + randn/20,flash_grab_out_data(2,condition) - bar_only_ave,'b--o');
+        plot(3 + randn/20,flash_grab_in_data(1,condition) - bar_only_ave,'r--o');
+        plot(3 + randn/20,flash_grab_in_data(2,condition) - bar_only_ave,'b--o');
+        plot(5 + randn/20,flash_grab_out_data(1,condition) - bar_only_ave,'r--o');
+        plot(5 + randn/20,flash_grab_out_data(2,condition) - bar_only_ave,'b--o');
     end
 
     for condition = 1: length(perceived_location_in)
-        plot(3 + randn/20,perceived_location_in(2,condition) - bar_only_ave,'b--o');
-        plot(5 + randn/20,perceived_location_out(2,condition) - bar_only_ave,'b--o');
+        plot(4 + randn/20,perceived_location_in(2,condition) - bar_only_ave,'b--o');
+        plot(6 + randn/20,perceived_location_out(2,condition) - bar_only_ave,'b--o');
     end
 
 end

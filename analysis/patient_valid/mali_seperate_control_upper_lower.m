@@ -17,7 +17,7 @@ addpath '../../function'
 bar_only_mark = 2; % 1 means show bar_only data   2 means no bar_only data  every data was normalized by bar_only
 % pValue = input('>>>Calculate p Value? (y/n):  ','s');
 
-folderNum = 2;
+folderNum = 1;
 folders = {'upper_field','lower_field', 'normal_field'};
 path = '../../data/corticalBlindness/bar';
 
@@ -125,10 +125,10 @@ hold on;
 
 path = 'withBackground_off_sync/';
 
-if folder == 1
-    thisFolderName = fullfile(path, folders{folder});
+if folderNum == 1
+    thisFolderName = fullfile(path, folders{folderNum});
 else
-    thisFolderName = fullfile('../', folders{folder});
+    thisFolderName = fullfile('../', folders{folderNum});
 end
 cd(thisFolderName);
 

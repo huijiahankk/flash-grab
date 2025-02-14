@@ -16,10 +16,10 @@ clear all;
 annulusPattern = 'sector';  %  blurredBoundary   sector
 annulusWidth = 'CB'; % blindspot   artificialScotoma
 
-sbjnames = {'lili'};   % % lili
+sbjnames = {'lili'};   % % lili  'zhuerliang'
 path = strcat('../../data/corticalBlindness/Eyelink_guiding/',annulusPattern,'/',annulusWidth,'/');
 
-folderNum = 1;
+folderNum = 2;
 folders = {'upper_field','lower_field'};
 
 datapath = sprintf([path  '%s/'],sbjnames{1});
@@ -115,6 +115,13 @@ for condition = 1:length(flash_grab_in)
     plot(5 + randn/20,perceived_location_out(1,condition)- bar_only_ave,'r--o');
     plot(5 + randn/20,perceived_location_out(2,condition)- bar_only_ave,'b--o');
 end
+
+a = control_out - bar_only_ave_temp;
+b = flash_grab_out - bar_only_ave_temp;
+c = perceived_location_out - bar_only_ave_temp;
+d = control_in - bar_only_ave_temp;
+e = flash_grab_in - bar_only_ave_temp;
+f = perceived_location_in - bar_only_ave_temp;
 
 
 set(gca, 'XTick', 1:5, 'XTickLabels', XaxisMarker,'fontsize',30,'FontWeight','bold');
